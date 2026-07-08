@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soyeon &amp; Doyoon — October 30, 2026 — Seoul</title>
+  <meta name="description" content="Soyeon & Doyoon are getting married! Friday, October 30, 2026 — The Shilla Seoul.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link id="gfonts" rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..800;1,400..800&family=Clicker+Script&family=Montserrat:ital,wght@0,300..700;1,300..700&display=swap">
+
+  <link rel="stylesheet" href="css/styles.css">
+
+  <!-- Apply saved design settings before first paint to avoid flashing -->
+  <script>
+    (function () {
+      try {
+        var s = JSON.parse(localStorage.getItem("sd-design") || "{}");
+        var l = s.layout || {};
+        var d = document.documentElement;
+        d.dataset.hero = l.hero || "banner";
+        d.dataset.header = l.header || "stacked";
+        d.dataset.mode = l.mode || "multi";
+        d.dataset.width = l.width || "cozy";
+        var c = s.colors || {};
+        if (c.bg) d.style.setProperty("--c-bg", c.bg);
+        if (c.accent) d.style.setProperty("--c-accent", c.accent);
+        if (c.alt) d.style.setProperty("--c-alt", c.alt);
+        if (c.text) d.style.setProperty("--c-text", c.text);
+      } catch (e) { /* first visit */ }
+    })();
+  </script>
+</head>
+<body>
+
+  <header class="site-header" id="siteHeader">
+    <div class="header-inner">
+      <a class="brand" href="#/welcome">
+        <span class="brand-monogram" id="brandMonogram"></span>
+        <span class="brand-names" id="brandNames"></span>
+      </a>
+      <nav class="site-nav" id="siteNav" aria-label="Site"></nav>
+    </div>
+  </header>
+
+  <main id="main"><!-- pages are rendered here by js/app.js --></main>
+
+  <footer class="site-footer">
+    <div class="footer-monogram" id="footerMonogram"></div>
+    <div class="footer-line" id="footerLine"></div>
+    <div class="footer-note">Made with love&nbsp;— hosted by us, designed by us.</div>
+  </footer>
+
+  <!-- ===================== Design customizer ===================== -->
+  <button class="design-toggle" id="designToggle" aria-label="Open design settings">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+    </svg>
+    <span>Design</span>
+  </button>
+
+  <aside class="design-panel" id="designPanel" aria-label="Design settings">
+    <div class="dp-head">
+      <h3>Design</h3>
+      <button class="dp-close" id="designClose" aria-label="Close">&times;</button>
+    </div>
+    <p class="dp-hint">Everything Joy wouldn't let you change. Settings are saved in your browser.</p>
+
+    <section class="dp-section">
+      <h4>Fonts</h4>
+      <label class="dp-field">
+        <span>Headings</span>
+        <select id="fontHeading" data-role="heading"></select>
+      </label>
+      <input class="dp-custom" id="fontHeadingCustom" type="text" placeholder="Any Google Font name…" hidden>
+
+      <label class="dp-field">
+        <span>Accent script</span>
+        <select id="fontScript" data-role="script"></select>
+      </label>
+      <input class="dp-custom" id="fontScriptCustom" type="text" placeholder="Any Google Font name…" hidden>
+
+      <label class="dp-field">
+        <span>Body text</span>
+        <select id="fontBody" data-role="body"></select>
+      </label>
+      <input class="dp-custom" id="fontBodyCustom" type="text" placeholder="Any Google Font name…" hidden>
+    </section>
+
+    <section class="dp-section">
+      <h4>Colors</h4>
+      <div class="dp-swatches" id="paletteSwatches"></div>
+      <div class="dp-colors">
+        <label><span>Background</span><input type="color" id="colBg"></label>
+        <label><span>Accent</span><input type="color" id="colAccent"></label>
+        <label><span>Secondary</span><input type="color" id="colAlt"></label>
+        <label><span>Text</span><input type="color" id="colText"></label>
+      </div>
+    </section>
+
+    <section class="dp-section">
+      <h4>Layout</h4>
+      <div class="dp-field-row">
+        <span>Hero</span>
+        <div class="dp-radios" data-setting="hero">
+          <button data-value="banner">Banner</button>
+          <button data-value="classic">Classic</button>
+          <button data-value="minimal">Minimal</button>
+        </div>
+      </div>
+      <div class="dp-field-row">
+        <span>Header</span>
+        <div class="dp-radios" data-setting="header">
+          <button data-value="stacked">Stacked</button>
+          <button data-value="inline">Inline</button>
+        </div>
+      </div>
+      <div class="dp-field-row">
+        <span>Pages</span>
+        <div class="dp-radios" data-setting="mode">
+          <button data-value="multi">Separate</button>
+          <button data-value="single">One page</button>
+        </div>
+      </div>
+      <div class="dp-field-row">
+        <span>Width</span>
+        <div class="dp-radios" data-setting="width">
+          <button data-value="cozy">Cozy</button>
+          <button data-value="wide">Wide</button>
+        </div>
+      </div>
+    </section>
+
+    <button class="dp-reset" id="designReset">Reset to defaults</button>
+  </aside>
+
+  <!-- Lightbox for gallery photos -->
+  <div class="lightbox" id="lightbox" hidden><img id="lightboxImg" alt="Photo"></div>
+
+  <input type="file" id="fileInput" accept="image/*" hidden>
+  <input type="file" id="fileInputMulti" accept="image/*" multiple hidden>
+
+  <script src="js/content.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
