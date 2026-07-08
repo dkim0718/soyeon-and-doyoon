@@ -185,10 +185,15 @@ function photoSlotHtml(slotId, extraClass = "", label = "Add a photo") {
     </div>`;
 }
 
-function setSlotImage(slotEl, blob) {
+/* source may be a Blob (local upload) or a URL string (default from photos/) */
+function setSlotImage(slotEl, source) {
   let img = slotEl.querySelector("img.slot-img");
-  if (!blob) {
-    if (img) { URL.revokeObjectURL(img.src); img.remove(); }
+  const isDefault = typeof source === "string";
+  if (!source) {
+    if (img) {
+      if (img.src.startsWith("blob:")) URL.revokeObjectURL(img.src);
+      img.remove();
+    }
     slotEl.classList.add("empty");
     slotEl.querySelector('[data-act="remove"]').hidden = true;
     slotEl.querySelector('[data-act="replace"]').textContent = "Photo";
@@ -199,13 +204,18 @@ function setSlotImage(slotEl, blob) {
     img.className = "slot-img";
     img.alt = "";
     slotEl.prepend(img);
-  } else {
+  } else if (img.src.startsWith("blob:")) {
     URL.revokeObjectURL(img.src);
   }
-  img.src = URL.createObjectURL(blob);
+  img.src = isDefault ? source : URL.createObjectURL(source);
   slotEl.classList.remove("empty");
-  slotEl.querySelector('[data-act="remove"]').hidden = false;
+  // "Remove" only applies to local uploads — defaults are files in photos/.
+  slotEl.querySelector('[data-act="remove"]').hidden = isDefault;
   slotEl.querySelector('[data-act="replace"]').textContent = "Replace";
+}
+
+function slotDefault(slotId) {
+  return (SITE.photos || {})[slotId] || null;
 }
 
 let pendingSlot = null;
@@ -228,7 +238,8 @@ function wireSlots(root) {
       if (act && act.dataset.act === "remove") {
         ev.stopPropagation();
         dbDelete(slot.dataset.slot);
-        setSlotImage(slot, null);
+        setSlotImage(slot, slotDefault(slot.dataset.slot)); // fall back to default photo
+        syncHeroText();
         return;
       }
       pendingSlot = slot;
@@ -480,7 +491,7 @@ function syncHeroText() {
 
 async function hydratePhotos() {
   let entries = [];
-  try { entries = await dbEntries(); } catch { return; }
+  try { entries = await dbEntries(); } catch { /* still apply defaults below */ }
   const gallery = document.getElementById("gallery");
 
   for (const [key, blob] of entries) {
@@ -491,8 +502,30 @@ async function hydratePhotos() {
       if (slot) setSlotImage(slot, blob);
     }
   }
-  if (gallery) ensureGalleryAddTile();
+
+  // Default photos for slots without a local upload
+  for (const [slotId, url] of Object.entries(SITE.photos || {})) {
+    const slot = document.querySelector(`[data-slot="${CSS.escape(slotId)}"]`);
+    if (slot && slot.classList.contains("empty")) setSlotImage(slot, url);
+  }
+  if (gallery) {
+    ensureGalleryAddTile();
+    for (const url of SITE.galleryDefaults || []) addGalleryDefault(url);
+  }
   syncHeroText();
+}
+
+function addGalleryDefault(url) {
+  const gallery = document.getElementById("gallery");
+  const fig = document.createElement("figure");
+  fig.className = "gallery-item";
+  const img = document.createElement("img");
+  img.src = url;
+  img.alt = "Gallery photo";
+  img.loading = "lazy";
+  fig.append(img); // no remove button — defaults are files in photos/
+  fig.addEventListener("click", () => openLightbox(url));
+  gallery.append(fig);
 }
 
 function ensureGalleryAddTile() {

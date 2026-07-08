@@ -105,7 +105,7 @@ const SITE = {
   qanda: [
       {
           "q": "When is the RSVP deadline?",
-          "a": "Please RSVP by April 15 so we can get an accurate headcount. :)"
+          "a": "Please RSVP by September 15 so we can get an accurate headcount. :)"
       },
       {
           "q": "Can I bring a date?",
@@ -117,7 +117,7 @@ const SITE = {
       },
       {
           "q": "What will the weather be like?",
-          "a": "Welcome to Tokyo! Expect warm and often humid weather, with daytime temperatures around 80–90°F. It can also rain unexpectedly, so lightweight clothing and a small umbrella are both smart to bring."
+          "a": "Welcome to Seoul! Late October is beautiful autumn weather — crisp and clear, with daytime highs around 55–65°F (13–18°C) and noticeably cooler evenings. Bring a light jacket or a layer for after sunset."
       },
       {
           "q": "Where should I park?",
@@ -202,7 +202,7 @@ const SITE = {
 
   rsvp: {
     email: "dkim0718@gmail.com", // RSVPs are sent to this address
-    deadline: "April 15, 2026",
+    deadline: "September 15, 2026",
     message:
       "Please let us know whether you can make it by the date below — it helps " +
       "us get an accurate headcount. We hope to see you there!",
@@ -213,6 +213,21 @@ const SITE = {
       "A place for photos — engagement pictures now, wedding-day memories later. " +
       "Click any empty frame on the site to add a photo.",
   },
+
+  // Default photos — files in the photos/ folder, shown to every visitor.
+  // A photo you upload in the browser overrides these on your device only;
+  // replace the files (same names) to change them for everyone.
+  photos: {
+    hero: "photos/hero.jpg",
+    story: "photos/story.jpg",
+  },
+  galleryDefaults: [
+    "photos/gallery-1.jpg",
+    "photos/gallery-2.jpg",
+    "photos/gallery-3.jpg",
+    "photos/gallery-4.jpg",
+    "photos/gallery-5.jpg",
+  ],
 
   // Pages appear in the navigation in this order.
   // Remove a line to hide that page.

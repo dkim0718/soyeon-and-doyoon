@@ -51,10 +51,15 @@ upload. The **Moments** page accepts multiple photos at once. Photos are
 automatically downscaled and stored in your browser's IndexedDB, so they
 survive refreshes on *your* machine.
 
-> **Important:** uploaded photos live only in the browser where you added them —
-> they are a private preview, not published files. When you're happy with the
-> layout, put the final images in a `photos/` folder and reference them from
-> the HTML/CSS (or ask Claude to wire them in), then deploy.
+The site also ships **default photos** in the `photos/` folder (currently the
+pictures from the old Joy site, with EXIF/GPS metadata stripped). These are
+what every visitor sees. The mapping lives in `js/content.js` (`photos` and
+`galleryDefaults`) — to swap one for everyone, replace the file in `photos/`
+(keep the same name) and push.
+
+> **Important:** photos uploaded through the browser live only on the device
+> where you added them — they're a private preview layered on top of the
+> defaults. "Remove" on a slot just reverts to the default photo.
 
 ## RSVP
 
