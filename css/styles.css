@@ -434,6 +434,8 @@ html[data-hero="minimal"] .hero-names { font-size: clamp(3rem, 9vw, 5.4rem); }
   color: var(--c-accent);
 }
 
+.travel-block p { white-space: pre-line; }
+
 /* ---------------- Q&A ---------------- */
 
 .qa-item {
@@ -467,7 +469,7 @@ html[data-hero="minimal"] .hero-names { font-size: clamp(3rem, 9vw, 5.4rem); }
 
 .qa-item[open] summary::after { transform: translateY(-50%) rotate(45deg); }
 
-.qa-answer { padding: 0 0 1.2rem; font-size: 0.95rem; }
+.qa-answer { padding: 0 0 1.2rem; font-size: 0.95rem; white-space: pre-line; }
 
 /* ---------------- registry ---------------- */
 

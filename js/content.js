@@ -14,9 +14,9 @@ const SITE = {
 
   wedding: {
     // Used for the countdown. Include the timezone offset (+09:00 = Seoul).
-    dateISO: "2026-10-30T12:00:00+09:00",
+    dateISO: "2026-10-30T17:30:00+09:00",
     dateDisplay: "Friday, October 30, 2026",
-    timeDisplay: "12:00 PM (KST)", // placeholder — set your ceremony time
+    timeDisplay: "5:30 PM (KST)",
     venue: "Yeong Bin Gwan, The Shilla Seoul",
     venueAddress: "249 Dongho-ro, Jung District, Seoul, South Korea",
     city: "Seoul, South Korea",
@@ -25,175 +25,238 @@ const SITE = {
   welcome: {
     heading: "We're getting married!",
     message:
-      "We are so excited to celebrate with you. Here you'll find everything you " +
-      "need to know about our wedding weekend — the schedule, where to stay, " +
-      "how to get there, and answers to common questions. We can't wait to see you in Seoul!",
+      "We're so excited to celebrate our big day with you in Seoul. Here you'll " +
+      "find our schedule, where to stay, travel tips, and answers to common " +
+      "questions. We can't wait to see you!",
   },
 
   story: {
     intro: "How we met",
-    text: "The first time I saw him, we were both waiting at the same gate for a flight to Tokyo. I remember glancing over and thinking, Wow, he's cute. When I got to my seat, I noticed the seat next to me was empty and thought, how amazing would it be if he sat there?\n\nAnd he did. We started chatting, he asked for my number, and then we went our separate ways. I was sure I'd never hear from him again. I thought about him now and then, but eventually he just became another 'missed connection.' Then, a few months later, out of nowhere, he messaged me, 'Happy New Year.' From there, it was like nothing had ever changed.",
+    text:
+      "For her, winter in Boston was proving to be quite gloomy, and he was " +
+      "looking to move back to Korea in a year or two. That's when Soyeon " +
+      "(same name, not the bride) introduced the two, and had their first " +
+      "date at SRV.\n\n" +
+      "One date turned into two, then into three, but just as the two were " +
+      "getting close, Soyeon had to go abroad to Brussels for her secondment. " +
+      "He offered to help, and to visit often. Distance notwithstanding, they " +
+      "continued to bond over long conversations.\n\n" +
+      "After countless trans-atlantic flights, trips to Korea and all over " +
+      "Europe, these two are finally tying the knot.",
   },
 
   // Add, remove, or reorder schedule items freely.
   schedule: [
     {
-      title: "Wedding Ceremony",
+      title: "Welcome Drinks",
       date: "Friday, October 30, 2026",
-      time: "12:00 PM", // placeholder — set your real time
+      time: "5:30 – 6:30 PM",
       location: "Yeong Bin Gwan, The Shilla Seoul",
-      note: "Ceremony followed by lunch reception. Formal attire.",
+      note: "Cocktail attire.",
     },
     {
-      title: "Reception",
+      title: "Ceremony",
       date: "Friday, October 30, 2026",
-      time: "1:00 PM", // placeholder — set your real time
+      time: "6:30 – 7:00 PM",
+      location: "The Shilla Seoul",
+      note: "We're getting married! We can't wait to celebrate with you all. Cocktail attire.",
+    },
+    {
+      title: "Dinner",
+      date: "Friday, October 30, 2026",
+      time: "7:00 – 9:00 PM",
       location: "Yeong Bin Gwan, The Shilla Seoul",
-      note: "Dinner, toasts, and time together with the people we love most.",
+      note: "",
+    },
+    {
+      title: "After Party",
+      date: "Friday, October 30, 2026",
+      time: "9:00 PM",
+      location: "Yeong Bin Gwan, The Shilla Seoul",
+      note: "",
     },
   ],
 
+  stayIntro:
+    "To make planning easier, we've listed a few hotels offering special rates " +
+    "just for our guests. If you'll be staying overnight, we recommend booking " +
+    "your room early while there's still availability.",
+
   hotels: [
-      {
-          "name": "The Shilla Seoul",
-          "address": "249, Dongho-ro, Jung-gu",
-          "stars": 5,
-          "blurb": "Don't miss out on the many recreational opportunities, including an indoor pool, a hot tub, and a sauna. Additional features at this hotel include complimentary wireless internet access, concierge services, and gift shops/newsstands. Guests can get to nearby shops on the complimentary shuttle."
-      },
-      {
-          "name": "The Ambassador Seoul - A Pullman Hotel",
-          "address": "287, Dongho-ro, Jung-gu",
-          "stars": 5,
-          "blurb": "Take advantage of recreational opportunities offered, including a health club, an outdoor pool, and an indoor pool. Additional features at this hotel include complimentary wireless internet access, concierge services, and wedding services."
-      },
-      {
-          "name": "The Summit Hotel Seoul Dongdaemun",
-          "address": "198, Jangchungdan-ro",
-          "stars": 3.5,
-          "blurb": "Take advantage of recreation opportunities such as a fitness center, or other amenities including complimentary wireless internet access and a banquet hall."
-      },
-      {
-          "name": "Toyoko Inn Seoul Dongdaemun No.2",
-          "address": "325, Toegye-ro, Jung-gu",
-          "stars": 3,
-          "blurb": "Make use of convenient amenities, which include complimentary wireless internet access and a vending machine."
-      }
+    {
+      name: "The Shilla Seoul",
+      address: "249, Dongho-ro, Jung-gu · the venue",
+      stars: 5,
+      blurb:
+        "This hotel is ideal for those seeking a luxurious and convenient stay. " +
+        "Located in the heart of Seoul, The Shilla offers exquisite facilities " +
+        "such as a spa, fitness center, and multiple dining options. Plus, its " +
+        "stunning views of the city make it a great choice for anyone wanting " +
+        "to experience Seoul's beauty.",
+    },
+    {
+      name: "The Ambassador Seoul - A Pullman Hotel",
+      address: "287, Dongho-ro, Jung-gu · 0.3 mi from venue",
+      stars: 5,
+      blurb:
+        "The Ambassador Seoul - A Pullman Hotel is a modern, upscale hotel " +
+        "located in the heart of the city. With sleek and stylish rooms, a " +
+        "fitness center, and multiple dining options, it's a great choice for " +
+        "guests looking for convenience and luxury during their stay.",
+    },
+    {
+      name: "The Summit Hotel Seoul Dongdaemun",
+      address: "198, Jangchungdan-ro · 0.4 mi from venue",
+      stars: 3.5,
+      blurb:
+        "The Summit Hotel Seoul Dongdaemun is a great option for those who want " +
+        "to stay in the heart of the bustling Dongdaemun area. Its convenient " +
+        "location allows for easy access to shopping, dining, and cultural " +
+        "experiences. Plus, the rooms are spacious and comfortable, perfect for " +
+        "unwinding after a long day of exploring.",
+    },
+    {
+      name: "Toyoko Inn Seoul Dongdaemun No.2",
+      address: "325, Toegye-ro, Jung-gu · 0.6 mi from venue",
+      stars: 3,
+      blurb:
+        "This hotel is a convenient and affordable option for those wanting to " +
+        "explore the vibrant Dongdaemun neighborhood in Seoul. With clean and " +
+        "comfortable rooms, free breakfast and friendly staff, it's a great " +
+        "choice for budget-conscious travelers looking to experience the city.",
+    },
   ],
 
   travel: [
     {
-      title: "Getting to Seoul",
-      body:
-        "Most international guests will fly into Incheon International Airport (ICN), " +
-        "about 70–90 minutes from the venue by car or airport limousine bus. " +
-        "Gimpo Airport (GMP) is closer — roughly 40 minutes — and handles many " +
-        "regional flights from Japan, China, and Taiwan.",
+      title: "Getting In",
+      body: "We recommend flying into Incheon Airport (ICN)!",
     },
     {
-      title: "Getting to the venue",
+      title: "Getting Downtown",
       body:
-        "The Shilla Seoul is located at 249 Dongho-ro, Jung District. The nearest " +
-        "subway stop is Dongguk University Station (Line 3). Taxis and ride apps " +
-        "(Kakao T) are inexpensive and easy to use throughout the city.",
+        "There are plenty of ways to get downtown! You'll find several car " +
+        "rental options, and taxis or ride services are both easy and convenient.",
     },
     {
-      title: "Parking",
-      body: "There's plenty of free parking near the venue entrance.",
+      title: "Our Favorite Restaurants",
+      body:
+        "팔선 (Palsun) — a famous Chinese restaurant.\n" +
+        "태극당 (Taegeukdang) — serves famous ice cream monaka as well as other baked goods.\n" +
+        "오장동 흥남집 — serves cold buckwheat noodle dishes.",
+    },
+    {
+      title: "Things to Do in Seoul",
+      body:
+        "광장시장 — A traditional market in Seoul, famous for snacks!\n" +
+        "경복궁 — The old palace in Seoul. Try renting out 한복 (traditional Korean clothing) and doing a photoshoot!\n" +
+        "N Seoul Tower — Enjoy great views of Seoul.",
     },
   ],
 
   qanda: [
-      {
-          "q": "When is the RSVP deadline?",
-          "a": "Please RSVP by September 15 so we can get an accurate headcount. :)"
-      },
-      {
-          "q": "Can I bring a date?",
-          "a": "Check your invitation to see if you have a plus one."
-      },
-      {
-          "q": "Can kids come?",
-          "a": "We adore your kids, but we’re keeping the ceremony and reception adults-only. That said, we know some of you are traveling with children—your little ones are more than welcome at the Friday cocktail reception and Sunday brunch! If you need childcare during the ceremony, we’ll have babysitting available onsite. If you have any questions, just let us know!"
-      },
-      {
-          "q": "What will the weather be like?",
-          "a": "Welcome to Seoul! Late October is beautiful autumn weather — crisp and clear, with daytime highs around 55–65°F (13–18°C) and noticeably cooler evenings. Bring a light jacket or a layer for after sunset."
-      },
-      {
-          "q": "Where should I park?",
-          "a": "There’s plenty of free parking near the venue entrance."
-      },
-      {
-          "q": "Are the ceremony and reception areas wheelchair accessible?",
-          "a": "Absolutely! We’ll have a cart available for anyone who needs help getting around the property."
-      },
-      {
-          "q": "What’s the dress code?",
-          "a": "Check our Schedule for dress code details."
-      },
-      {
-          "q": "Will the wedding be held indoors or outdoors?",
-          "a": "Our wedding ceremony is outdoors, but our reception will be in a tent :)"
-      },
-      {
-          "q": "What shoes should I wear (or avoid)?",
-          "a": "Ladies, skip the stilettos—seriously! There are lots of grassy and uneven spots, so go for block heels or sandals instead. We don’t want anyone ruining their shoes or twisting an ankle."
-      },
-      {
-          "q": "Can we use our phones or cameras to take photos at the wedding?",
-          "a": "Absolutely! We’d love for you to snap photos and share them on our Joy app. We just ask that you don’t take pictures during the ceremony."
-      },
-      {
-          "q": "How did you two meet?",
-          "a": "Read Our Story!"
-      },
-      {
-          "q": "Who made the first move—and how did it happen?",
-          "a": "He texted me first on New Year’s Day. A few hours later, we already had dinner plans for that week."
-      },
-      {
-          "q": "Who can I contact if I have questions?",
-          "a": "If you have any questions, please reach out to our amazing Maid of Honor, Aoi, at +81 90-1234-5678."
-      },
-      {
-          "q": "Who’s taking out the trash?",
-          "a": "Whoever’s closest to the trash :)"
-      },
-      {
-          "q": "What’s your most memorable date?",
-          "a": "One of our first dates was biking and then kayaking through the coves around the Izu Peninsula. Our guide joked that a few hours in a tandem kayak will test any relationship—he was right! But we made it, and that adventure is still one of our favorite memories."
-      },
-      {
-          "q": "What’s your favorite thing to do together?",
-          "a": "We love paddleboarding and biking in the park!"
-      },
-      {
-          "q": "Where are you headed for your honeymoon?",
-          "a": "Anywhere with beautiful beaches! Maybe the Maldives before it goes completely underwater?"
-      },
-      {
-          "q": "What's the best meal you've had together?",
-          "a": "We splurged on a five-course dinner in Paris. It was magical."
-      },
-      {
-          "q": "What's the most memorable trip you've taken together?",
-          "a": "Last April, we got to see the Northern Lights in Norway. It was amazing!"
-      },
-      {
-          "q": "We’re on the same page about",
-          "a": "What's important to us. And that's spending time with the people we love most. (You all!)"
-      }
+    {
+      q: "When is the RSVP deadline?",
+      a: "Please RSVP by September 15 so we can get an accurate headcount. :)",
+    },
+    {
+      q: "What will the weather be like?",
+      a:
+        "Welcome to Seoul! Late October is beautiful autumn weather — crisp and " +
+        "clear, with daytime highs around 55–65°F (13–18°C) and noticeably " +
+        "cooler evenings. Bring a light jacket or a layer for after sunset.",
+    },
+    {
+      q: "Can I bring a date?",
+      a: "Check your invitation to see if you have a plus-one.",
+    },
+    {
+      q: "Are kids welcome?",
+      a: "Yes - please let us know in advance so we can plan accordingly!",
+    },
+    {
+      q: "Where can I park?",
+      a: "The venue provides valet parking services.",
+    },
+    {
+      q: "What should I wear?",
+      a: "Check our Schedule for dress code details.",
+    },
+    {
+      q: "What shoes should I wear (or avoid)?",
+      a:
+        "Ladies, please skip the stilettos—seriously! There's a lot of grass and " +
+        "uneven ground, so go for block heels or sandals. We want everyone's " +
+        "shoes (and ankles) to make it through the night.",
+    },
+    {
+      q: "Is the wedding indoors or outdoors?",
+      a: "Our wedding ceremony will be outdoors, and our reception will be right beside, indoors :)",
+    },
+    {
+      q: "Can we use our phones and cameras to take photos during the wedding?",
+      a: "Yes! We'd love for you to take photos and share them with us.",
+    },
+    {
+      q: "How did you two meet?",
+      a: "Read Our Story!",
+    },
+    {
+      q: "Who made the first move? How did it happen?",
+      a:
+        "Her:\n" +
+        "Him: I made the first move by texting her \"I really enjoyed our " +
+        "conversation and would love to treat you out to dinner again!\"",
+    },
+    {
+      q: "Who takes out the trash?",
+      a: "Whoever's closest to the trash :) But he tends to be closer to the trash, most of the times.",
+    },
+    {
+      q: "What's your most memorable date?",
+      a:
+        "Her:\n" +
+        "Him: Our first date was definitely the most memorable! A close second: " +
+        "We went to a Celtics vs Lakers game and got to see all our favorite " +
+        "players in one game.",
+    },
+    {
+      q: "What's your favorite activity to do together?",
+      a:
+        "Watching movies, going to see ballet, and finding the most delicious " +
+        "restaurants. Most of all, we love traveling to new places and exploring " +
+        "the world!",
+    },
+    {
+      q: "Where are you going for your honeymoon?",
+      a: "We are going to Tanzania, hopefully to catch the start of the calving season!",
+    },
+    {
+      q: "What's the best meal you've shared together?",
+      a:
+        "Her:\n" +
+        "Him: Our best homemade meal was a delicious tomato sauce pasta that she " +
+        "made. Outside, there are so many to choose from, but Langosteria in " +
+        "Italy is one of them.",
+    },
+    {
+      q: "What's the most memorable trip you've taken together?",
+      a:
+        "Last December, we went to Iceland to see the Northern lights. Not only " +
+        "did we check off that from our bucketlist, we drove through a " +
+        "sandstorm, blizzard, rain, and hailstorm all in the same day!",
+    },
   ],
 
   registry: {
     note:
-      "Your presence at our wedding is the greatest gift of all. If you'd like " +
-      "to give something more, we've put together a registry below.",
+      "Your presence is enough of a present to us! But for those of you who " +
+      "are stubborn, we've put together a wish-list to help you out.",
     links: [
       {
-        label: "Our Registry",
+        label: "Browse Our Registry",
         url: "https://withjoy.com/soyeon-and-doyoon/registry",
-        description: "Our existing registry — cash funds and gifts.",
+        description: "Our wish-list — cash funds and gifts.",
       },
       // Add more registries like this:
       // { label: "Zola", url: "https://...", description: "..." },

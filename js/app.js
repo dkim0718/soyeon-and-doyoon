@@ -317,7 +317,8 @@ function renderStay() {
         <p class="hotel-blurb">${h.blurb}</p>
       </div>
     </div>`).join("");
-  return `${pageTitle("where to", "Stay")}<div class="hotel-grid">${cards}</div>`;
+  const intro = SITE.stayIntro ? `<p class="center" style="margin-bottom:2.2rem">${SITE.stayIntro}</p>` : "";
+  return `${pageTitle("where to", "Stay")}${intro}<div class="hotel-grid">${cards}</div>`;
 }
 
 function renderTravel() {
