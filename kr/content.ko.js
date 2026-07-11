@@ -292,8 +292,6 @@ window.SITE = {
     { id: "welcome",  label: "홈" },
     { id: "story",    label: "우리 이야기" },
     { id: "schedule", label: "예식 안내" },
-    { id: "stay",     label: "숙소 안내" },
-    { id: "travel",   label: "오시는 길" },
     { id: "qanda",    label: "자주 묻는 질문" },
     { id: "moments",  label: "갤러리" },
     { id: "rsvp",     label: "참석 회신" },

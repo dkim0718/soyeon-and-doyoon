@@ -64,6 +64,7 @@ const DEFAULT_TITLES = {
 const SETTINGS_KEY = "sd-design";
 
 let settings = loadSettings();
+let fontPickers = {};
 
 function loadSettings() {
   // Per-site defaults let the Korean site start with Korean-capable fonts
@@ -428,38 +429,120 @@ function designEnabled() {
   catch (e) { return false; }
 }
 
-function buildDesignPanel() {
-  for (const [role, el] of [
-    ["heading", document.getElementById("fontHeading")],
-    ["script", document.getElementById("fontScript")],
-    ["body", document.getElementById("fontBody")],
-  ]) {
-    const choices = [...fontChoices()[role]];
-    if (!choices.includes(settings.fonts[role])) choices.unshift(settings.fonts[role]);
-    el.innerHTML =
-      choices.map((f) => `<option value="${f}">${f}</option>`).join("") +
-      `<option value="__custom__">Custom Google Font…</option>`;
-    el.value = settings.fonts[role];
-
-    const custom = document.getElementById(el.id + "Custom");
-    el.addEventListener("change", () => {
-      if (el.value === "__custom__") { custom.hidden = false; custom.focus(); return; }
-      custom.hidden = true;
-      settings.fonts[role] = el.value;
-      applySettings();
-    });
-    custom.addEventListener("keydown", (e) => {
-      if (e.key !== "Enter") return;
-      const name = custom.value.trim();
-      if (!name) return;
-      settings.fonts[role] = name;
-      applySettings();
-      const opt = document.createElement("option");
-      opt.value = name; opt.textContent = name;
-      el.prepend(opt); el.value = name;
-      custom.hidden = true; custom.value = "";
-    });
+/* Load every offered font (plus current picks) so each picker option and the
+   trigger can render in its own typeface. Dedicated link, no weight axis. */
+function ensurePreviewFonts() {
+  const fams = new Set();
+  for (const role of ["heading", "script", "body"]) {
+    for (const f of fontChoices()[role]) if (f && f !== "None") fams.add(f);
+    if (settings.fonts[role] && settings.fonts[role] !== "None") fams.add(settings.fonts[role]);
   }
+  let link = document.getElementById("gfontsPreview");
+  if (!link) {
+    link = document.createElement("link");
+    link.id = "gfontsPreview";
+    link.rel = "stylesheet";
+    document.head.appendChild(link);
+  }
+  const parts = [...fams].map((f) => "family=" + encodeURIComponent(f).replace(/%20/g, "+"));
+  link.href = "https://fonts.googleapis.com/css2?" + parts.join("&") + "&display=swap";
+}
+
+function closeAllFontMenus() {
+  document.querySelectorAll(".fp-menu").forEach((m) => { m.hidden = true; });
+}
+
+/* A custom font picker: the trigger and every option render IN the font they
+   name, so you can preview typefaces without selecting them first. The hidden
+   native <select> is kept as a value holder. */
+function makeFontPicker(role) {
+  const id = "font" + role.charAt(0).toUpperCase() + role.slice(1);
+  const select = document.getElementById(id);
+  const customInput = document.getElementById(id + "Custom");
+  const label = select.closest(".dp-field");
+  select.style.display = "none";
+
+  const picker = document.createElement("div");
+  picker.className = "fp";
+  const trigger = document.createElement("button");
+  trigger.type = "button";
+  trigger.className = "fp-trigger";
+  const menu = document.createElement("div");
+  menu.className = "fp-menu";
+  menu.hidden = true;
+  picker.append(trigger, menu);
+  label.appendChild(picker);
+
+  const fallback = role === "script" ? "cursive" : "serif";
+  const styleAs = (elm, font) => { elm.style.fontFamily = (font && font !== "None") ? `"${font}", ${fallback}` : ""; };
+  const setTrigger = (v) => { trigger.textContent = v === "None" ? "None" : v; styleAs(trigger, v); };
+
+  function pick(v) {
+    settings.fonts[role] = v;
+    select.value = v;
+    applySettings();
+    setTrigger(v);
+    menu.hidden = true;
+    menu.querySelectorAll(".fp-opt").forEach((o) => o.classList.toggle("selected", o.dataset.value === v));
+  }
+
+  function buildMenu() {
+    menu.innerHTML = "";
+    const choices = [...fontChoices()[role]];
+    if (settings.fonts[role] && !choices.includes(settings.fonts[role])) choices.unshift(settings.fonts[role]);
+    choices.forEach((v) => {
+      const opt = document.createElement("button");
+      opt.type = "button";
+      opt.className = "fp-opt" + (v === settings.fonts[role] ? " selected" : "");
+      opt.dataset.value = v;
+      opt.textContent = v === "None" ? "None (use heading font)" : v;
+      styleAs(opt, v);
+      opt.addEventListener("click", () => pick(v));
+      menu.append(opt);
+    });
+    const customBtn = document.createElement("button");
+    customBtn.type = "button";
+    customBtn.className = "fp-opt fp-custom";
+    customBtn.textContent = "Custom Google Font…";
+    customBtn.addEventListener("click", () => { menu.hidden = true; customInput.hidden = false; customInput.focus(); });
+    menu.append(customBtn);
+  }
+
+  trigger.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const wasOpen = !menu.hidden;
+    closeAllFontMenus();
+    if (!wasOpen) {
+      menu.hidden = false;
+      const sel = menu.querySelector(".fp-opt.selected");
+      if (sel) sel.scrollIntoView({ block: "nearest" });
+    }
+  });
+
+  customInput.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    const name = customInput.value.trim();
+    if (!name) return;
+    pick(name);
+    ensurePreviewFonts();
+    buildMenu();
+    customInput.hidden = true;
+    customInput.value = "";
+  });
+
+  buildMenu();
+  setTrigger(settings.fonts[role]);
+  return { buildMenu, setTrigger };
+}
+
+function buildDesignPanel() {
+  ensurePreviewFonts();
+  fontPickers = {
+    heading: makeFontPicker("heading"),
+    script: makeFontPicker("script"),
+    body: makeFontPicker("body"),
+  };
+  document.addEventListener("click", closeAllFontMenus);
 
   const sw = document.getElementById("paletteSwatches");
   sw.innerHTML = PALETTES.map((p) => `
@@ -513,9 +596,9 @@ function buildDesignPanel() {
 }
 
 function refreshPanelState() {
-  document.getElementById("fontHeading").value = settings.fonts.heading;
-  document.getElementById("fontScript").value = settings.fonts.script;
-  document.getElementById("fontBody").value = settings.fonts.body;
+  for (const role of ["heading", "script", "body"]) {
+    if (fontPickers[role]) { fontPickers[role].buildMenu(); fontPickers[role].setTrigger(settings.fonts[role]); }
+  }
 
   document.querySelectorAll(".dp-swatch").forEach((b) =>
     b.classList.toggle("selected", b.dataset.palette === settings.colors.preset));
