@@ -1,7 +1,12 @@
 /* ============================================================
-   App logic: hash router, page rendering, countdown,
-   photo upload (IndexedDB), and the design customizer.
-   Content lives in js/content.js — edit that file, not this one.
+   Joy engine — shared by the English (en) and Korean (kr)
+   wedding websites. Content lives in the per-locale content
+   file (en/content.en.js, kr/content.ko.js) as `window.SITE`;
+   fixed UI strings live in shared/i18n.js.
+
+   Responsibilities: hash router, page rendering, countdown,
+   display-only gallery + lightbox, the RSVP widget mount, and
+   the (optional) design customizer.
    ============================================================ */
 
 "use strict";
@@ -11,9 +16,9 @@
    ---------------------------------------------------------- */
 
 const FONT_CHOICES = {
-  heading: ["Playfair Display", "Cormorant Garamond", "EB Garamond", "Libre Caslon Text", "DM Serif Display", "Marcellus", "Lora"],
-  script: ["Clicker Script", "Great Vibes", "Parisienne", "Dancing Script", "Allura", "Charmonman", "None"],
-  body: ["Montserrat", "Inter", "Lato", "Karla", "Bitter", "Jost", "Nunito Sans"],
+  heading: ["Playfair Display", "Cormorant Garamond", "EB Garamond", "Libre Caslon Text", "DM Serif Display", "Marcellus", "Lora", "Nanum Myeongjo", "Noto Serif KR", "Gowun Batang"],
+  script: ["Clicker Script", "Great Vibes", "Parisienne", "Dancing Script", "Allura", "Charmonman", "Nanum Pen Script", "None"],
+  body: ["Montserrat", "Inter", "Lato", "Karla", "Bitter", "Jost", "Nunito Sans", "Noto Sans KR", "Gowun Dodum"],
 };
 
 const PALETTES = [
@@ -31,23 +36,42 @@ const DEFAULT_SETTINGS = {
   layout: { hero: "banner", header: "stacked", mode: "multi", width: "cozy" },
 };
 
+/* Fallback section titles (English) if a content file omits SITE.titles */
+const DEFAULT_TITLES = {
+  welcome:  { script: "welcome",       title: "" },
+  story:    { script: "our",           title: "Story" },
+  schedule: { script: "the",           title: "Schedule" },
+  stay:     { script: "where to",      title: "Stay" },
+  travel:   { script: "getting",       title: "There" },
+  qanda:    { script: "questions &",   title: "Answers" },
+  registry: { script: "the",           title: "Registry" },
+  moments:  { script: "our",           title: "Moments" },
+  rsvp:     { script: "join",          title: "Us" },
+};
+
+const SETTINGS_KEY = "sd-design";
+
 let settings = loadSettings();
 
 function loadSettings() {
+  // Per-site defaults let the Korean site start with Korean-capable fonts
+  // (content file may set SITE.fontDefaults). User overrides still win.
+  const siteFonts = (window.SITE && window.SITE.fontDefaults) || {};
+  const baseFonts = { ...DEFAULT_SETTINGS.fonts, ...siteFonts };
   try {
-    const saved = JSON.parse(localStorage.getItem("sd-design") || "{}");
+    const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
     return {
-      fonts: { ...DEFAULT_SETTINGS.fonts, ...saved.fonts },
+      fonts: { ...baseFonts, ...saved.fonts },
       colors: { ...DEFAULT_SETTINGS.colors, ...saved.colors },
       layout: { ...DEFAULT_SETTINGS.layout, ...saved.layout },
     };
   } catch {
-    return structuredClone(DEFAULT_SETTINGS);
+    return { fonts: baseFonts, colors: { ...DEFAULT_SETTINGS.colors }, layout: { ...DEFAULT_SETTINGS.layout } };
   }
 }
 
 function saveSettings() {
-  localStorage.setItem("sd-design", JSON.stringify(settings));
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
 }
 
 function applySettings() {
@@ -79,7 +103,8 @@ function loadGoogleFonts() {
   const fams = new Set([settings.fonts.heading, settings.fonts.body]);
   if (settings.fonts.script !== "None") fams.add(settings.fonts.script);
   const parts = [...fams].map((f) => "family=" + encodeURIComponent(f).replace(/%20/g, "+") + ":ital,wght@0,300..800;1,300..800");
-  document.getElementById("gfonts").href = "https://fonts.googleapis.com/css2?" + parts.join("&") + "&display=swap";
+  const link = document.getElementById("gfonts");
+  if (link) link.href = "https://fonts.googleapis.com/css2?" + parts.join("&") + "&display=swap";
 }
 
 /* tiny color helpers (hex in, hex out) */
@@ -98,170 +123,25 @@ function mixColors(a, b, t) {
 function mixWithWhite(c, t) { return mixColors(c, "#ffffff", t); }
 
 /* ----------------------------------------------------------
-   Photo storage (IndexedDB)
+   Photos (display-only — the curated set from shared/photos)
    ---------------------------------------------------------- */
 
-const DB_NAME = "sd-wedding-photos";
-let dbPromise = null;
-
-function openDb() {
-  if (!dbPromise) {
-    dbPromise = new Promise((resolve, reject) => {
-      const req = indexedDB.open(DB_NAME, 1);
-      req.onupgradeneeded = () => req.result.createObjectStore("photos");
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
-  }
-  return dbPromise;
-}
-
-async function dbPut(key, blob) {
-  const db = await openDb();
-  return new Promise((res, rej) => {
-    const tx = db.transaction("photos", "readwrite");
-    tx.objectStore("photos").put(blob, key);
-    tx.oncomplete = res;
-    tx.onerror = () => rej(tx.error);
-  });
-}
-
-async function dbDelete(key) {
-  const db = await openDb();
-  return new Promise((res, rej) => {
-    const tx = db.transaction("photos", "readwrite");
-    tx.objectStore("photos").delete(key);
-    tx.oncomplete = res;
-    tx.onerror = () => rej(tx.error);
-  });
-}
-
-async function dbEntries() {
-  const db = await openDb();
-  return new Promise((res, rej) => {
-    const tx = db.transaction("photos", "readonly");
-    const store = tx.objectStore("photos");
-    const keysReq = store.getAllKeys();
-    const valsReq = store.getAll();
-    tx.oncomplete = () => res(keysReq.result.map((k, i) => [k, valsReq.result[i]]));
-    tx.onerror = () => rej(tx.error);
-  });
-}
-
-/* Downscale an image file to keep storage small */
-function downscale(file, maxDim = 2200, quality = 0.85) {
-  return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
-      if (scale === 1 && file.size < 1_500_000) return resolve(file);
-      const canvas = document.createElement("canvas");
-      canvas.width = Math.round(img.width * scale);
-      canvas.height = Math.round(img.height * scale);
-      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
-      canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("encode failed"))), "image/jpeg", quality);
-    };
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("not an image")); };
-    img.src = url;
-  });
-}
-
-/* ----------------------------------------------------------
-   Photo slot component
-   ---------------------------------------------------------- */
-
-const CAMERA_SVG = `<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`;
-
-function photoSlotHtml(slotId, extraClass = "", label = "Add a photo") {
-  return `
-    <div class="photo-slot empty ${extraClass}" data-slot="${slotId}" tabindex="0" role="button" aria-label="${label}">
-      <div class="slot-placeholder">${CAMERA_SVG}<span>${label}</span></div>
-      <div class="slot-actions">
-        <button type="button" data-act="replace">Photo</button>
-        <button type="button" data-act="remove" hidden>Remove</button>
-      </div>
-    </div>`;
-}
-
-/* source may be a Blob (local upload) or a URL string (default from photos/) */
-function setSlotImage(slotEl, source) {
-  let img = slotEl.querySelector("img.slot-img");
-  const isDefault = typeof source === "string";
-  if (!source) {
-    if (img) {
-      if (img.src.startsWith("blob:")) URL.revokeObjectURL(img.src);
-      img.remove();
-    }
-    slotEl.classList.add("empty");
-    slotEl.querySelector('[data-act="remove"]').hidden = true;
-    slotEl.querySelector('[data-act="replace"]').textContent = "Photo";
-    return;
-  }
-  if (!img) {
-    img = document.createElement("img");
-    img.className = "slot-img";
-    img.alt = "";
-    slotEl.prepend(img);
-  } else if (img.src.startsWith("blob:")) {
-    URL.revokeObjectURL(img.src);
-  }
-  img.src = isDefault ? source : URL.createObjectURL(source);
-  slotEl.classList.remove("empty");
-  // "Remove" only applies to local uploads — defaults are files in photos/.
-  slotEl.querySelector('[data-act="remove"]').hidden = isDefault;
-  slotEl.querySelector('[data-act="replace"]').textContent = "Replace";
-}
-
-function slotDefault(slotId) {
-  return (SITE.photos || {})[slotId] || null;
-}
-
-let pendingSlot = null;
-const fileInput = () => document.getElementById("fileInput");
-
-async function handleSlotFile(slotEl, file) {
-  try {
-    const blob = await downscale(file);
-    await dbPut(slotEl.dataset.slot, blob);
-    setSlotImage(slotEl, blob);
-  } catch (e) {
-    console.warn("photo upload failed:", e);
-  }
-}
-
-function wireSlots(root) {
-  root.querySelectorAll(".photo-slot").forEach((slot) => {
-    slot.addEventListener("click", (ev) => {
-      const act = ev.target.closest("[data-act]");
-      if (act && act.dataset.act === "remove") {
-        ev.stopPropagation();
-        dbDelete(slot.dataset.slot);
-        setSlotImage(slot, slotDefault(slot.dataset.slot)); // fall back to default photo
-        syncHeroText();
-        return;
-      }
-      pendingSlot = slot;
-      fileInput().click();
-    });
-    slot.addEventListener("dragover", (e) => { e.preventDefault(); slot.classList.add("dragover"); });
-    slot.addEventListener("dragleave", () => slot.classList.remove("dragover"));
-    slot.addEventListener("drop", (e) => {
-      e.preventDefault();
-      slot.classList.remove("dragover");
-      const f = e.dataTransfer.files[0];
-      if (f) handleSlotFile(slot, f);
-    });
-  });
+function photoImg(src, alt, extraClass) {
+  if (!src) return "";
+  return `<div class="photo ${extraClass || ""}"><img src="${src}" alt="${alt || ""}" loading="lazy"></div>`;
 }
 
 /* ----------------------------------------------------------
    Page templates
    ---------------------------------------------------------- */
 
-function pageTitle(script, title) {
-  return `<div class="page-title"><span class="script">${script}</span><h2>${title}</h2></div>`;
+function titleFor(id) {
+  return (SITE.titles && SITE.titles[id]) || DEFAULT_TITLES[id] || { script: "", title: "" };
+}
+
+function pageTitle(id) {
+  const s = titleFor(id);
+  return `<div class="page-title"><span class="script">${s.script || ""}</span><h2>${s.title || ""}</h2></div>`;
 }
 
 function renderWelcome() {
@@ -271,27 +151,31 @@ function renderWelcome() {
     <div class="hero-names">${names}</div>
     <div class="hero-date">${w.dateDisplay}</div>
     <div class="hero-venue">${w.venue}</div>`;
+  const heroPhoto = (SITE.photos && SITE.photos.hero)
+    ? `<img class="hero-img" src="${SITE.photos.hero}" alt="" fetchpriority="high">` : "";
 
   return `
     <section class="hero">
       <div class="hero-photo-wrap">
-        ${photoSlotHtml("hero", "", "Add your hero photo")}
+        ${heroPhoto}
         <div class="hero-overlay" id="heroOverlay">${heroText}</div>
       </div>
       <div class="hero-inner" id="heroInner">${heroText}</div>
       <div class="countdown" id="countdown"></div>
     </section>
     <section class="page-body" style="max-width:var(--w-content);margin:0 auto;padding:3rem 1.5rem 0">
-      <div class="page-title"><span class="script">welcome</span><h2>${SITE.welcome.heading}</h2></div>
+      <div class="page-title"><span class="script">${titleFor("welcome").script}</span><h2>${SITE.welcome.heading}</h2></div>
       <p class="center">${SITE.welcome.message}</p>
     </section>`;
 }
 
 function renderStory() {
+  const photo = (SITE.photos && SITE.photos.story)
+    ? `<div class="story-photo">${photoImg(SITE.photos.story, "", "slot-tall")}</div>` : "";
   return `
-    ${pageTitle("our", "Story")}
+    ${pageTitle("story")}
     <p class="center muted" style="margin-bottom:0.4rem">${SITE.story.intro}</p>
-    <div class="story-photo">${photoSlotHtml("story", "slot-tall", "Add a photo of us")}</div>
+    ${photo}
     <p class="story-text">${SITE.story.text}</p>`;
 }
 
@@ -303,13 +187,12 @@ function renderSchedule() {
       <div class="timeline-where">${it.location}</div>
       <p style="font-size:0.92rem;margin-top:0.35rem">${it.note || ""}</p>
     </div>`).join("");
-  return `${pageTitle("the", "Schedule")}<div class="timeline">${items}</div>`;
+  return `${pageTitle("schedule")}<div class="timeline">${items}</div>`;
 }
 
 function renderStay() {
-  const cards = SITE.hotels.map((h, i) => `
+  const cards = SITE.hotels.map((h) => `
     <div class="hotel-card">
-      ${photoSlotHtml("hotel-" + i, "", "Add photo")}
       <div class="hotel-body">
         <h3>${h.name}</h3>
         <div class="hotel-stars">${"★".repeat(Math.floor(h.stars))}${h.stars % 1 ? "½" : ""} <span class="muted">(${h.stars})</span></div>
@@ -318,14 +201,14 @@ function renderStay() {
       </div>
     </div>`).join("");
   const intro = SITE.stayIntro ? `<p class="center" style="margin-bottom:2.2rem">${SITE.stayIntro}</p>` : "";
-  return `${pageTitle("where to", "Stay")}${intro}<div class="hotel-grid">${cards}</div>`;
+  return `${pageTitle("stay")}${intro}<div class="hotel-grid">${cards}</div>`;
 }
 
 function renderTravel() {
   const blocks = SITE.travel.map((t) => `
     <div class="travel-block"><h3>${t.title}</h3><p>${t.body}</p></div>`).join("");
   return `
-    ${pageTitle("getting", "There")}
+    ${pageTitle("travel")}
     <p class="center muted" style="margin-bottom:2.4rem">${SITE.wedding.venue} · ${SITE.wedding.venueAddress}</p>
     ${blocks}`;
 }
@@ -336,7 +219,7 @@ function renderQanda() {
       <summary>${q.q}</summary>
       <div class="qa-answer">${q.a}</div>
     </details>`).join("");
-  return `${pageTitle("questions &", "Answers")}${items}`;
+  return `${pageTitle("qanda")}${items}`;
 }
 
 function renderRegistry() {
@@ -345,37 +228,25 @@ function renderRegistry() {
       <h3>${l.label} →</h3>
       <p>${l.description || ""}</p>
     </a>`).join("");
-  return `${pageTitle("the", "Registry")}<p class="center">${SITE.registry.note}</p><div class="registry-links">${links}</div>`;
+  return `${pageTitle("registry")}<p class="center">${SITE.registry.note}</p><div class="registry-links">${links}</div>`;
 }
 
 function renderMoments() {
   return `
-    ${pageTitle("our", "Moments")}
+    ${pageTitle("moments")}
     <p class="center">${SITE.moments.intro}</p>
     <div class="gallery" id="gallery"></div>`;
 }
 
 function renderRsvp() {
+  const deadline = SITE.rsvp && SITE.rsvp.deadline
+    ? `<p class="center" style="margin-top:0.6rem"><strong>${t("respondBy", { date: SITE.rsvp.deadline })}</strong></p>` : "";
+  const intro = SITE.rsvp && SITE.rsvp.message ? `<p class="center">${SITE.rsvp.message}</p>` : "";
   return `
-    ${pageTitle("join", "Us")}
-    <p class="center">${SITE.rsvp.message}</p>
-    <p class="center" style="margin-top:0.6rem"><strong>Kindly respond by ${SITE.rsvp.deadline}.</strong></p>
-    <form class="rsvp-form" id="rsvpForm">
-      <label><span>Your name</span><input type="text" name="name" required placeholder="Full name"></label>
-      <label><span>Email</span><input type="email" name="email" placeholder="you@example.com"></label>
-      <div class="rsvp-attend" role="radiogroup" aria-label="Will you attend?">
-        <label><input type="radio" name="attending" value="Joyfully accepts" checked> Joyfully accepts</label>
-        <label><input type="radio" name="attending" value="Regretfully declines"> Regretfully declines</label>
-      </div>
-      <label><span>Number of guests (including you)</span>
-        <select name="guests"><option>1</option><option>2</option><option>3</option><option>4</option></select>
-      </label>
-      <label><span>Dietary notes or a message for us</span>
-        <textarea name="notes" rows="4" placeholder="Allergies, song requests, anything at all…"></textarea>
-      </label>
-      <button class="btn" type="submit">Send RSVP</button>
-      <div class="rsvp-sent" id="rsvpSent"></div>
-    </form>`;
+    ${pageTitle("rsvp")}
+    ${intro}
+    ${deadline}
+    <div id="rsvpWidget" class="rsvp-widget"></div>`;
 }
 
 const PAGE_RENDERERS = {
@@ -411,11 +282,10 @@ function renderAllPages() {
     })
     .join("");
 
-  wireSlots(main);
-  hydratePhotos();
-  wireGallery();
-  wireRsvp();
+  renderGallery();
+  mountRsvp();
   startCountdown();
+  syncHeroText();
 }
 
 function currentPage() {
@@ -462,7 +332,7 @@ function startCountdown() {
     const h = Math.floor(diff / 3600000); diff -= h * 3600000;
     const m = Math.floor(diff / 60000); diff -= m * 60000;
     const s = Math.floor(diff / 1000);
-    const cells = [[d, "Days"], [h, "Hours"], [m, "Minutes"], [s, "Seconds"]];
+    const cells = [[d, t("count.days")], [h, t("count.hours")], [m, t("count.minutes")], [s, t("count.seconds")]];
     el.innerHTML = cells
       .map(([n, l]) => `<div class="count-cell"><div class="count-num">${n}</div><div class="count-label">${l}</div></div>`)
       .join("");
@@ -482,143 +352,66 @@ function syncHeroText() {
   const banner = settings.layout.hero === "banner";
   overlay.style.display = banner ? "" : "none";
   inner.style.display = banner ? "none" : "";
-  const heroSlot = document.querySelector('[data-slot="hero"]');
-  if (heroSlot) overlay.classList.toggle("on-photo", !heroSlot.classList.contains("empty"));
+  const hasPhoto = !!(SITE.photos && SITE.photos.hero);
+  overlay.classList.toggle("on-photo", hasPhoto);
 }
 
 /* ----------------------------------------------------------
-   Photo hydration + gallery
+   Gallery (display-only) + lightbox
    ---------------------------------------------------------- */
 
-async function hydratePhotos() {
-  let entries = [];
-  try { entries = await dbEntries(); } catch { /* still apply defaults below */ }
-  const gallery = document.getElementById("gallery");
-
-  for (const [key, blob] of entries) {
-    if (key.startsWith("gallery-")) {
-      if (gallery) addGalleryItem(key, blob, false);
-    } else {
-      const slot = document.querySelector(`[data-slot="${CSS.escape(key)}"]`);
-      if (slot) setSlotImage(slot, blob);
-    }
-  }
-
-  // Default photos for slots without a local upload
-  for (const [slotId, url] of Object.entries(SITE.photos || {})) {
-    const slot = document.querySelector(`[data-slot="${CSS.escape(slotId)}"]`);
-    if (slot && slot.classList.contains("empty")) setSlotImage(slot, url);
-  }
-  if (gallery) {
-    ensureGalleryAddTile();
-    for (const url of SITE.galleryDefaults || []) addGalleryDefault(url);
-  }
-  syncHeroText();
-}
-
-function addGalleryDefault(url) {
-  const gallery = document.getElementById("gallery");
-  const fig = document.createElement("figure");
-  fig.className = "gallery-item";
-  const img = document.createElement("img");
-  img.src = url;
-  img.alt = "Gallery photo";
-  img.loading = "lazy";
-  fig.append(img); // no remove button — defaults are files in photos/
-  fig.addEventListener("click", () => openLightbox(url));
-  gallery.append(fig);
-}
-
-function ensureGalleryAddTile() {
-  const gallery = document.getElementById("gallery");
-  if (!gallery || gallery.querySelector(".gallery-add")) return;
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = "gallery-add";
-  btn.innerHTML = `${CAMERA_SVG}<span>Add photos</span>`;
-  btn.addEventListener("click", () => document.getElementById("fileInputMulti").click());
-  gallery.prepend(btn);
-}
-
-function addGalleryItem(key, blob, prepend = true) {
+function renderGallery() {
   const gallery = document.getElementById("gallery");
   if (!gallery) return;
-  const fig = document.createElement("figure");
-  fig.className = "gallery-item";
-  fig.dataset.key = key;
-  const img = document.createElement("img");
-  img.src = URL.createObjectURL(blob);
-  img.alt = "Gallery photo";
-  img.loading = "lazy";
-  const rm = document.createElement("button");
-  rm.className = "g-remove";
-  rm.type = "button";
-  rm.setAttribute("aria-label", "Remove photo");
-  rm.textContent = "×";
-  rm.addEventListener("click", (e) => {
-    e.stopPropagation();
-    dbDelete(key);
-    URL.revokeObjectURL(img.src);
-    fig.remove();
+  const urls = SITE.galleryDefaults || [];
+  gallery.innerHTML = "";
+  urls.forEach((url) => {
+    const fig = document.createElement("figure");
+    fig.className = "gallery-item";
+    const img = document.createElement("img");
+    img.src = url;
+    img.alt = "Gallery photo";
+    img.loading = "lazy";
+    fig.append(img);
+    fig.addEventListener("click", () => openLightbox(url));
+    gallery.append(fig);
   });
-  fig.append(img, rm);
-  fig.addEventListener("click", () => openLightbox(img.src));
-  const addTile = gallery.querySelector(".gallery-add");
-  if (prepend && addTile) addTile.after(fig);
-  else gallery.append(fig);
-}
-
-function wireGallery() {
-  ensureGalleryAddTile();
-  const multi = document.getElementById("fileInputMulti");
-  multi.onchange = async () => {
-    for (const file of multi.files) {
-      try {
-        const blob = await downscale(file, 1800, 0.82);
-        const key = "gallery-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
-        await dbPut(key, blob);
-        addGalleryItem(key, blob);
-      } catch (e) { console.warn("skipped file:", e); }
-    }
-    multi.value = "";
-  };
 }
 
 function openLightbox(src) {
   const lb = document.getElementById("lightbox");
+  if (!lb) return;
   document.getElementById("lightboxImg").src = src;
   lb.hidden = false;
 }
 
 /* ----------------------------------------------------------
-   RSVP (composes an email — no server needed)
+   RSVP widget mount
    ---------------------------------------------------------- */
 
-function wireRsvp() {
-  const form = document.getElementById("rsvpForm");
-  if (!form) return;
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const data = new FormData(form);
-    const subject = `RSVP — ${data.get("name")} (${data.get("attending")})`;
-    const body = [
-      `Name: ${data.get("name")}`,
-      `Email: ${data.get("email") || "—"}`,
-      `Attending: ${data.get("attending")}`,
-      `Guests: ${data.get("guests")}`,
-      `Notes: ${data.get("notes") || "—"}`,
-    ].join("\n");
-    location.href = `mailto:${SITE.rsvp.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    document.getElementById("rsvpSent").textContent = "Your email app should open — just press send!";
-  });
+function mountRsvp() {
+  const host = document.getElementById("rsvpWidget");
+  if (!host || !window.Store) return;
+  const kind = SITE.rsvpKind || "wedding";
+  const opts = { store: window.Store, config: SITE };
+  if (kind === "afterparty" && window.mountAfterpartyRsvp) {
+    window.mountAfterpartyRsvp(host, opts);
+  } else if (window.mountWeddingRsvp) {
+    window.mountWeddingRsvp(host, opts);
+  }
 }
 
 /* ----------------------------------------------------------
-   Design panel
+   Design panel (optional — gated by SITE.designPanel)
    ---------------------------------------------------------- */
 
+function designEnabled() {
+  if (SITE.designPanel === true) return true;
+  try { return new URLSearchParams(location.search).get("design") === "1"; }
+  catch (e) { return false; }
+}
+
 function buildDesignPanel() {
-  // Font selects
   for (const [role, el] of [
     ["heading", document.getElementById("fontHeading")],
     ["script", document.getElementById("fontScript")],
@@ -633,11 +426,7 @@ function buildDesignPanel() {
 
     const custom = document.getElementById(el.id + "Custom");
     el.addEventListener("change", () => {
-      if (el.value === "__custom__") {
-        custom.hidden = false;
-        custom.focus();
-        return;
-      }
+      if (el.value === "__custom__") { custom.hidden = false; custom.focus(); return; }
       custom.hidden = true;
       settings.fonts[role] = el.value;
       applySettings();
@@ -649,16 +438,12 @@ function buildDesignPanel() {
       settings.fonts[role] = name;
       applySettings();
       const opt = document.createElement("option");
-      opt.value = name;
-      opt.textContent = name;
-      el.prepend(opt);
-      el.value = name;
-      custom.hidden = true;
-      custom.value = "";
+      opt.value = name; opt.textContent = name;
+      el.prepend(opt); el.value = name;
+      custom.hidden = true; custom.value = "";
     });
   }
 
-  // Palette swatches
   const sw = document.getElementById("paletteSwatches");
   sw.innerHTML = PALETTES.map((p) => `
     <button class="dp-swatch" data-palette="${p.id}" title="${p.name}" aria-label="${p.name}">
@@ -673,7 +458,6 @@ function buildDesignPanel() {
     refreshPanelState();
   });
 
-  // Custom color pickers
   for (const [key, id] of [["bg", "colBg"], ["accent", "colAccent"], ["alt", "colAlt"], ["text", "colText"]]) {
     const input = document.getElementById(id);
     input.addEventListener("input", () => {
@@ -684,7 +468,6 @@ function buildDesignPanel() {
     });
   }
 
-  // Layout radio groups
   document.querySelectorAll(".dp-radios").forEach((group) => {
     group.addEventListener("click", (e) => {
       const btn = e.target.closest("button[data-value]");
@@ -692,17 +475,16 @@ function buildDesignPanel() {
       settings.layout[group.dataset.setting] = btn.dataset.value;
       applySettings();
       refreshPanelState();
-      route();       // page mode may have changed
-      syncHeroText(); // hero style may have changed
+      route();
+      syncHeroText();
     });
   });
 
-  // Open/close/reset
   const panel = document.getElementById("designPanel");
   document.getElementById("designToggle").addEventListener("click", () => panel.classList.toggle("open"));
   document.getElementById("designClose").addEventListener("click", () => panel.classList.remove("open"));
   document.getElementById("designReset").addEventListener("click", () => {
-    localStorage.removeItem("sd-design");
+    localStorage.removeItem(SETTINGS_KEY);
     settings = structuredClone(DEFAULT_SETTINGS);
     applySettings();
     refreshPanelState();
@@ -737,6 +519,7 @@ function refreshPanelState() {
    ---------------------------------------------------------- */
 
 function boot() {
+  document.documentElement.lang = SITE.locale || "en";
   document.title = `${SITE.couple.displayName} — ${SITE.wedding.dateDisplay}`;
   document.getElementById("brandMonogram").textContent = SITE.couple.monogram;
   document.getElementById("brandNames").textContent = SITE.couple.displayName;
@@ -747,24 +530,22 @@ function boot() {
   applySettings();
   buildNav();
   renderAllPages();
-  buildDesignPanel();
+
+  const toggle = document.getElementById("designToggle");
+  if (designEnabled()) {
+    if (toggle) toggle.hidden = false;
+    buildDesignPanel();
+  } else if (toggle) {
+    toggle.hidden = true;
+  }
+
   route();
   syncHeroText();
 
   window.addEventListener("hashchange", route);
 
-  // single-file input used by all photo slots
-  fileInput().addEventListener("change", () => {
-    const f = fileInput().files[0];
-    if (f && pendingSlot) {
-      handleSlotFile(pendingSlot, f).then(syncHeroText);
-    }
-    fileInput().value = "";
-  });
-
-  document.getElementById("lightbox").addEventListener("click", (e) => {
-    e.currentTarget.hidden = true;
-  });
+  const lightbox = document.getElementById("lightbox");
+  if (lightbox) lightbox.addEventListener("click", (e) => { e.currentTarget.hidden = true; });
 }
 
 document.addEventListener("DOMContentLoaded", boot);

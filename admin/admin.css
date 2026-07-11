@@ -1,0 +1,68 @@
+/* 관리자 페이지 공용 스타일 (style.css 토큰 재사용) */
+body {
+  font-family: 'Noto Sans KR', -apple-system, system-ui, sans-serif;
+  background: var(--bg-soft);
+}
+.admin-wrap { max-width: 760px; margin: 0 auto; padding: 24px 18px 80px; }
+.admin-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.admin-head h1 { font-size: 20px; margin: 0; }
+.admin-nav { display: flex; gap: 8px; flex-wrap: wrap; }
+.admin-nav a {
+  font-size: 13px; padding: 8px 14px; border-radius: 999px;
+  background: #fff; border: 1px solid var(--line); color: var(--ink-soft);
+}
+.admin-nav a.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.card {
+  background: #fff; border: 1px solid var(--line); border-radius: 14px;
+  padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 14px rgba(60, 50, 65, 0.05);
+}
+.card h2 { font-size: 15px; margin: 0 0 14px; color: var(--accent-deep); }
+.card .hint { font-size: 12px; color: var(--ink-faint); line-height: 1.6; }
+
+.stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+.stat {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 12px;
+  padding: 14px; text-align: center;
+}
+.stat b { display: block; font-size: 22px; color: var(--accent-deep); }
+.stat span { font-size: 12px; color: var(--ink-faint); }
+
+table.data { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.data th, table.data td {
+  padding: 9px 8px; border-bottom: 1px solid var(--line); text-align: left;
+  vertical-align: top; word-break: break-all;
+}
+table.data th { color: var(--ink-faint); font-weight: 500; font-size: 12px; white-space: nowrap; }
+table.data .num { text-align: center; }
+.table-scroll { overflow-x: auto; }
+
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.btn-danger { background: #fff; border: 1px solid #d88; color: #b55; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; }
+.tag.groom { background: #e3ecf7; color: #3a5f8a; }
+.tag.bride { background: #f7e3ea; color: #8a3a5b; }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-grid .full { grid-column: 1 / -1; }
+.form-grid label { display: block; font-size: 12px; color: var(--ink-soft); margin-bottom: 4px; }
+.form-grid textarea { min-height: 110px; resize: vertical; }
+.check-row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.check-row input { width: 16px; height: 16px; padding: 0; accent-color: var(--accent); }
+@media (max-width: 560px) { .form-grid { grid-template-columns: 1fr; } }
+
+/* 접근 게이트 */
+.gate {
+  max-width: 340px; margin: 18vh auto 0; text-align: center;
+  background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 32px 26px;
+}
+.gate h1 { font-size: 17px; margin: 0 0 6px; }
+.gate p { font-size: 12px; color: var(--ink-faint); margin: 0 0 18px; }
+.gate input { text-align: center; letter-spacing: 0.3em; margin-bottom: 12px; }
+.notice-bar {
+  background: #fff8e6; border: 1px solid #eeddb0; color: #8a6d2f;
+  border-radius: 10px; padding: 10px 14px; font-size: 12px; line-height: 1.6; margin-bottom: 16px;
+}

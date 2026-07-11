@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>웨딩 참석 확인 · 관리자</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🔐</text></svg>">
+<link rel="stylesheet" href="../shared/mochung/style.css">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-wrap" id="adminApp" hidden>
+  <div class="admin-head">
+    <h1>✅ 웨딩 참석 확인</h1>
+    <div class="admin-nav">
+      <a href="index.html">홈</a>
+      <a href="rsvp.html" class="on">웨딩 참석</a>
+      <a href="afterparty.html">애프터파티</a>
+      <a href="guestbook.html">방명록</a>
+      <a href="edit.html">청첩장 수정</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>집계 <span class="hint" id="filterNote"></span></h2>
+    <div class="stat-row">
+      <div class="stat"><b id="stRes">-</b><span>응답 수</span></div>
+      <div class="stat"><b id="stHead">-</b><span>참석 인원</span></div>
+      <div class="stat"><b id="stYes">-</b><span>참석</span></div>
+      <div class="stat"><b id="stNo">-</b><span>불참</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+      <h2 style="margin:0;">응답 목록</h2>
+      <div class="btn-row" style="margin:0;">
+        <select id="sideFilter" style="width:auto; padding:8px 12px; font-size:13px;">
+          <option value="">측: 전체</option>
+          <option value="groom">신랑 측</option>
+          <option value="bride">신부 측</option>
+        </select>
+        <select id="localeFilter" style="width:auto; padding:8px 12px; font-size:13px;">
+          <option value="">언어: 전체</option>
+          <option value="ko">한국어</option>
+          <option value="en">English</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" id="btnCsv">CSV 다운로드</button>
+      </div>
+    </div>
+    <div class="table-scroll" style="margin-top:14px;">
+      <table class="data">
+        <thead>
+          <tr>
+            <th>전달 시각</th><th>측</th><th>성함</th><th>참석</th><th class="num">인원</th>
+            <th>연락처</th><th>동행인</th><th>식사</th><th>버스</th><th>메시지</th><th>언어</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p class="hint" id="emptyMsg" hidden>조건에 맞는 참석의사가 없습니다.</p>
+  </div>
+</div>
+
+<!-- 공유 데이터 백엔드 (로드 순서 중요) -->
+<script src="../invite/config.js"></script>
+<script src="../shared/site-config.js"></script>
+<script src="../shared/supabase-config.js"></script>
+<script>
+  if (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url && window.SUPABASE_CONFIG.anonKey) {
+    document.write('<scr' + 'ipt src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/scr' + 'ipt>');
+  }
+</script>
+<script src="../shared/store.localStorage.js"></script>
+<script src="../shared/store.supabase.js"></script>
+<script src="../shared/store.js"></script>
+<script src="admin.js"></script>
+<script>
+Admin.gate(async function () {
+  const store = window.Store;
+  const esc = Admin.esc;
+  let all = [];
+
+  const sideKo = function (s) { return s === 'groom' ? '신랑' : s === 'bride' ? '신부' : '-'; };
+  const localeKo = function (l) { return l === 'en' ? 'English' : '한국어'; };
+  const attKo = function (a) { return a ? '참석' : '불참'; };
+  const sumParty = function (arr) {
+    return arr.reduce(function (s, r) { return s + (r.attending ? (r.party_count || 0) : 0); }, 0);
+  };
+
+  function filtered() {
+    const side = document.getElementById('sideFilter').value;
+    const locale = document.getElementById('localeFilter').value;
+    return all.filter(function (r) {
+      if (side && r.side !== side) return false;
+      if (locale && (r.locale || 'ko') !== locale) return false;
+      return true;
+    });
+  }
+
+  async function refresh() {
+    all = await store.listWeddingRsvps();
+    const list = filtered();
+
+    document.getElementById('stRes').textContent = list.length + '건';
+    document.getElementById('stHead').textContent = sumParty(list) + '명';
+    document.getElementById('stYes').textContent =
+      list.filter(function (r) { return r.attending; }).length + '건';
+    document.getElementById('stNo').textContent =
+      list.filter(function (r) { return !r.attending; }).length + '건';
+
+    document.getElementById('rows').innerHTML = list.map(function (r) {
+      return '<tr>' +
+        '<td style="white-space:nowrap;">' + Admin.fmtDateTime(r.created_at) + '</td>' +
+        '<td><span class="tag ' + (r.side || '') + '">' + sideKo(r.side) + '</span></td>' +
+        '<td>' + esc(r.name) + '</td>' +
+        '<td>' + attKo(r.attending) + '</td>' +
+        '<td class="num">' + (r.attending ? (r.party_count || 0) : 0) + '</td>' +
+        '<td style="white-space:nowrap;">' + esc(r.phone) + '</td>' +
+        '<td>' + esc(r.companion) + '</td>' +
+        '<td>' + esc(r.meal) + '</td>' +
+        '<td>' + esc(r.bus) + '</td>' +
+        '<td>' + esc(r.message) + '</td>' +
+        '<td>' + localeKo(r.locale) + '</td>' +
+        '<td><button class="btn btn-sm btn-danger" data-del="' + r.id + '">삭제</button></td>' +
+        '</tr>';
+    }).join('');
+    document.getElementById('emptyMsg').hidden = list.length > 0;
+    document.getElementById('filterNote').textContent = '(현재 필터 기준)';
+  }
+
+  document.getElementById('sideFilter').addEventListener('change', refresh);
+  document.getElementById('localeFilter').addEventListener('change', refresh);
+
+  document.getElementById('rows').addEventListener('click', async function (e) {
+    const btn = e.target.closest('[data-del]');
+    if (!btn) return;
+    if (!confirm('이 응답을 삭제할까요?')) return;
+    await store.deleteWeddingRsvp(btn.dataset.del);
+    refresh();
+  });
+
+  document.getElementById('btnCsv').addEventListener('click', function () {
+    const rows = [['전달시각', '측', '성함', '참석', '인원', '연락처', '동행인', '식사', '버스', '메시지', '언어']];
+    filtered().forEach(function (r) {
+      rows.push([
+        Admin.fmtDateTime(r.created_at),
+        sideKo(r.side), r.name, attKo(r.attending),
+        r.attending ? (r.party_count || 0) : 0,
+        r.phone, r.companion, r.meal, r.bus, r.message, localeKo(r.locale),
+      ]);
+    });
+    Admin.download('wedding-rsvp.csv', Admin.toCsv(rows), 'text/csv;charset=utf-8');
+  });
+
+  refresh();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>방명록 관리 · 관리자</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🔐</text></svg>">
+<link rel="stylesheet" href="../shared/mochung/style.css">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-wrap" id="adminApp" hidden>
+  <div class="admin-head">
+    <h1>📖 방명록 관리</h1>
+    <div class="admin-nav">
+      <a href="index.html">홈</a>
+      <a href="rsvp.html">웨딩 참석</a>
+      <a href="afterparty.html">애프터파티</a>
+      <a href="guestbook.html" class="on">방명록</a>
+      <a href="edit.html">청첩장 수정</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+      <h2 style="margin:0;">메시지 <span id="gbTotal"></span></h2>
+      <div class="btn-row" style="margin:0;">
+        <select id="localeFilter" style="width:auto; padding:8px 12px; font-size:13px;">
+          <option value="">언어: 전체</option>
+          <option value="ko">한국어</option>
+          <option value="en">English</option>
+        </select>
+        <input type="search" id="gbSearch" placeholder="이름/내용 검색"
+               style="width:180px; padding:8px 12px; font-size:13px;">
+      </div>
+    </div>
+    <div class="table-scroll" style="margin-top:14px;">
+      <table class="data">
+        <thead><tr><th>작성 시각</th><th>이름</th><th>메시지</th><th>언어</th><th></th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p class="hint" id="emptyMsg" hidden>조건에 맞는 방명록 메시지가 없습니다.</p>
+  </div>
+</div>
+
+<!-- 공유 데이터 백엔드 (로드 순서 중요) -->
+<script src="../invite/config.js"></script>
+<script src="../shared/site-config.js"></script>
+<script src="../shared/supabase-config.js"></script>
+<script>
+  if (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url && window.SUPABASE_CONFIG.anonKey) {
+    document.write('<scr' + 'ipt src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/scr' + 'ipt>');
+  }
+</script>
+<script src="../shared/store.localStorage.js"></script>
+<script src="../shared/store.supabase.js"></script>
+<script src="../shared/store.js"></script>
+<script src="admin.js"></script>
+<script>
+Admin.gate(async function () {
+  const store = window.Store;
+  const esc = Admin.esc;
+  const localeKo = function (l) { return l === 'en' ? 'English' : '한국어'; };
+
+  async function refresh() {
+    const locale = document.getElementById('localeFilter').value;
+    const q = document.getElementById('gbSearch').value.trim().toLowerCase();
+    const all = await store.listGuestbook(locale ? { locale: locale } : {});
+    const list = q
+      ? all.filter(function (e) {
+          return (e.name || '').toLowerCase().includes(q) ||
+                 (e.message || '').toLowerCase().includes(q);
+        })
+      : all;
+    document.getElementById('gbTotal').textContent = '(' + list.length + '건)';
+    document.getElementById('rows').innerHTML = list.map(function (e) {
+      return '<tr>' +
+        '<td style="white-space:nowrap;">' + Admin.fmtDateTime(e.createdAt) + '</td>' +
+        '<td style="white-space:nowrap;">' + esc(e.name) + '</td>' +
+        '<td>' + esc(e.message) + '</td>' +
+        '<td>' + localeKo(e.locale) + '</td>' +
+        '<td><button class="btn btn-sm btn-danger" data-del="' + e.id + '">삭제</button></td>' +
+        '</tr>';
+    }).join('');
+    document.getElementById('emptyMsg').hidden = list.length > 0;
+  }
+
+  document.getElementById('localeFilter').addEventListener('change', refresh);
+  document.getElementById('gbSearch').addEventListener('input', refresh);
+
+  document.getElementById('rows').addEventListener('click', async function (e) {
+    const btn = e.target.closest('[data-del]');
+    if (!btn) return;
+    if (!confirm('이 메시지를 삭제할까요?')) return;
+    try {
+      await store.deleteGuestbook(btn.dataset.del, { admin: true });
+    } catch (err) {
+      alert('삭제 실패: ' + (err && err.message ? err.message : err));
+    }
+    refresh();
+  });
+
+  refresh();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>청첩장 수정 · 관리자</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🔐</text></svg>">
+<link rel="stylesheet" href="../shared/mochung/style.css">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-wrap" id="adminApp" hidden>
+  <div class="admin-head">
+    <h1>✏️ 청첩장 수정</h1>
+    <div class="admin-nav">
+      <a href="index.html">홈</a>
+      <a href="rsvp.html">웨딩 참석</a>
+      <a href="afterparty.html">애프터파티</a>
+      <a href="guestbook.html">방명록</a>
+      <a href="edit.html" class="on">청첩장 수정</a>
+      <a href="../invite/index.html" target="_blank">미리보기 ↗</a>
+    </div>
+  </div>
+
+  <div class="notice-bar">
+    수정 내용은 <b>이 브라우저의 localStorage</b>(또는 연결된 백엔드)에 <code>invite</code> 범위 override로
+    저장되어 즉시 미리보기에 반영됩니다. 모든 방문자에게 영구 반영하려면 "설정 JSON 내보내기"로 받은 내용을
+    <code>invite/config.js</code> 에 옮겨 배포하세요. (README 참고)
+  </div>
+
+  <div class="card">
+    <h2>디자인 · 폰트</h2>
+    <div class="form-grid">
+      <div>
+        <label>폰트 프리셋</label>
+        <select data-cfg="theme.fontPreset">
+          <option value="classic">클래식 — 고운바탕 (명조풍)</option>
+          <option value="romantic">로맨틱 — 나눔명조 + 고운돋움</option>
+          <option value="modern">모던 — 고운돋움 + 노토산스</option>
+          <option value="bold">볼드 — 송명 + 노토세리프</option>
+          <option value="handwriting">손글씨 — 나눔펜스크립트</option>
+        </select>
+      </div>
+      <div>
+        <label>글자 크기</label>
+        <select data-cfg="theme.fontScale" data-type="number">
+          <option value="0.9">작게 (0.9)</option>
+          <option value="1">보통 (1.0)</option>
+          <option value="1.05">약간 크게 (1.05)</option>
+          <option value="1.1">크게 (1.1)</option>
+        </select>
+      </div>
+      <div class="check-row"><input type="checkbox" id="fxStars" data-cfg="theme.effects.stars"><label for="fxStars">메인 별 반짝임 효과</label></div>
+      <div class="check-row"><input type="checkbox" id="fxReveal" data-cfg="theme.effects.reveal"><label for="fxReveal">스크롤 등장 효과</label></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>신랑 · 신부</h2>
+    <div class="form-grid">
+      <div><label>신랑 성함</label><input data-cfg="couple.groom.fullName"></div>
+      <div><label>신부 성함</label><input data-cfg="couple.bride.fullName"></div>
+      <div><label>신랑 이름(성 제외)</label><input data-cfg="couple.groom.firstName"></div>
+      <div><label>신부 이름(성 제외)</label><input data-cfg="couple.bride.firstName"></div>
+      <div><label>신랑 영문</label><input data-cfg="couple.groom.enName"></div>
+      <div><label>신부 영문</label><input data-cfg="couple.bride.enName"></div>
+      <div><label>신랑 연락처</label><input data-cfg="couple.groom.phone"></div>
+      <div><label>신부 연락처</label><input data-cfg="couple.bride.phone"></div>
+      <div><label>신랑 호칭 (아들/장남 등)</label><input data-cfg="couple.groom.role"></div>
+      <div><label>신부 호칭 (딸/장녀 등)</label><input data-cfg="couple.bride.role"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>혼주</h2>
+    <div class="form-grid">
+      <div><label>신랑 아버지</label><input data-cfg="couple.groom.father.name"></div>
+      <div><label>신부 아버지</label><input data-cfg="couple.bride.father.name"></div>
+      <div class="check-row"><input type="checkbox" id="gfD" data-cfg="couple.groom.father.deceased"><label for="gfD">故 (신랑 아버지)</label></div>
+      <div class="check-row"><input type="checkbox" id="bfD" data-cfg="couple.bride.father.deceased"><label for="bfD">故 (신부 아버지)</label></div>
+      <div><label>신랑 아버지 연락처</label><input data-cfg="couple.groom.father.phone"></div>
+      <div><label>신부 아버지 연락처</label><input data-cfg="couple.bride.father.phone"></div>
+      <div><label>신랑 어머니</label><input data-cfg="couple.groom.mother.name"></div>
+      <div><label>신부 어머니</label><input data-cfg="couple.bride.mother.name"></div>
+      <div class="check-row"><input type="checkbox" id="gmD" data-cfg="couple.groom.mother.deceased"><label for="gmD">故 (신랑 어머니)</label></div>
+      <div class="check-row"><input type="checkbox" id="bmD" data-cfg="couple.bride.mother.deceased"><label for="bmD">故 (신부 어머니)</label></div>
+      <div><label>신랑 어머니 연락처</label><input data-cfg="couple.groom.mother.phone"></div>
+      <div><label>신부 어머니 연락처</label><input data-cfg="couple.bride.mother.phone"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>예식 정보</h2>
+    <div class="form-grid">
+      <div><label>예식 날짜</label><input type="date" id="weddingDate"></div>
+      <div><label>예식 시간</label><input type="time" id="weddingTime"></div>
+      <div class="full"><label>날짜 표기 문구</label><input data-cfg="wedding.dateText" placeholder="2026. 10. 30. 금요일 오후 6시 30분"></div>
+      <div><label>메인 날짜 줄 (영문)</label><input data-cfg="wedding.heroDateLine" placeholder="2026 . 10 . 30 . FRI"></div>
+      <div><label>메인 시간 줄 (영문)</label><input data-cfg="wedding.heroTimeLine" placeholder="PM 6:30"></div>
+      <div><label>예식장 이름</label><input data-cfg="wedding.venueName"></div>
+      <div><label>홀 이름</label><input data-cfg="wedding.venueHall"></div>
+      <div class="full"><label>주소</label><input data-cfg="wedding.address"></div>
+      <div><label>예식장 전화</label><input data-cfg="wedding.venueTel"></div>
+      <div></div>
+      <div><label>위도 (지도 링크용)</label><input data-cfg="wedding.lat" data-type="number"></div>
+      <div><label>경도 (지도 링크용)</label><input data-cfg="wedding.lng" data-type="number"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>모시는 글</h2>
+    <div class="form-grid">
+      <div class="full"><label>제목</label><input data-cfg="greeting.heading"></div>
+      <div class="full"><label>내용</label><textarea data-cfg="greeting.body"></textarea></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>참석의사 (RSVP)</h2>
+    <div class="form-grid">
+      <div class="check-row"><input type="checkbox" id="rsvpEn" data-cfg="rsvp.enabled"><label for="rsvpEn">참석의사 기능 사용</label></div>
+      <div class="check-row"><input type="checkbox" id="rsvpPopup" data-cfg="rsvp.popupOnLoad"><label for="rsvpPopup">접속 시 안내 팝업</label></div>
+      <div class="check-row"><input type="checkbox" id="rsvpMeal" data-cfg="rsvp.askMeal"><label for="rsvpMeal">식사 여부 질문</label></div>
+      <div class="check-row"><input type="checkbox" id="rsvpComp" data-cfg="rsvp.askCompanion"><label for="rsvpComp">동행인 질문</label></div>
+      <div class="check-row"><input type="checkbox" id="rsvpBus" data-cfg="rsvp.askBus"><label for="rsvpBus">대절버스 질문</label></div>
+      <div class="full"><label>안내 문구</label><textarea data-cfg="rsvp.notice"></textarea></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>마음 전하실 곳</h2>
+    <div class="form-grid">
+      <div class="full"><label>안내 문구</label><textarea data-cfg="accounts.notice"></textarea></div>
+      <div><label>신랑 측 은행</label><input data-cfg="accounts.groom.0.bank"></div>
+      <div><label>신부 측 은행</label><input data-cfg="accounts.bride.0.bank"></div>
+      <div><label>신랑 측 계좌번호</label><input data-cfg="accounts.groom.0.number"></div>
+      <div><label>신부 측 계좌번호</label><input data-cfg="accounts.bride.0.number"></div>
+      <div><label>신랑 측 예금주</label><input data-cfg="accounts.groom.0.holder"></div>
+      <div><label>신부 측 예금주</label><input data-cfg="accounts.bride.0.holder"></div>
+      <div><label>신랑 측 카카오페이 링크</label><input data-cfg="accounts.groom.0.kakaopayUrl" placeholder="https://qr.kakaopay.com/..."></div>
+      <div><label>신부 측 카카오페이 링크</label><input data-cfg="accounts.bride.0.kakaopayUrl" placeholder="https://qr.kakaopay.com/..."></div>
+      <div><label>신랑 측 카드결제 링크</label><input data-cfg="accounts.groom.0.cardPayUrl"></div>
+      <div><label>신부 측 카드결제 링크</label><input data-cfg="accounts.bride.0.cardPayUrl"></div>
+    </div>
+    <p class="hint">계좌를 여러 개(혼주 계좌 등) 등록하려면 invite/config.js 의 accounts 배열에 항목을 추가하세요.</p>
+  </div>
+
+  <div class="card">
+    <h2>축하 화환</h2>
+    <div class="form-grid">
+      <div class="check-row full"><input type="checkbox" id="flowerEn" data-cfg="flower.enabled"><label for="flowerEn">화환 섹션 표시</label></div>
+      <div class="full"><label>화환 서비스 링크</label><input data-cfg="flower.url" placeholder="https://..."></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>공유 · 카카오</h2>
+    <div class="form-grid">
+      <div class="full"><label>카카오 JavaScript 키</label><input data-cfg="share.kakaoJsKey" placeholder="developers.kakao.com 에서 발급"></div>
+      <div class="full"><label>대표 URL (배포 주소)</label><input data-cfg="share.url" placeholder="https://..."></div>
+      <div class="full"><label>공유 제목</label><input data-cfg="share.title"></div>
+      <div class="full"><label>공유 설명</label><textarea data-cfg="share.description" style="min-height:60px;"></textarea></div>
+      <div class="full"><label>공유 이미지 주소</label><input data-cfg="share.imageUrl"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>관리자</h2>
+    <div class="form-grid">
+      <div><label>관리자 암호</label><input data-cfg="admin.passcode"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnSave">저장하기</button>
+      <a class="btn btn-ghost" href="../invite/index.html" target="_blank">미리보기 ↗</a>
+      <button class="btn btn-ghost" id="btnExportCfg">설정 JSON 내보내기</button>
+      <button class="btn btn-danger" id="btnReset">기본값으로 초기화</button>
+    </div>
+    <p class="hint" style="margin-top:10px;">저장하면 이 브라우저에서 보는 청첩장에 즉시 반영됩니다.</p>
+  </div>
+</div>
+
+<!-- 모청 기본값 (defaults/passcode) -->
+<script src="../invite/config.js"></script>
+<!-- 공유 데이터 백엔드 (로드 순서 중요) -->
+<script src="../shared/site-config.js"></script>
+<script src="../shared/supabase-config.js"></script>
+<script>
+  if (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url && window.SUPABASE_CONFIG.anonKey) {
+    document.write('<scr' + 'ipt src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/scr' + 'ipt>');
+  }
+</script>
+<script src="../shared/store.localStorage.js"></script>
+<script src="../shared/store.supabase.js"></script>
+<script src="../shared/store.js"></script>
+<script src="admin.js"></script>
+<script>
+Admin.gate(async function () {
+  const store = window.Store;
+  const cfg = await Admin.mergedInviteConfig();
+
+  function getPath(obj, path) {
+    return path.split('.').reduce(function (o, k) { return o == null ? o : o[k]; }, obj);
+  }
+  function setPath(obj, path, value) {
+    const keys = path.split('.');
+    let cur = obj;
+    for (let i = 0; i < keys.length - 1; i++) {
+      const k = keys[i];
+      if (cur[k] == null || typeof cur[k] !== 'object') {
+        cur[k] = String(parseInt(keys[i + 1], 10)) === keys[i + 1] ? [] : {};
+      }
+      cur = cur[k];
+    }
+    cur[keys[keys.length - 1]] = value;
+  }
+
+  const fields = Array.from(document.querySelectorAll('[data-cfg]'));
+
+  // 폼 채우기
+  fields.forEach(function (el) {
+    const v = getPath(cfg, el.dataset.cfg);
+    if (el.type === 'checkbox') el.checked = !!v;
+    else el.value = v == null ? '' : v;
+  });
+  const wd = new Date(cfg.wedding.dateISO);
+  const p = function (n) { return String(n).padStart(2, '0'); };
+  document.getElementById('weddingDate').value =
+    wd.getFullYear() + '-' + p(wd.getMonth() + 1) + '-' + p(wd.getDate());
+  document.getElementById('weddingTime').value = p(wd.getHours()) + ':' + p(wd.getMinutes());
+
+  // 저장
+  document.getElementById('btnSave').addEventListener('click', async function () {
+    const out = JSON.parse(JSON.stringify(cfg));
+    fields.forEach(function (el) {
+      let v;
+      if (el.type === 'checkbox') v = el.checked;
+      else if (el.dataset.type === 'number') v = parseFloat(el.value) || 0;
+      else v = el.value;
+      setPath(out, el.dataset.cfg, v);
+    });
+    const d = document.getElementById('weddingDate').value;
+    const t = document.getElementById('weddingTime').value;
+    if (d && t) out.wedding.dateISO = d + 'T' + t + ':00+09:00';
+    await store.saveConfigOverride('invite', out);
+    alert('저장되었습니다. 미리보기에서 확인하세요.');
+  });
+
+  document.getElementById('btnExportCfg').addEventListener('click', async function () {
+    const override = (await store.getConfigOverride('invite')) || cfg;
+    Admin.download('mochung-config.json', JSON.stringify(override, null, 2), 'application/json');
+  });
+
+  document.getElementById('btnReset').addEventListener('click', async function () {
+    if (!confirm('모든 수정 내용을 지우고 invite/config.js 기본값으로 되돌릴까요?')) return;
+    await store.clearConfigOverride('invite');
+    location.reload();
+  });
+});
+</script>
+</body>
+</html>

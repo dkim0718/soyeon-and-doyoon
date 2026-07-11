@@ -800,3 +800,48 @@ html[data-mode="single"] .page + .page::before {
 @media print {
   .design-toggle, .design-panel, .slot-actions, .gallery-add { display: none !important; }
 }
+
+/* =====================================================================
+   Merged sites: display-only photos (uploads removed) + RSVP widget
+   ===================================================================== */
+
+.photo { overflow: hidden; }
+.photo img, .hero-img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+html[data-hero="banner"] .hero-photo-wrap .hero-img {
+  border-radius: 0;
+  min-height: 62vh;
+  max-height: 84vh;
+}
+html[data-hero="classic"] .hero-photo-wrap .hero-img {
+  border: 1px solid var(--c-line);
+  padding: 0;
+  background: var(--c-surface);
+  min-height: 24rem;
+  max-height: 40rem;
+}
+.story-photo { aspect-ratio: 3 / 4; overflow: hidden; border-radius: 2px; }
+.gallery-item { cursor: pointer; }
+
+/* Keep field labels uppercase but never transform the values people type */
+.rsvp-form input, .rsvp-form textarea, .rsvp-form select { text-transform: none; }
+
+.rsvp-widget { max-width: 34rem; margin: 0 auto; }
+.rsvp-hint { font-size: 0.8rem; margin-top: 0.6rem; }
+.ap-heading { font-family: var(--f-heading); text-align: center; margin-bottom: 1rem; }
+.ap-greeting { text-align: center; margin-bottom: 1.4rem; }
+.ap-greeting h3 { font-family: var(--f-heading); font-size: 1.4rem; color: var(--c-accent); }
+.ap-note { margin-top: 0.5rem; font-size: 0.85rem; color: var(--c-alt); }
+.ap-stepper { display: flex; align-items: center; gap: 1rem; }
+.ap-stepper output { min-width: 2ch; text-align: center; font-size: 1.2rem; font-family: var(--f-heading); }
+.ap-step-btn {
+  width: 2.2rem; height: 2.2rem; border-radius: 50%;
+  border: 1px solid var(--c-line); background: var(--c-surface);
+  font-size: 1.2rem; line-height: 1; cursor: pointer; color: var(--c-accent);
+}
+.ap-step-btn:hover { border-color: var(--c-accent); }
+.ap-companions { display: grid; gap: 0.5rem; }
+.ap-thanks { display: grid; gap: 1.2rem; justify-items: center; }
+
+.btn-ghost { background: transparent; color: var(--c-accent); border: 1px solid var(--c-line); }
+.btn-ghost:hover { border-color: var(--c-accent); opacity: 1; }

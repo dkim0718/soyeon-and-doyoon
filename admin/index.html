@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>관리자 · 대시보드</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🔐</text></svg>">
+<link rel="stylesheet" href="../shared/mochung/style.css">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-wrap" id="adminApp" hidden>
+  <div class="admin-head">
+    <h1>💌 청첩장 관리자</h1>
+    <div class="admin-nav">
+      <a href="index.html" class="on">홈</a>
+      <a href="rsvp.html">웨딩 참석</a>
+      <a href="afterparty.html">애프터파티</a>
+      <a href="guestbook.html">방명록</a>
+      <a href="edit.html">청첩장 수정</a>
+      <a href="../invite/index.html" target="_blank">청첩장 보기 ↗</a>
+    </div>
+  </div>
+
+  <div class="notice-bar" id="backendNotice"></div>
+
+  <div class="card">
+    <h2>웨딩 참석 (RSVP)</h2>
+    <p class="hint" style="margin-bottom:12px;">모청·한국어 사이트에서 자율 접수되는 참석의사입니다. (참석 인원 = 참석 응답의 인원 합계)</p>
+    <div class="stat-row">
+      <div class="stat"><b id="wRes">-</b><span>응답 수</span></div>
+      <div class="stat"><b id="wHead">-</b><span>참석 인원</span></div>
+      <div class="stat"><b id="wGroom">-</b><span>신랑 측 인원</span></div>
+      <div class="stat"><b id="wBride">-</b><span>신부 측 인원</span></div>
+      <div class="stat"><b id="wKo">-</b><span>한국어(ko) 인원</span></div>
+      <div class="stat"><b id="wEn">-</b><span>영어(en) 인원</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>애프터파티 (After-party)</h2>
+    <p class="hint" style="margin-bottom:12px;">초대 명단 기반의 개별 초대입니다. (참석 인원 = 참석 응답의 인원 합계)</p>
+    <div class="stat-row">
+      <div class="stat"><b id="apTotal">-</b><span>초대 인원</span></div>
+      <div class="stat"><b id="apResponded">-</b><span>응답 완료</span></div>
+      <div class="stat"><b id="apPending">-</b><span>미응답</span></div>
+      <div class="stat"><b id="apHead">-</b><span>참석 인원</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>방명록 · 남은 일</h2>
+    <div class="stat-row">
+      <div class="stat"><b id="gbCount">-</b><span>방명록 메시지</span></div>
+      <div class="stat"><b id="dday">-</b><span>예식까지</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>데이터 백업</h2>
+    <p class="hint">참석의사·애프터파티 명단·응답·방명록·수정 내용을 JSON 파일로 저장하거나 복원합니다.</p>
+    <div class="btn-row">
+      <button class="btn btn-ghost btn-sm" id="btnExport">JSON 내보내기</button>
+      <button class="btn btn-ghost btn-sm" id="btnImport">JSON 가져오기</button>
+      <input type="file" id="importFile" accept="application/json" hidden>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>세션</h2>
+    <div class="btn-row">
+      <button class="btn btn-ghost btn-sm" id="btnLogout">관리자 로그아웃</button>
+    </div>
+  </div>
+</div>
+
+<!-- 모청 기본값 (passcode/defaults) -->
+<script src="../invite/config.js"></script>
+<!-- 공유 데이터 백엔드 (로드 순서 중요) -->
+<script src="../shared/site-config.js"></script>
+<script src="../shared/supabase-config.js"></script>
+<script>
+  if (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url && window.SUPABASE_CONFIG.anonKey) {
+    document.write('<scr' + 'ipt src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/scr' + 'ipt>');
+  }
+</script>
+<script src="../shared/store.localStorage.js"></script>
+<script src="../shared/store.supabase.js"></script>
+<script src="../shared/store.js"></script>
+<script src="admin.js"></script>
+<script>
+Admin.gate(async function () {
+  const store = window.Store;
+  const set = function (id, v) { document.getElementById(id).textContent = v; };
+  const sumParty = function (arr) { return arr.reduce(function (s, r) { return s + (r.party_count || 0); }, 0); };
+
+  // 백엔드 안내
+  const notice = document.getElementById('backendNotice');
+  if (Admin.backend() === 'supabase') {
+    notice.innerHTML = '현재 저장소: <b>Supabase</b> — 모든 방문자의 응답이 한 곳에 모입니다.';
+  } else {
+    notice.innerHTML = '현재 저장소: <b>브라우저 localStorage</b> (테스트용) — 응답은 <b>이 기기</b>에만 저장됩니다. ' +
+      '실제 배포에는 Supabase 연결이 필요합니다. (README 참고)';
+  }
+
+  // 웨딩 RSVP
+  const weddings = await store.listWeddingRsvps();
+  const attending = weddings.filter(function (r) { return r.attending; });
+  set('wRes', weddings.length + '건');
+  set('wHead', sumParty(attending) + '명');
+  set('wGroom', sumParty(attending.filter(function (r) { return r.side === 'groom'; })) + '명');
+  set('wBride', sumParty(attending.filter(function (r) { return r.side === 'bride'; })) + '명');
+  set('wKo', sumParty(attending.filter(function (r) { return r.locale === 'ko'; })) + '명');
+  set('wEn', sumParty(attending.filter(function (r) { return r.locale === 'en'; })) + '명');
+
+  // 애프터파티
+  const ap = await store.listAfterpartyRsvps();
+  const responded = ap.filter(function (x) { return x.rsvp; });
+  const pending = ap.filter(function (x) { return !x.rsvp; });
+  const apHead = responded
+    .filter(function (x) { return x.rsvp.attending; })
+    .reduce(function (s, x) { return s + (x.rsvp.party_count || 0); }, 0);
+  set('apTotal', ap.length + '명');
+  set('apResponded', responded.length + '건');
+  set('apPending', pending.length + '건');
+  set('apHead', apHead + '명');
+
+  // 방명록 · D-day
+  const gb = await store.listGuestbook();
+  set('gbCount', gb.length + '건');
+  const cfg = await Admin.mergedInviteConfig();
+  const dday = Math.ceil((new Date(cfg.wedding.dateISO) - new Date()) / 86400000);
+  set('dday', dday > 0 ? 'D-' + dday : dday === 0 ? 'D-DAY' : 'D+' + (-dday));
+
+  // 백업
+  document.getElementById('btnExport').addEventListener('click', async function () {
+    const data = await store.exportAll();
+    Admin.download('mochung-backup.json', JSON.stringify(data, null, 2), 'application/json');
+  });
+  const fileInput = document.getElementById('importFile');
+  document.getElementById('btnImport').addEventListener('click', function () { fileInput.click(); });
+  fileInput.addEventListener('change', function () {
+    const f = fileInput.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = async function () {
+      try {
+        await store.importAll(JSON.parse(reader.result));
+        alert('복원되었습니다.');
+        location.reload();
+      } catch (e) {
+        alert('가져오기 실패: ' + (e && e.message ? e.message : e));
+      }
+    };
+    reader.readAsText(f);
+  });
+
+  document.getElementById('btnLogout').addEventListener('click', Admin.logout);
+});
+</script>
+</body>
+</html>

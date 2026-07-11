@@ -4,7 +4,12 @@
 //  items, save, and refresh the page.
 // ============================================================
 
-const SITE = {
+window.SITE = {
+  // — Site behavior (read by the shared Joy engine) —
+  locale: "en",           // language for UI chrome (shared/i18n.js)
+  rsvpKind: "afterparty", // English site collects the curated afterparty RSVP
+  designPanel: false,     // hide the guest-facing Design button (append ?design=1 to preview)
+
   couple: {
     partner1: "Soyeon",
     partner2: "Doyoon",
@@ -277,20 +282,14 @@ const SITE = {
       "Click any empty frame on the site to add a photo.",
   },
 
-  // Default photos — files in the photos/ folder, shown to every visitor.
-  // A photo you upload in the browser overrides these on your device only;
-  // replace the files (same names) to change them for everyone.
+  // Curated photos, shared across all three sites (shared/photos/).
+  // The gallery is the same set the 모청 shows (gallery-01..30).
   photos: {
-    hero: "photos/hero.jpg",
-    story: "photos/story.jpg",
+    hero: "../shared/photos/hero.jpg",
+    story: "../shared/photos/story.jpg",
   },
-  galleryDefaults: [
-    "photos/gallery-1.jpg",
-    "photos/gallery-2.jpg",
-    "photos/gallery-3.jpg",
-    "photos/gallery-4.jpg",
-    "photos/gallery-5.jpg",
-  ],
+  galleryDefaults: Array.from({ length: 30 }, (_, i) =>
+    "../shared/photos/gallery-" + String(i + 1).padStart(2, "0") + ".jpg"),
 
   // Pages appear in the navigation in this order.
   // Remove a line to hide that page.

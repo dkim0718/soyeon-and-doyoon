@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ko" data-font-preset="classic">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>소연 ♥ 도윤 결혼식에 초대합니다</title>
+<meta name="description" content="2026년 10월 30일 금요일 오후 6시 · 신라호텔 영빈관">
+<meta name="theme-color" content="#37333d">
+<meta name="robots" content="noindex, nofollow"><!-- preview: keep out of search results -->
+
+<!-- 배포 후 og:url / og:image 를 실제 절대주소로 바꿔주세요 (카카오톡 미리보기용) -->
+<meta property="og:title" content="소연 ♥ 도윤 결혼식에 초대합니다">
+<meta property="og:description" content="2026년 10월 30일 금요일 오후 6시 · 신라호텔 영빈관">
+<meta property="og:type" content="website">
+<meta property="og:image" content="../shared/photos/og.jpg">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>💌</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@300;400;600&family=Song+Myung&family=Nanum+Pen+Script&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,500&family=Cinzel:wght@400;600&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/mochung/style.css">
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- ===================== 메인 (커버) ===================== -->
+  <header class="hero" id="hero">
+    <div class="hero-photo"><img src="../shared/photos/cover.jpg" alt="웨딩 사진" fetchpriority="high"></div>
+    <div class="hero-shade"></div>
+    <canvas id="starCanvas" aria-hidden="true"></canvas>
+    <div class="hero-top">
+      <p class="hero-eyebrow">The Wedding Of</p>
+      <h1 class="hero-names">
+        <span data-bind="couple.groom.firstName">도윤</span>
+        <span class="amp">and</span>
+        <span data-bind="couple.bride.firstName">소연</span>
+      </h1>
+    </div>
+    <div class="hero-bottom">
+      <p class="hero-date" data-bind="wedding.heroDateLine">2026 . 10 . 30 . FRI</p>
+      <p class="hero-time" data-bind="wedding.heroTimeLine">PM 6:00</p>
+      <p class="hero-venue" data-bind="wedding.venueName">신라호텔 영빈관</p>
+    </div>
+    <div class="hero-scroll" aria-hidden="true">⌄</div>
+  </header>
+
+  <main>
+    <!-- ===================== 모시는 글 ===================== -->
+    <section class="sec reveal" id="greeting">
+      <p class="sec-eyebrow">Invitation</p>
+      <h2 class="sec-title" data-bind="greeting.heading">소중한 분들을 초대합니다</h2>
+      <p class="greeting-body" data-bind="greeting.body"></p>
+      <div class="family" id="familyLines"></div>
+      <button class="btn btn-ghost btn-contact" id="btnContacts">📞&nbsp; 연락하기</button>
+    </section>
+
+    <!-- ===================== 웨딩 홈페이지 (한국어 사이트로 이동) ===================== -->
+    <section class="sec reveal" id="website">
+      <p class="sec-eyebrow">Wedding Website</p>
+      <h2 class="sec-title">웨딩 홈페이지</h2>
+      <p class="rsvp-notice">일정, 오시는 길, 갤러리 등 더 자세한 안내를<br>웨딩 홈페이지에서 확인하실 수 있습니다.</p>
+      <a class="btn btn-primary btn-block" id="btnWebsite" href="#">💌&nbsp; 웨딩 홈페이지 방문하기</a>
+    </section>
+
+    <!-- ===================== 예식 일시 / 달력 ===================== -->
+    <section class="sec reveal" id="calendar">
+      <p class="sec-eyebrow">Save the Date</p>
+      <h2 class="sec-title" data-bind="wedding.dateText">2026. 10. 30. 금요일 오후 6시</h2>
+      <div class="cal-card">
+        <p class="cal-month" id="calMonth">OCTOBER<small>2026</small></p>
+        <table class="cal" id="calTable"></table>
+      </div>
+      <div class="dday">
+        <div class="dd"><b id="ddDays">-</b><span>DAYS</span></div>
+        <div class="dd"><b id="ddHours">-</b><span>HOUR</span></div>
+        <div class="dd"><b id="ddMins">-</b><span>MIN</span></div>
+        <div class="dd"><b id="ddSecs">-</b><span>SEC</span></div>
+      </div>
+      <p class="dday-line" id="ddayLine"></p>
+    </section>
+
+    <!-- ===================== 갤러리 ===================== -->
+    <section class="sec sec-gallery reveal" id="gallery">
+      <p class="sec-eyebrow">Gallery</p>
+      <h2 class="sec-title" data-bind="gallery.title">우리의 순간들</h2>
+      <div class="gal-track" id="galTrack"></div>
+      <p class="gal-counter" id="galCounter"></p>
+      <button class="btn btn-ghost gal-all" id="btnGalleryAll">전체보기</button>
+    </section>
+
+    <!-- ===================== 참석의사 전달 ===================== -->
+    <section class="sec reveal" id="rsvp">
+      <p class="sec-eyebrow">R S V P</p>
+      <h2 class="sec-title">참석의사 전달</h2>
+      <p class="rsvp-notice" data-bind="rsvp.notice"></p>
+      <button class="btn btn-primary btn-block" id="btnRsvp">참석의사 전달하기</button>
+    </section>
+
+    <!-- ===================== 오시는 길 ===================== -->
+    <section class="sec reveal" id="location">
+      <p class="sec-eyebrow">Location</p>
+      <h2 class="sec-title">오시는 길</h2>
+      <p class="loc-venue" data-bind="wedding.venueName">신라호텔 영빈관</p>
+      <p class="loc-address" data-bind="wedding.address">서울 중구 동호로 249</p>
+      <p class="loc-tel" id="venueTel"></p>
+      <div class="map-box">
+        <a class="map-canvas" id="mapCanvas" target="_blank" rel="noopener">
+          <span class="pin">
+            <span class="dot">📍</span>
+            <span class="label" data-bind="wedding.venueName">신라호텔 영빈관</span>
+          </span>
+        </a>
+        <div class="map-actions">
+          <a id="mapNaver" target="_blank" rel="noopener">네이버 지도</a>
+          <a id="mapKakao" target="_blank" rel="noopener">카카오맵</a>
+          <a id="mapTmap" target="_blank" rel="noopener">티맵</a>
+        </div>
+      </div>
+      <button class="btn btn-ghost loc-copy" id="btnCopyAddr">주소 복사</button>
+    </section>
+
+    <!-- ===================== 축하 화환 (설정에서 켜기) ===================== -->
+    <section class="sec reveal" id="flower" hidden>
+      <p class="sec-eyebrow">Flower</p>
+      <h2 class="sec-title" data-bind="flower.title">축하 화환 보내기</h2>
+      <p class="flower-body" data-bind="flower.body"></p>
+      <a class="btn btn-primary" id="btnFlower" target="_blank" rel="noopener">축하 화환 선물하기</a>
+    </section>
+
+    <!-- ===================== 마음 전하실 곳 ===================== -->
+    <section class="sec reveal" id="accounts">
+      <p class="sec-eyebrow">With Love</p>
+      <h2 class="sec-title">마음 전하실 곳</h2>
+      <p class="acc-notice" data-bind="accounts.notice"></p>
+      <div class="acc-group" id="accGroom">
+        <button class="acc-head">신랑 측 계좌번호 <span class="arrow">⌄</span></button>
+        <div class="acc-body"></div>
+      </div>
+      <div class="acc-group" id="accBride">
+        <button class="acc-head">신부 측 계좌번호 <span class="arrow">⌄</span></button>
+        <div class="acc-body"></div>
+      </div>
+    </section>
+
+    <!-- ===================== 방명록 ===================== -->
+    <section class="sec reveal" id="guestbook">
+      <p class="sec-eyebrow">Guestbook</p>
+      <h2 class="sec-title">축하 메시지</h2>
+      <form class="gb-form" id="gbForm">
+        <div class="row">
+          <input type="text" id="gbName" placeholder="이름" maxlength="20" required>
+          <input type="password" id="gbPw" placeholder="비밀번호 (삭제용)" maxlength="20" required>
+        </div>
+        <textarea id="gbMsg" placeholder="축하의 마음을 남겨주세요" maxlength="200" required></textarea>
+        <p class="gb-count"><span id="gbCount">0</span> / 200</p>
+        <button type="submit" class="btn btn-primary btn-block">축하메시지 남기기</button>
+      </form>
+      <div class="gb-list" id="gbList"></div>
+      <button class="btn btn-ghost gb-more" id="gbMore" hidden>더보기</button>
+    </section>
+  </main>
+
+  <!-- ===================== 공유 / 푸터 ===================== -->
+  <footer class="share">
+    <p class="sec-eyebrow">Share</p>
+    <div class="share-btns">
+      <button class="btn btn-kakao" id="btnKakao">💬&nbsp; 카카오톡으로 공유하기</button>
+      <button class="btn btn-ghost" id="btnCopyLink">🔗&nbsp; 청첩장 주소 복사하기</button>
+      <button class="btn btn-ghost" id="btnIcs">📅&nbsp; 내 캘린더에 저장하기</button>
+    </div>
+    <p class="footer-names"><span data-bind="couple.groom.enName">DOYOON</span> ♥ <span data-bind="couple.bride.enName">SOYEON</span></p>
+  </footer>
+</div>
+
+<!-- ===================== 입장 안내 팝업 ===================== -->
+<div class="overlay center" id="popupOverlay">
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="참석의사 안내">
+    <div class="popup-photo"><img src="../shared/photos/cover.jpg" alt=""></div>
+    <h3 class="sheet-title">참석의사 전달</h3>
+    <div class="popup-rows">
+      <div class="row"><span class="k">주인공</span><span id="popupCouple"></span></div>
+      <div class="row"><span class="k">예식일</span><span id="popupDate"></span></div>
+      <div class="row"><span class="k">위치</span><span id="popupVenue"></span></div>
+    </div>
+    <button class="btn btn-primary btn-block" id="popupGo">참석의사 전달하기</button>
+    <div class="popup-foot">
+      <button id="popupToday">오늘 그만보기</button>
+      <button id="popupClose">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== RSVP 입력 시트 ===================== -->
+<div class="overlay" id="rsvpOverlay">
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="참석의사 전달">
+    <button class="sheet-close" data-close="rsvpOverlay">✕</button>
+    <h3 class="sheet-title">참석의사 전달</h3>
+    <form id="rsvpForm">
+      <div class="side-toggle" id="rsvpSide">
+        <button type="button" data-side="groom" class="on">신랑 측</button>
+        <button type="button" data-side="bride">신부 측</button>
+      </div>
+      <div class="form-field">
+        <label>성함 <span class="req">*</span></label>
+        <input type="text" id="rsvpName" maxlength="20" placeholder="참석자 성함" required>
+      </div>
+      <div class="form-field">
+        <label>참석 인원 (본인 포함) <span class="req">*</span></label>
+        <div class="stepper">
+          <button type="button" id="rsvpMinus">−</button>
+          <output id="rsvpCount">1</output>
+          <button type="button" id="rsvpPlus">＋</button>
+        </div>
+      </div>
+      <div class="form-field">
+        <label>연락처 <span class="req">*</span></label>
+        <input type="tel" id="rsvpPhone" maxlength="20" placeholder="010-0000-0000" required>
+      </div>
+      <div class="form-field" id="rsvpCompanionField">
+        <label>동행인 성함</label>
+        <input type="text" id="rsvpCompanion" maxlength="60" placeholder="동행인이 있을 경우 입력">
+      </div>
+      <div class="form-field" id="rsvpMealField">
+        <label>식사 여부</label>
+        <div class="seg" id="rsvpMeal">
+          <button type="button" data-v="예정">예정</button>
+          <button type="button" data-v="안함">안함</button>
+          <button type="button" data-v="미정">미정</button>
+        </div>
+      </div>
+      <div class="form-field" id="rsvpBusField" hidden>
+        <label>대절버스 탑승</label>
+        <div class="seg" id="rsvpBus">
+          <button type="button" data-v="탑승">탑승</button>
+          <button type="button" data-v="미탑승">미탑승</button>
+        </div>
+      </div>
+      <p class="rsvp-warn">전달한 내용은 수정이 불가합니다.<br>내용 변동이 있을 경우 재전달해 주세요.</p>
+      <div class="consent" id="consentBox">
+        <div class="consent-row">
+          <input type="checkbox" id="rsvpConsent">
+          <label for="rsvpConsent">개인정보 수집 및 이용 동의 (필수)</label>
+          <button type="button" class="consent-toggle" id="consentToggle">보기</button>
+        </div>
+        <div class="consent-detail">
+          제공 받는 자 : 청첩장 주인(신랑·신부측)<br>
+          이용 목적 : RSVP 응답 확인 및 관련 안내<br>
+          제공 항목 : 성함, 연락처 등 입력한 항목<br>
+          보유 기간 : 예식일로부터 90일<br>
+          동의를 거부할 권리가 있으며, 거부 시 참석의사 전달이 제한됩니다.
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">참석의사 전달하기</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== 연락하기 모달 ===================== -->
+<div class="overlay center" id="contactsOverlay">
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="연락하기">
+    <button class="sheet-close" data-close="contactsOverlay">✕</button>
+    <h3 class="sheet-title">연락하기</h3>
+    <div id="contactsBody"></div>
+  </div>
+</div>
+
+<!-- ===================== 갤러리 전체보기 ===================== -->
+<div class="overlay" id="galleryAllOverlay">
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="갤러리 전체보기">
+    <button class="sheet-close" data-close="galleryAllOverlay">✕</button>
+    <h3 class="sheet-title">갤러리</h3>
+    <div class="gal-grid" id="galGrid"></div>
+  </div>
+</div>
+
+<!-- ===================== 라이트박스 ===================== -->
+<div class="lightbox" id="lightbox">
+  <p class="lb-counter" id="lbCounter"></p>
+  <button class="lb-close" id="lbClose" aria-label="닫기">✕</button>
+  <button class="lb-nav lb-prev" id="lbPrev" aria-label="이전">‹</button>
+  <img id="lbImg" alt="갤러리 사진">
+  <button class="lb-nav lb-next" id="lbNext" aria-label="다음">›</button>
+</div>
+
+<!-- ===================== 방명록 삭제 비밀번호 ===================== -->
+<div class="overlay center" id="pwOverlay">
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="메시지 삭제">
+    <h3 class="sheet-title">메시지 삭제</h3>
+    <div class="form-field">
+      <label>작성 시 입력한 비밀번호</label>
+      <input type="password" id="pwInput" maxlength="20">
+    </div>
+    <button class="btn btn-primary btn-block" id="pwConfirm">삭제하기</button>
+    <div class="popup-foot"><span></span><button data-close="pwOverlay">취소</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- content/config -->
+<script src="config.js"></script>
+<!-- shared data backend (load order matters) -->
+<script src="../shared/site-config.js"></script>
+<script src="../shared/supabase-config.js"></script>
+<script>
+  if (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url && window.SUPABASE_CONFIG.anonKey) {
+    document.write('<scr' + 'ipt src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/scr' + 'ipt>');
+  }
+</script>
+<script src="../shared/store.localStorage.js"></script>
+<script src="../shared/store.supabase.js"></script>
+<script src="../shared/store.js"></script>
+<!-- 모청 engine -->
+<script src="../shared/mochung/effects.js"></script>
+<script src="../shared/mochung/main.js"></script>
+<!-- link the "웨딩 홈페이지" button to the Korean wedding site -->
+<script>
+  (function () {
+    var b = document.getElementById('btnWebsite');
+    if (b && window.SITE_URLS && window.SITE_URLS.kr) b.href = window.SITE_URLS.kr;
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>애프터파티 관리 · 관리자</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🔐</text></svg>">
+<link rel="stylesheet" href="../shared/mochung/style.css">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-wrap" id="adminApp" hidden>
+  <div class="admin-head">
+    <h1>🥂 애프터파티 관리</h1>
+    <div class="admin-nav">
+      <a href="index.html">홈</a>
+      <a href="rsvp.html">웨딩 참석</a>
+      <a href="afterparty.html" class="on">애프터파티</a>
+      <a href="guestbook.html">방명록</a>
+      <a href="edit.html">청첩장 수정</a>
+    </div>
+  </div>
+
+  <!-- (a) CSV 명단 가져오기 -->
+  <div class="card">
+    <h2>초대 명단 가져오기 (CSV)</h2>
+    <p class="hint" style="margin-bottom:10px;">
+      첫 줄은 헤더여야 합니다:
+      <code>display_name,invite_code,side,locale,party_limit,group_label</code><br>
+      같은 <code>invite_code</code> 또는 같은 이름은 <b>덮어쓰기(수정)</b> 됩니다.
+    </p>
+    <textarea id="csvBox" style="min-height:120px; font-family:monospace; font-size:12px;"
+      placeholder="display_name,invite_code,side,locale,party_limit,group_label&#10;Jane Doe,ABC123,bride,en,2,College Friends"></textarea>
+    <div class="btn-row">
+      <button class="btn btn-ghost btn-sm" id="btnFile">파일 선택…</button>
+      <button class="btn btn-primary btn-sm" id="btnImport">가져오기</button>
+      <input type="file" id="csvFile" accept=".csv,text/csv,text/plain" hidden>
+    </div>
+    <p class="hint" id="importResult" style="margin-top:10px;"></p>
+  </div>
+
+  <!-- (c) 초대 링크 -->
+  <div class="card">
+    <h2>초대 링크</h2>
+    <p class="hint" style="margin-bottom:10px;">
+      EN 사이트(<code id="enBase">SITE_URLS.en</code>) 기준 개별 초대 링크입니다.
+      <code>invite_code</code> 가 있는 게스트만 포함됩니다.
+    </p>
+    <div class="btn-row" style="margin-top:0;">
+      <button class="btn btn-ghost btn-sm" id="btnBuildLinks">링크 생성</button>
+      <button class="btn btn-ghost btn-sm" id="btnCopyLinks">전체 복사</button>
+      <button class="btn btn-ghost btn-sm" id="btnLinksCsv">링크 CSV</button>
+    </div>
+    <textarea id="linksBox" readonly rows="5"
+      style="margin-top:12px; font-family:monospace; font-size:12px;"
+      placeholder="[링크 생성] 을 누르면 성함 + 초대 링크 목록이 표시됩니다."></textarea>
+  </div>
+
+  <!-- (b) 응답 현황 -->
+  <div class="card">
+    <h2>응답 현황</h2>
+    <div class="stat-row" style="margin-bottom:14px;">
+      <div class="stat"><b id="apTotal">-</b><span>초대 인원</span></div>
+      <div class="stat"><b id="apResponded">-</b><span>응답 완료</span></div>
+      <div class="stat"><b id="apPending">-</b><span>미응답</span></div>
+      <div class="stat"><b id="apHead">-</b><span>참석 인원</span></div>
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+      <h2 style="margin:0; font-size:14px;">초대 목록</h2>
+      <div class="btn-row" style="margin:0;">
+        <select id="sideFilter" style="width:auto; padding:8px 12px; font-size:13px;">
+          <option value="">측: 전체</option>
+          <option value="groom">신랑 측</option>
+          <option value="bride">신부 측</option>
+          <option value="both">공통</option>
+        </select>
+        <select id="localeFilter" style="width:auto; padding:8px 12px; font-size:13px;">
+          <option value="">언어: 전체</option>
+          <option value="en">English</option>
+          <option value="ko">한국어</option>
+        </select>
+        <select id="statusFilter" style="width:auto; padding:8px 12px; font-size:13px;">
+          <option value="">응답: 전체</option>
+          <option value="responded">응답 완료</option>
+          <option value="pending">미응답</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" id="btnCsv">CSV 다운로드</button>
+      </div>
+    </div>
+    <div class="table-scroll" style="margin-top:14px;">
+      <table class="data">
+        <thead>
+          <tr>
+            <th>성함</th><th>그룹</th><th class="num">배정</th><th>응답</th><th>참석</th>
+            <th class="num">인원</th><th>동행 (+1)</th><th>연락처</th><th>메시지</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p class="hint" id="emptyMsg" hidden>조건에 맞는 초대가 없습니다. 먼저 명단을 가져오세요.</p>
+  </div>
+</div>
+
+<!-- 공유 데이터 백엔드 (로드 순서 중요) -->
+<script src="../invite/config.js"></script>
+<script src="../shared/site-config.js"></script>
+<script src="../shared/supabase-config.js"></script>
+<script>
+  if (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url && window.SUPABASE_CONFIG.anonKey) {
+    document.write('<scr' + 'ipt src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/scr' + 'ipt>');
+  }
+</script>
+<script src="../shared/store.localStorage.js"></script>
+<script src="../shared/store.supabase.js"></script>
+<script src="../shared/store.js"></script>
+<script src="admin.js"></script>
+<script>
+Admin.gate(async function () {
+  const store = window.Store;
+  const esc = Admin.esc;
+  let joined = [];
+
+  const enBase = function () { return (window.SITE_URLS && window.SITE_URLS.en) || ''; };
+  const sideKo = function (s) { return s === 'groom' ? '신랑' : s === 'bride' ? '신부' : '공통'; };
+  const localeKo = function (l) { return l === 'ko' ? '한국어' : 'EN'; };
+  const set = function (id, v) { document.getElementById(id).textContent = v; };
+
+  document.getElementById('enBase').textContent = enBase() || '(SITE_URLS.en 미설정)';
+
+  /* ---------- (a) 명단 가져오기 ---------- */
+
+  document.getElementById('btnFile').addEventListener('click', function () {
+    document.getElementById('csvFile').click();
+  });
+  document.getElementById('csvFile').addEventListener('change', function () {
+    const f = this.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = function () { document.getElementById('csvBox').value = reader.result; };
+    reader.readAsText(f);
+  });
+
+  document.getElementById('btnImport').addEventListener('click', async function () {
+    const out = document.getElementById('importResult');
+    out.style.color = '';
+    const grid = Admin.parseCsv(document.getElementById('csvBox').value)
+      .filter(function (r) { return r.some(function (c) { return String(c).trim() !== ''; }); });
+    if (grid.length < 2) { out.textContent = '가져올 데이터가 없습니다. (헤더 + 최소 1행 필요)'; return; }
+    const header = grid[0].map(function (h) { return String(h).trim().toLowerCase().replace(/\s+/g, '_'); });
+    if (header.indexOf('display_name') < 0) {
+      out.textContent = '헤더에 display_name 열이 필요합니다.';
+      return;
+    }
+    const rows = grid.slice(1).map(function (cols) {
+      const obj = {};
+      header.forEach(function (k, i) { obj[k] = cols[i] != null ? cols[i] : ''; });
+      return obj;
+    });
+    try {
+      const res = await store.importAfterpartyGuests(rows);
+      let msg = '추가 ' + res.inserted + ' · 수정 ' + res.updated + ' · 건너뜀 ' + res.skipped;
+      if (res.errors && res.errors.length) msg += ' — ' + res.errors.slice(0, 5).join('; ');
+      out.textContent = msg;
+      await refresh();
+    } catch (e) {
+      out.textContent = '가져오기 실패: ' + (e && e.message ? e.message : e);
+    }
+  });
+
+  /* ---------- (c) 초대 링크 ---------- */
+
+  function buildLinks() {
+    const base = enBase();
+    const lines = joined.map(function (x) { return x.guest; })
+      .filter(function (g) { return g.invite_code; })
+      .map(function (g) {
+        return g.display_name + '\t' + base + '/?code=' + encodeURIComponent(g.invite_code);
+      });
+    document.getElementById('linksBox').value = lines.length
+      ? lines.join('\n')
+      : 'invite_code 가 있는 게스트가 없습니다.';
+    return lines;
+  }
+  document.getElementById('btnBuildLinks').addEventListener('click', buildLinks);
+  document.getElementById('btnCopyLinks').addEventListener('click', async function () {
+    const text = document.getElementById('linksBox').value;
+    const ok = await Admin.copyText(text);
+    this.textContent = ok ? '복사됨 ✓' : '복사 실패';
+    const btn = this;
+    setTimeout(function () { btn.textContent = '전체 복사'; }, 1500);
+  });
+  document.getElementById('btnLinksCsv').addEventListener('click', function () {
+    const base = enBase();
+    const rows = [['성함', '그룹', 'invite_code', '초대링크']];
+    joined.map(function (x) { return x.guest; })
+      .filter(function (g) { return g.invite_code; })
+      .forEach(function (g) {
+        rows.push([g.display_name, g.group_label, g.invite_code, base + '/?code=' + g.invite_code]);
+      });
+    Admin.download('afterparty-invite-links.csv', Admin.toCsv(rows), 'text/csv;charset=utf-8');
+  });
+
+  /* ---------- (b) 응답 현황 ---------- */
+
+  function currentFiltered() {
+    const side = document.getElementById('sideFilter').value;
+    const loc = document.getElementById('localeFilter').value;
+    const st = document.getElementById('statusFilter').value;
+    return joined.filter(function (x) {
+      if (side && x.guest.side !== side) return false;
+      if (loc && x.guest.locale !== loc) return false;
+      if (st === 'responded' && !x.rsvp) return false;
+      if (st === 'pending' && x.rsvp) return false;
+      return true;
+    });
+  }
+
+  function renderStats() {
+    const responded = joined.filter(function (x) { return x.rsvp; });
+    const pending = joined.filter(function (x) { return !x.rsvp; });
+    const head = responded
+      .filter(function (x) { return x.rsvp.attending; })
+      .reduce(function (s, x) { return s + (x.rsvp.party_count || 0); }, 0);
+    set('apTotal', joined.length + '명');
+    set('apResponded', responded.length + '건');
+    set('apPending', pending.length + '건');
+    set('apHead', head + '명');
+  }
+
+  function renderTable() {
+    const list = currentFiltered();
+    document.getElementById('rows').innerHTML = list.map(function (x) {
+      const g = x.guest, r = x.rsvp;
+      const contact = r ? [r.contact_email, r.contact_phone].filter(Boolean).join(' / ') : '';
+      const comp = r && r.companions && r.companions.length ? r.companions.join(', ') : '';
+      const resp = r
+        ? '<b style="color:#3a7d5a;">응답</b>'
+        : '<span style="color:#b55;">미응답</span>';
+      const att = r ? (r.attending ? '참석' : '불참') : '-';
+      return '<tr>' +
+        '<td>' + esc(g.display_name) + '</td>' +
+        '<td>' + esc(g.group_label) + '</td>' +
+        '<td class="num">' + g.party_limit + '</td>' +
+        '<td style="white-space:nowrap;">' + resp + '</td>' +
+        '<td>' + att + '</td>' +
+        '<td class="num">' + (r ? (r.attending ? r.party_count : 0) : '-') + '</td>' +
+        '<td>' + esc(comp) + '</td>' +
+        '<td>' + esc(contact) + '</td>' +
+        '<td>' + esc(r ? r.message : '') + '</td>' +
+        '<td><button class="btn btn-sm btn-danger" data-del="' + g.id + '">삭제</button></td>' +
+        '</tr>';
+    }).join('');
+    document.getElementById('emptyMsg').hidden = list.length > 0;
+  }
+
+  async function refresh() {
+    joined = await store.listAfterpartyRsvps();
+    renderStats();
+    renderTable();
+    buildLinks();
+  }
+
+  ['sideFilter', 'localeFilter', 'statusFilter'].forEach(function (id) {
+    document.getElementById(id).addEventListener('change', renderTable);
+  });
+
+  document.getElementById('rows').addEventListener('click', async function (e) {
+    const btn = e.target.closest('[data-del]');
+    if (!btn) return;
+    if (!confirm('이 게스트와 응답을 명단에서 삭제할까요?')) return;
+    await store.deleteAfterpartyGuest(btn.dataset.del);
+    refresh();
+  });
+
+  document.getElementById('btnCsv').addEventListener('click', function () {
+    const rows = [['성함', '그룹', '측', '언어', '배정', '응답', '참석', '인원', '동행', '이메일', '전화', '메시지']];
+    currentFiltered().forEach(function (x) {
+      const g = x.guest, r = x.rsvp;
+      rows.push([
+        g.display_name, g.group_label, sideKo(g.side), localeKo(g.locale), g.party_limit,
+        r ? '응답' : '미응답',
+        r ? (r.attending ? '참석' : '불참') : '',
+        r ? (r.attending ? r.party_count : 0) : '',
+        r && r.companions ? r.companions.join(', ') : '',
+        r ? r.contact_email : '', r ? r.contact_phone : '', r ? r.message : '',
+      ]);
+    });
+    Admin.download('afterparty-rsvp.csv', Admin.toCsv(rows), 'text/csv;charset=utf-8');
+  });
+
+  refresh();
+});
+</script>
+</body>
+</html>
