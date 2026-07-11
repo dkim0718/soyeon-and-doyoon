@@ -19,6 +19,8 @@
     .flag { font-size:.72rem; color:#9a8f8a; margin-bottom:2rem; }
     .cards { display:grid; gap:1rem; width:100%; max-width:40rem; }
     @media (min-width:640px){ .cards.two { grid-template-columns:1fr 1fr; } }
+    .cards.three { max-width:56rem; }
+    @media (min-width:820px){ .cards.three { grid-template-columns:1fr 1fr 1fr; } }
     a.card { display:block; text-decoration:none; color:inherit; background:var(--card); border:1px solid var(--line);
       border-radius:14px; padding:1.4rem 1.5rem; transition:transform .12s ease, box-shadow .12s ease; }
     a.card:hover { transform:translateY(-2px); box-shadow:0 8px 26px rgba(120,80,60,.12); }
@@ -39,7 +41,7 @@
   <div class="date">Friday, October 30, 2026 · The Shilla Seoul</div>
   <p class="flag">Work-in-progress preview · not indexed · placeholder contact info</p>
 
-  <div class="cards two">
+  <div class="cards three">
     <a class="card" href="invite/">
       <span class="tag">모청 · Mobile Invitation</span>
       <h2 class="ko">모바일 청첩장</h2>
@@ -50,11 +52,14 @@
       <h2 class="ko">웨딩 홈페이지</h2>
       <p>Full Korean wedding website — schedule, directions, gallery, and the wedding RSVP.</p>
     </a>
+    <a class="card" href="en/">
+      <span class="tag">English site · Afterparty</span>
+      <h2>Wedding Website</h2>
+      <p>The English-language site — our story, schedule, and the afterparty RSVP. (Unlisted in production.)</p>
+    </a>
   </div>
 
   <div class="sep muted">
-    Also in this preview (kept unlisted in production):
-    <a href="en/">English wedding website →</a> (afterparty RSVP) ·
     <a href="admin/">Admin dashboard →</a>
   </div>
 

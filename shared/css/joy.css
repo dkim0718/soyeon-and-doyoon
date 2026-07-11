@@ -89,6 +89,16 @@ html[data-header="inline"] .brand { flex-direction: row; gap: 0.8rem; align-item
 html[data-header="inline"] .brand-monogram { font-size: 2rem; }
 html[data-header="inline"] .brand-names { display: none; }
 
+/* No monogram (e.g. the Korean site): the full names ARE the brand. Render
+   them prominently instead of as a small letter-spaced sublabel. */
+.brand.no-monogram .brand-names {
+  font-size: 1.55rem;
+  letter-spacing: 0.08em;
+  text-transform: none;
+  color: var(--c-accent);
+}
+html[data-header="inline"] .brand.no-monogram .brand-names { display: inline; }
+
 .site-nav {
   display: flex;
   flex-wrap: wrap;

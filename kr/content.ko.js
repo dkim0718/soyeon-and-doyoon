@@ -9,7 +9,7 @@ window.SITE = {
   // — 사이트 동작 (공용 Joy 엔진이 읽습니다) —
   locale: "ko",         // UI 문구 언어 (shared/i18n.js)
   rsvpKind: "wedding",  // 한국어 사이트는 자유 참석 회신(오픈 self-report)을 받습니다
-  designPanel: false,   // 하객에게 보이는 Design 버튼 숨김 (?design=1 로 미리보기 가능)
+  designPanel: true,    // 글꼴을 바꿔볼 수 있도록 Design 버튼 표시 (배포 전 false 로)
 
   // 한글에 어울리는 기본 글꼴 (사용자가 디자인 패널에서 바꾸면 그 값이 우선)
   fontDefaults: {
@@ -22,7 +22,7 @@ window.SITE = {
     partner1: "소연",
     partner2: "도윤",
     displayName: "소연 & 도윤",
-    monogram: "소 ♥ 도",
+    monogram: "",           // 빈 값 → 축약형 대신 전체 이름(소연 & 도윤)을 크게 표시
   },
 
   wedding: {

@@ -21,6 +21,18 @@ const FONT_CHOICES = {
   body: ["Montserrat", "Inter", "Lato", "Karla", "Bitter", "Jost", "Nunito Sans", "Noto Sans KR", "Gowun Dodum"],
 };
 
+/* Korean-first font sets for the ko site's design panel. Every font here is
+   loaded up front by kr/index.html's static <link>, so switching is instant. */
+const FONT_CHOICES_KO = {
+  heading: ["Nanum Myeongjo", "Noto Serif KR", "Gowun Batang", "Song Myung", "Hahmlet", "Black Han Sans", "Do Hyeon", "Jua"],
+  script: ["Nanum Pen Script", "Gaegu", "Gamja Flower", "None"],
+  body: ["Noto Sans KR", "Gowun Dodum", "Nanum Gothic", "IBM Plex Sans KR", "Sunflower"],
+};
+
+function fontChoices() {
+  return (typeof SITE !== "undefined" && SITE.locale === "ko") ? FONT_CHOICES_KO : FONT_CHOICES;
+}
+
 const PALETTES = [
   { id: "magnolia",  name: "Magnolia",   bg: "#f8f1ef", accent: "#875346", alt: "#5a6857", text: "#333333" },
   { id: "forest",    name: "Forest",     bg: "#faf7f0", accent: "#2f4a3c", alt: "#b08d57", text: "#26302b" },
@@ -102,7 +114,12 @@ function applySettings() {
 function loadGoogleFonts() {
   const fams = new Set([settings.fonts.heading, settings.fonts.body]);
   if (settings.fonts.script !== "None") fams.add(settings.fonts.script);
-  const parts = [...fams].map((f) => "family=" + encodeURIComponent(f).replace(/%20/g, "+") + ":ital,wght@0,300..800;1,300..800");
+  // Request families WITHOUT a weight/italic axis: css2 rejects the whole
+  // request if any one family lacks the requested axis (common with Korean and
+  // single-weight display fonts), which would drop every font. Bold weights for
+  // the built-in choices come from each page's static <link>; this dynamic link
+  // just guarantees any custom-typed font also loads.
+  const parts = [...fams].map((f) => "family=" + encodeURIComponent(f).replace(/%20/g, "+"));
   const link = document.getElementById("gfonts");
   if (link) link.href = "https://fonts.googleapis.com/css2?" + parts.join("&") + "&display=swap";
 }
@@ -417,7 +434,7 @@ function buildDesignPanel() {
     ["script", document.getElementById("fontScript")],
     ["body", document.getElementById("fontBody")],
   ]) {
-    const choices = [...FONT_CHOICES[role]];
+    const choices = [...fontChoices()[role]];
     if (!choices.includes(settings.fonts[role])) choices.unshift(settings.fonts[role]);
     el.innerHTML =
       choices.map((f) => `<option value="${f}">${f}</option>`).join("") +
@@ -521,9 +538,22 @@ function refreshPanelState() {
 function boot() {
   document.documentElement.lang = SITE.locale || "en";
   document.title = `${SITE.couple.displayName} — ${SITE.wedding.dateDisplay}`;
-  document.getElementById("brandMonogram").textContent = SITE.couple.monogram;
+  // An empty monogram means "no abbreviation" → show the full names as the
+  // brand instead of an initials-style monogram (see .brand.no-monogram CSS).
+  const monoEl = document.getElementById("brandMonogram");
+  const brandEl = document.querySelector(".brand");
+  if (SITE.couple.monogram) {
+    monoEl.textContent = SITE.couple.monogram;
+    monoEl.hidden = false;
+    if (brandEl) brandEl.classList.remove("no-monogram");
+  } else {
+    monoEl.hidden = true;
+    if (brandEl) brandEl.classList.add("no-monogram");
+  }
   document.getElementById("brandNames").textContent = SITE.couple.displayName;
-  document.getElementById("footerMonogram").textContent = SITE.couple.monogram;
+  const footMono = document.getElementById("footerMonogram");
+  footMono.textContent = SITE.couple.monogram || "";
+  footMono.hidden = !SITE.couple.monogram;
   document.getElementById("footerLine").textContent =
     `${SITE.couple.displayName} · ${SITE.wedding.dateDisplay} · ${SITE.wedding.city}`;
 
