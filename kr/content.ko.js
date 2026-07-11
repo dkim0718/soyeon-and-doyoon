@@ -283,7 +283,7 @@ window.SITE = {
     hero: "../shared/photos/hero.jpg",
     story: "../shared/photos/story.jpg",
   },
-  galleryDefaults: Array.from({ length: 30 }, (_, i) =>
+  galleryDefaults: Array.from({ length: 15 }, (_, i) =>
     "../shared/photos/gallery-" + String(i + 1).padStart(2, "0") + ".jpg"),
 
   // 내비게이션에 이 순서대로 페이지가 나타납니다. 줄을 지우면 그 페이지가 숨겨집니다.

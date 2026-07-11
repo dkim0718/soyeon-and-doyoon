@@ -76,7 +76,7 @@ window.MOCHUNG_DEFAULTS = {
 
   gallery: {
     title: '우리의 순간들',
-    photos: Array.from({ length: 30 }, (_, i) =>
+    photos: Array.from({ length: 15 }, (_, i) =>
       '../shared/photos/gallery-' + String(i + 1).padStart(2, '0') + '.jpg'),
   },
 

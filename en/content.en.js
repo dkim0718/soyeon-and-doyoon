@@ -288,7 +288,7 @@ window.SITE = {
     hero: "../shared/photos/hero.jpg",
     story: "../shared/photos/story.jpg",
   },
-  galleryDefaults: Array.from({ length: 30 }, (_, i) =>
+  galleryDefaults: Array.from({ length: 15 }, (_, i) =>
     "../shared/photos/gallery-" + String(i + 1).padStart(2, "0") + ".jpg"),
 
   // Pages appear in the navigation in this order.
