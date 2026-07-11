@@ -615,10 +615,35 @@ function refreshPanelState() {
 }
 
 /* ----------------------------------------------------------
+   Admin content override (edited in /admin/edit-site.html)
+   ---------------------------------------------------------- */
+
+function deepMerge(base, over) {
+  if (over === null || over === undefined) return base;
+  if (typeof over !== "object" || Array.isArray(over)) return over;
+  const out = Array.isArray(base) ? [] : Object.assign({}, base);
+  for (const k of Object.keys(over)) out[k] = deepMerge(base ? base[k] : undefined, over[k]);
+  return out;
+}
+
+// Merge the admin's saved edits (per-site scope) over the static content, so
+// the couple can change story/schedule/etc. from the admin without editing code.
+// localStorage backend = per-browser; Supabase backend = shared with everyone.
+async function applySiteOverride() {
+  try {
+    if (!window.Store || !window.Store.getConfigOverride) return;
+    const scope = SITE.locale === "ko" ? "kr" : "en";
+    const ov = await window.Store.getConfigOverride(scope);
+    if (ov && typeof ov === "object") window.SITE = deepMerge(window.SITE, ov);
+  } catch (e) { /* fall back to the static content file */ }
+}
+
+/* ----------------------------------------------------------
    Boot
    ---------------------------------------------------------- */
 
-function boot() {
+async function boot() {
+  await applySiteOverride();
   document.documentElement.lang = SITE.locale || "en";
   document.title = `${SITE.couple.displayName} — ${SITE.wedding.dateDisplay}`;
   // An empty monogram means "no abbreviation" → show the full names as the

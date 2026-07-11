@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>웹사이트 수정 · 관리자</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🔐</text></svg>">
+<link rel="stylesheet" href="../shared/mochung/style.css">
+<link rel="stylesheet" href="admin.css">
+<style>
+  .site-tabs { display:flex; gap:8px; margin-bottom:16px; }
+  .site-tabs .btn.on { background:var(--accent,#875346); color:#fff; }
+  .sec-card h2 { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .field { margin:12px 0; }
+  .field > label { display:block; font-size:12px; letter-spacing:.04em; color:#8b7f7a; margin-bottom:5px; }
+  .list-item { border:1px solid var(--line,#e6d9d4); border-radius:10px; padding:12px; margin:12px 0; position:relative; background:rgba(0,0,0,.015); }
+  .list-item .rm { position:absolute; top:8px; right:8px; }
+  .item-head { font-size:12px; color:#b0a49e; margin-bottom:6px; }
+  .save-bar { position:sticky; bottom:0; background:var(--card,#fffdfc); border-top:1px solid var(--line,#e6d9d4);
+    padding:14px 0; margin-top:20px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  #status { font-size:13px; min-height:1em; }
+  textarea { min-height:64px; }
+</style>
+</head>
+<body>
+<div class="admin-wrap" id="adminApp" hidden>
+  <div class="admin-head">
+    <h1>📝 웹사이트 수정</h1>
+    <div class="admin-nav">
+      <a href="index.html">홈</a>
+      <a href="rsvp.html">웨딩 참석</a>
+      <a href="afterparty.html">애프터파티</a>
+      <a href="guestbook.html">방명록</a>
+      <a href="edit.html">청첩장 수정</a>
+      <a href="edit-site.html" class="on">웹사이트 수정</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="hint" style="margin:0 0 12px;">
+      영어(EN) / 한국어(KR) 웨딩 홈페이지의 이야기·일정·Q&amp;A 등을 코드 수정 없이 편집합니다.
+      저장하면 이 브라우저에서 즉시 반영됩니다. <b>모든 방문자에게 공유하려면 Supabase 연결이 필요합니다</b>
+      (현재는 편집한 기기에서만 보입니다).
+    </p>
+    <div class="site-tabs">
+      <button class="btn btn-ghost btn-sm" id="tabEn" data-site="en">🇬🇧 English site</button>
+      <button class="btn btn-ghost btn-sm" id="tabKr" data-site="kr">🇰🇷 한국어 사이트</button>
+      <a class="btn btn-ghost btn-sm" id="previewLink" href="../en/" target="_blank" rel="noopener" style="margin-left:auto;">미리보기 ↗</a>
+    </div>
+  </div>
+
+  <div id="sections"></div>
+
+  <div class="save-bar">
+    <button class="btn btn-primary" id="btnSave">저장</button>
+    <button class="btn btn-ghost btn-sm" id="btnReset">기본값으로 되돌리기</button>
+    <span id="status"></span>
+  </div>
+</div>
+
+<!-- shared data backend (load order matters) -->
+<script src="../invite/config.js"></script>
+<script src="../shared/site-config.js"></script>
+<script src="../shared/supabase-config.js"></script>
+<script>
+  if (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url && window.SUPABASE_CONFIG.anonKey) {
+    document.write('<scr' + 'ipt src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/scr' + 'ipt>');
+  }
+</script>
+<script src="../shared/store.localStorage.js"></script>
+<script src="../shared/store.supabase.js"></script>
+<script src="../shared/store.js"></script>
+<script src="admin.js"></script>
+<!-- load BOTH content files and snapshot their defaults -->
+<script src="../en/content.en.js"></script>
+<script>window.__DEF_EN = window.SITE;</script>
+<script src="../kr/content.ko.js"></script>
+<script>window.__DEF_KR = window.SITE;</script>
+<script>
+Admin.gate(function () {
+  'use strict';
+  var defaults = { en: window.__DEF_EN, kr: window.__DEF_KR };
+  var SCOPE = { en: 'en', kr: 'kr' };
+  var site = 'en';
+  var collectors = [];  // per-section: () => [key, value]
+
+  // Which sections are editable, and their field schema.
+  var SECTIONS = [
+    { key:'welcome',  navId:'welcome',  label:'환영 인사 (Welcome)',   type:'fields',
+      fields:[['heading','제목 (heading)','text'],['message','메시지 (message)','textarea']] },
+    { key:'story',    navId:'story',    label:'우리 이야기 (Story)',   type:'fields',
+      fields:[['intro','소제목 (intro)','text'],['text','본문 (text)','textarea']] },
+    { key:'schedule', navId:'schedule', label:'일정 (Schedule)',       type:'list',
+      itemFields:[['title','제목'],['date','날짜'],['time','시간'],['location','장소'],['note','비고','textarea']] },
+    { key:'hotels',   navId:'stay',     label:'숙소 (Where to Stay)',  type:'list',
+      itemFields:[['name','이름'],['address','주소'],['stars','별점'],['blurb','설명','textarea']] },
+    { key:'travel',   navId:'travel',   label:'여행/오시는 길 (Travel)', type:'list',
+      itemFields:[['title','제목'],['body','내용','textarea']] },
+    { key:'qanda',    navId:'qanda',    label:'자주 묻는 질문 (Q&A)',  type:'list',
+      itemFields:[['q','질문'],['a','답변','textarea']] },
+    { key:'moments',  navId:'moments',  label:'갤러리 소개 (Gallery)', type:'fields',
+      fields:[['intro','소개 문구','textarea']] },
+    { key:'rsvp',     navId:'rsvp',     label:'참석 회신 (RSVP)',      type:'fields',
+      fields:[['message','안내 문구','textarea'],['deadline','회신 마감일','text']] },
+  ];
+
+  var $ = function (id) { return document.getElementById(id); };
+  function elm(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
+  function input(type, val) {
+    var e = document.createElement(type === 'textarea' ? 'textarea' : 'input');
+    if (type !== 'textarea') e.type = 'text';
+    e.value = val == null ? '' : String(val);
+    return e;
+  }
+
+  function fieldRow(labelText, type, val) {
+    var wrap = elm('div', 'field');
+    wrap.appendChild(elm('label', null, labelText));
+    var inp = input(type, val);
+    wrap.appendChild(inp);
+    return { wrap: wrap, inp: inp };
+  }
+
+  // Renders one section into `parent`, returns a collector fn.
+  function renderSection(sec, data) {
+    var card = elm('div', 'card sec-card');
+    card.appendChild(elm('h2', null, sec.label));
+
+    if (sec.type === 'fields') {
+      var obj = data || {};
+      var rows = {};
+      sec.fields.forEach(function (f) {
+        var r = fieldRow(f[1], f[2] || 'text', obj[f[0]]);
+        rows[f[0]] = r.inp;
+        card.appendChild(r.wrap);
+      });
+      $('sections').appendChild(card);
+      return function () {
+        var out = {};
+        sec.fields.forEach(function (f) { out[f[0]] = rows[f[0]].value; });
+        return [sec.key, out];
+      };
+    }
+
+    // list type
+    var items = Array.isArray(data) ? data.slice() : [];
+    var listWrap = elm('div');
+    var itemInputs = [];  // array of { fieldKey: input }
+
+    function addItem(itemData, idx) {
+      var box = elm('div', 'list-item');
+      box.appendChild(elm('div', 'item-head', '#' + (idx + 1)));
+      var rm = elm('button', 'btn btn-sm btn-danger rm', '삭제');
+      rm.type = 'button';
+      box.appendChild(rm);
+      var map = {};
+      sec.itemFields.forEach(function (f) {
+        var r = fieldRow(f[1], f[2] || 'text', (itemData || {})[f[0]]);
+        map[f[0]] = r.inp;
+        box.appendChild(r.wrap);
+      });
+      var ref = { map: map, box: box };
+      itemInputs.push(ref);
+      rm.addEventListener('click', function () {
+        box.remove();
+        var i = itemInputs.indexOf(ref);
+        if (i >= 0) itemInputs.splice(i, 1);
+        renumber();
+      });
+      listWrap.appendChild(box);
+    }
+    function renumber() {
+      [].forEach.call(listWrap.querySelectorAll('.item-head'), function (h, i) { h.textContent = '#' + (i + 1); });
+    }
+
+    items.forEach(function (it, i) { addItem(it, i); });
+    card.appendChild(listWrap);
+    var addBtn = elm('button', 'btn btn-ghost btn-sm', '+ 항목 추가');
+    addBtn.type = 'button';
+    addBtn.addEventListener('click', function () { addItem({}, itemInputs.length); });
+    card.appendChild(addBtn);
+    $('sections').appendChild(card);
+
+    return function () {
+      var arr = itemInputs.map(function (ref) {
+        var o = {};
+        sec.itemFields.forEach(function (f) { o[f[0]] = ref.map[f[0]].value; });
+        return o;
+      });
+      return [sec.key, arr];
+    };
+  }
+
+  async function loadSite(which) {
+    site = which;
+    $('tabEn').classList.toggle('on', site === 'en');
+    $('tabKr').classList.toggle('on', site === 'kr');
+    $('previewLink').href = site === 'en' ? '../en/' : '../kr/';
+    $('status').textContent = '';
+    var base = defaults[site] || {};
+    var override = (await window.Store.getConfigOverride(SCOPE[site])) || {};
+    var effective = Admin.deepMerge(base, override);
+    var navIds = (effective.navigation || []).map(function (n) { return n.id; });
+
+    $('sections').innerHTML = '';
+    collectors = [];
+    SECTIONS.forEach(function (sec) {
+      if (navIds.indexOf(sec.navId) < 0) return;       // only sections the site shows
+      if (effective[sec.key] == null) return;
+      collectors.push(renderSection(sec, effective[sec.key]));
+    });
+  }
+
+  async function save() {
+    var override = {};
+    collectors.forEach(function (c) { var kv = c(); override[kv[0]] = kv[1]; });
+    try {
+      await window.Store.saveConfigOverride(SCOPE[site], override);
+      $('status').style.color = '#3a7d5a';
+      $('status').textContent = '저장되었습니다. 미리보기에서 확인하세요. ' +
+        (window.Store.backend === 'supabase' ? '(모든 방문자에게 반영됩니다)' : '(이 브라우저에만 반영됩니다)');
+    } catch (e) {
+      $('status').style.color = '#b55';
+      $('status').textContent = '저장 실패: ' + (e && e.message ? e.message : e);
+    }
+  }
+
+  async function reset() {
+    if (!confirm(site.toUpperCase() + ' 사이트의 편집 내용을 지우고 기본값으로 되돌릴까요?')) return;
+    await window.Store.clearConfigOverride(SCOPE[site]);
+    await loadSite(site);
+    $('status').style.color = '#8b7f7a';
+    $('status').textContent = '기본값으로 되돌렸습니다.';
+  }
+
+  $('tabEn').addEventListener('click', function () { loadSite('en'); });
+  $('tabKr').addEventListener('click', function () { loadSite('kr'); });
+  $('btnSave').addEventListener('click', save);
+  $('btnReset').addEventListener('click', reset);
+
+  loadSite('en');
+});
+</script>
+</body>
+</html>
