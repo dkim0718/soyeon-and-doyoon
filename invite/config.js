@@ -115,12 +115,12 @@ window.MOCHUNG_DEFAULTS = {
     // developers.kakao.com 에서 발급한 JavaScript 키.
     // 사이트 도메인 등록 후 입력하면 카카오톡 공유가 활성화됩니다.
     kakaoJsKey: '',
-    // 공유에 사용할 대표 URL (비우면 현재 주소 사용)
-    url: '',
+    // 공유에 사용할 대표 URL (배포 도메인)
+    url: 'https://soyeondoyoon.com',
     title: '소연 ♥ 도윤 결혼식에 초대합니다',
     description: '2026년 10월 30일 금요일 오후 6시 30분\n신라호텔 영빈관',
-    // 카카오톡 미리보기 이미지 — 배포 후 절대주소(https://...)로 바꿔주세요.
-    imageUrl: '../shared/photos/og.jpg',
+    // 카카오톡 미리보기 이미지 (절대주소)
+    imageUrl: 'https://soyeondoyoon.com/shared/photos/og.jpg',
   },
 
   admin: {

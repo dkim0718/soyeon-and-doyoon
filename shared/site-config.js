@@ -11,7 +11,8 @@
  * add SITE_URLS.en to any nav/button.
  * ========================================================= */
 window.SITE_URLS = {
-  invite: 'https://invite.example.com', // 모청 (Korean mobile invitation)
-  kr:     'https://kr.example.com',      // Korean wedding website (linked from 모청)
-  en:     'https://en.example.com',      // English wedding website (afterparty — unlisted)
+  invite: 'https://soyeondoyoon.com',          // 모청 (widely shared; links to kr)
+  kr:     'https://kr.soyeondoyoon.com',        // Korean wedding website (linked from 모청)
+  en:     'https://suri.soyeondoyoon.fun',      // English / afterparty (unlisted; different TLD)
+  admin:  'https://doremi.soyeondoyoon.cloud',  // Admin dashboard (private; reference only — not linked)
 };
