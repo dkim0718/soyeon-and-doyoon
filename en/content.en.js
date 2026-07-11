@@ -63,7 +63,7 @@ window.SITE = {
       title: "Ceremony",
       date: "Friday, October 30, 2026",
       time: "6:30 – 7:00 PM",
-      location: "The Shilla Seoul",
+      location: "Yeong Bin Gwan, The Shilla Seoul",
       note: "We're getting married! We can't wait to celebrate with you all. Cocktail attire.",
     },
     {
@@ -71,7 +71,7 @@ window.SITE = {
       date: "Friday, October 30, 2026",
       time: "7:00 – 9:00 PM",
       location: "Yeong Bin Gwan, The Shilla Seoul",
-      note: "",
+      note: "Dinner will be indoors or outdoors depending on the weather that evening.",
     },
     {
       title: "After Party",
