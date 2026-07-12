@@ -235,19 +235,11 @@ function renderStay() {
   return `${pageTitle("stay")}${intro}<div class="hotel-grid">${cards}</div>`;
 }
 
-// Multi-line travel bodies (one place per line) become a styled list;
-// a "Name — description" line gets its name emphasized.
+// Multi-line travel bodies (one place per line) become a styled list.
 function travelBody(body) {
   const lines = String(body || "").split("\n").map((s) => s.trim()).filter(Boolean);
   if (lines.length <= 1) return `<p>${body}</p>`;
-  const items = lines.map((line) => {
-    // Accept em dash, en dash, or hyphen (spaced) and normalize to an em dash.
-    const m = line.match(/\s[—–-]\s/);
-    return m && m.index > 0
-      ? `<li><span class="tl-name">${line.slice(0, m.index)}</span> — ${line.slice(m.index + m[0].length)}</li>`
-      : `<li>${line}</li>`;
-  }).join("");
-  return `<ul class="travel-list">${items}</ul>`;
+  return `<ul class="travel-list">${lines.map((line) => `<li>${line}</li>`).join("")}</ul>`;
 }
 
 function renderTravel() {
