@@ -1,6 +1,11 @@
-# Supabase — turning on the shared backend
+# Supabase — the shared backend
 
-Until Supabase is configured, every page runs on a **localStorage fallback**: it all
+> **STATUS: LIVE since 2026-07-12.** Project `soyeondoyoon-wedding` (Seoul,
+> `tggzvaivpvkaqqvruwze`). Steps 1–6 below are all done — kept for reference /
+> disaster recovery. The guest-list section at the bottom is the part you'll
+> still use.
+
+Without Supabase configured, every page runs on a **localStorage fallback**: it all
 works, but RSVPs/guestbook/edits live only in each visitor's own browser. Turning on
 Supabase makes one shared database behind all four subdomains.
 

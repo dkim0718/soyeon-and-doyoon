@@ -66,20 +66,26 @@ To ship an update: `git push` to `main` → all four projects rebuild automatica
 
 ---
 
-## Before the real launch
+## Status (2026-07-12)
+
+- ✅ **All four sites live** on their real domains (table above), auto-deploying from `main`.
+- ✅ **Supabase backend ON** — project `soyeondoyoon-wedding` (Seoul), schema + RLS applied,
+  admin = magic-link for the allow-listed email. RSVPs/guestbook/edits are shared everywhere.
+  Setup + guest-list guide: **`supabase/README.md`**.
+- ✅ **Keep-alive** — `.github/workflows/supabase-keepalive.yml` pings the DB every 3 days so
+  the free tier never pauses.
+
+## Before the real launch (still open)
 
 - **Real private data.** The committed `invite/config.js` uses **placeholders** for phone numbers,
-  bank account, card-pay link and the admin passcode (the real values are in the gitignored
-  `invite/config.private.js`). Paste them back into `invite/config.js` and push when you're ready
-  for real guests. Change the admin passcode from `000000` too.
-- **noindex.** All four pages carry `<meta name="robots" content="noindex">` so search engines skip
-  them. Remove it from `invite/` and `kr/` only if you *want* the wedding site searchable (usually
-  you don't).
-- **Turn on the shared backend (Supabase).** Until then, RSVPs and admin edits are per-browser.
-  Full walkthrough (incl. the afterparty guest-list import): **`supabase/README.md`**.
-- **Keep Supabase awake.** The free tier pauses after ~7 days of no DB activity (which would break
-  the RSVP form). For the ~1–2 months around the wedding, upgrade to Supabase **Pro ($25/mo)** or add
-  a scheduled GitHub Action that pings the DB every few days (ask and I'll add it).
+  bank account and card-pay link (real values live in the gitignored `invite/config.private.js`).
+  Before pasting them back and pushing: **make the GitHub repo private** (Cloudflare Pages keeps
+  working; only the GitHub Pages staging mirror stops).
 - **Kakao share.** For a rich KakaoTalk preview of the 모청, register `soyeondoyoon.com` at
   developers.kakao.com and put the JavaScript key in `invite/config.js` → `share.kakaoJsKey`
   (`og:image` is already an absolute URL).
+- **Afterparty guest list.** Fill `supabase/guest-list.template.csv` (Group A = `party_limit 2`,
+  Group B = `1`), import via admin → 애프터파티 → 명단 가져오기, send out the per-guest links.
+- **noindex.** All four pages carry `<meta name="robots" content="noindex">` so search engines skip
+  them. Remove it from `invite/` and `kr/` only if you *want* the wedding site searchable (usually
+  you don't).
