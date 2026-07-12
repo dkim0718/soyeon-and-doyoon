@@ -42,7 +42,7 @@ shared/
 invite/  config.js       모청 content (MOCHUNG_DEFAULTS)
 kr/      content.ko.js   Korean wedding-site content
 en/      content.en.js   English afterparty content
-supabase/ schema.sql, seed.example.csv
+supabase/ README.md (setup guide), schema.sql, guest-list.template.csv
 scripts/ assemble.mjs
 ```
 
@@ -174,7 +174,7 @@ The English RSVP needs its curated list loaded first. In the admin, open
 
 Import is an **upsert** keyed on `invite_code` (else normalized `display_name`),
 so re-uploading a corrected CSV updates existing rows instead of duplicating.
-`supabase/seed.example.csv` shows the exact header and a few sample rows.
+`supabase/guest-list.template.csv` shows the exact header and a few sample rows.
 
 **Per-guest links.** After import, the afterparty admin generates a shareable
 link for each guest — `https://en.<your-domain>/?code=<invite_code>` — which

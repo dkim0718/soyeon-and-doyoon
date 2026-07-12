@@ -76,9 +76,7 @@ To ship an update: `git push` to `main` → all four projects rebuild automatica
   them. Remove it from `invite/` and `kr/` only if you *want* the wedding site searchable (usually
   you don't).
 - **Turn on the shared backend (Supabase).** Until then, RSVPs and admin edits are per-browser.
-  Create a free project → run `supabase/schema.sql` → `insert into public.admins(email)…` and turn
-  off Auth sign-ups → paste the URL + anon key into `shared/supabase-config.js` → push. Then RSVPs +
-  website edits are shared with everyone across all four subdomains.
+  Full walkthrough (incl. the afterparty guest-list import): **`supabase/README.md`**.
 - **Keep Supabase awake.** The free tier pauses after ~7 days of no DB activity (which would break
   the RSVP form). For the ~1–2 months around the wedding, upgrade to Supabase **Pro ($25/mo)** or add
   a scheduled GitHub Action that pings the DB every few days (ask and I'll add it).
