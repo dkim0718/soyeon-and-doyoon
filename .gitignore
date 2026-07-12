@@ -9,6 +9,8 @@
 /en/shared/
 /admin/shared/
 /admin/invite/
+/admin/en/
+/admin/kr/
 
 # Local-only Supabase keys you don't want committed.
 shared/supabase-config.local.js

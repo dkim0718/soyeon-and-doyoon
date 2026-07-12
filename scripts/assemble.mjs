@@ -93,17 +93,25 @@ async function assembleSite(site) {
     console.log('  + ' + path.relative(repoRoot, abs));
   });
 
-  // The admin pages load ../invite/config.js (the 모청 defaults, for the
-  // passcode + edit page). In the assembled admin root that path clamps to
-  // /invite/config.js, so vendor it in beside the admin pages too.
+  // The admin pages load defaults from sibling site dirs: ../invite/config.js
+  // (모청 defaults — passcode + 청첩장 수정) and ../en|kr content files
+  // (site defaults — 웹사이트 수정). In the assembled admin root those paths
+  // clamp to /invite/…, /en/…, /kr/…, so vendor each file in beside the pages.
   if (site === 'admin') {
-    const cfgDst = path.join(siteDir, 'invite');
-    await fs.rm(cfgDst, { recursive: true, force: true });
-    await fs.mkdir(cfgDst, { recursive: true });
-    await fs.copyFile(path.join(repoRoot, 'invite', 'config.js'), path.join(cfgDst, 'config.js'));
-    const { size } = await fs.stat(path.join(cfgDst, 'config.js'));
-    files += 1; bytes += size;
-    console.log('  + ' + path.relative(repoRoot, path.join(cfgDst, 'config.js')));
+    const vendored = [
+      ['invite', 'config.js'],
+      ['en', 'content.en.js'],
+      ['kr', 'content.ko.js'],
+    ];
+    for (const [dir, file] of vendored) {
+      const dstDir = path.join(siteDir, dir);
+      await fs.rm(dstDir, { recursive: true, force: true });
+      await fs.mkdir(dstDir, { recursive: true });
+      await fs.copyFile(path.join(repoRoot, dir, file), path.join(dstDir, file));
+      const { size } = await fs.stat(path.join(dstDir, file));
+      files += 1; bytes += size;
+      console.log('  + ' + path.relative(repoRoot, path.join(dstDir, file)));
+    }
   }
 
   console.log(
