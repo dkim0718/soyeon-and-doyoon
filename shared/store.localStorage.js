@@ -190,6 +190,29 @@ window.StoreLocal = (function () {
     writeList(KEYS.apRsvps, readList(KEYS.apRsvps).filter((r) => r.guest_id !== id));
   }
 
+  // Admin: patch one guest in place (inline editing on the admin page).
+  // Only the keys present in `patch` change; same validation as import.
+  async function updateAfterpartyGuest(id, patch) {
+    patch = patch || {};
+    const guests = readList(KEYS.apGuests);
+    const g = guests.find((x) => x.id === id);
+    if (!g) throw new Error('게스트를 찾을 수 없습니다');
+    if (patch.display_name != null) {
+      const name = str(patch.display_name, 80);
+      if (!name) throw new Error('성함은 비울 수 없습니다');
+      g.display_name = name;
+      g.name_norm = normName(name);
+    }
+    if (patch.invite_code !== undefined) g.invite_code = str(patch.invite_code, 40) || null;
+    if (patch.side != null && ['groom', 'bride', 'both'].includes(patch.side)) g.side = patch.side;
+    if (patch.locale != null) g.locale = patch.locale === 'ko' ? 'ko' : 'en';
+    if (patch.party_limit != null) g.party_limit = Math.min(20, Math.max(1, toInt(patch.party_limit, g.party_limit)));
+    if (patch.group_label != null) g.group_label = str(patch.group_label, 60);
+    if (patch.notes != null) g.notes = str(patch.notes, 200);
+    writeList(KEYS.apGuests, guests);
+    return Object.assign({}, g);
+  }
+
   function findGuest({ code, name }) {
     const guests = readList(KEYS.apGuests);
     if (code) {
@@ -394,7 +417,7 @@ window.StoreLocal = (function () {
     // wedding
     submitWeddingRsvp, addRsvp, listWeddingRsvps, listRsvps, deleteWeddingRsvp, deleteRsvp,
     // afterparty
-    importAfterpartyGuests, listAfterpartyGuests, deleteAfterpartyGuest,
+    importAfterpartyGuests, listAfterpartyGuests, deleteAfterpartyGuest, updateAfterpartyGuest,
     lookupAfterpartyGuest, submitAfterpartyRsvp, listAfterpartyRsvps, deleteAfterpartyRsvp,
     // guestbook
     listGuestbook, addGuestbook, deleteGuestbook,

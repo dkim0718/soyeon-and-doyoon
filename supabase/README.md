@@ -62,9 +62,14 @@ keys exist) or pay for Supabase Pro for the wedding months.
 
 # Afterparty guest list (the +1 database)
 
-Maintain the list in Google Sheets/Excel with **exactly these headers**, export as CSV,
-and import via the admin site → **애프터파티 → 명단 가져오기**. Template with sample rows:
-[`guest-list.template.csv`](guest-list.template.csv).
+Two ways to manage it, freely mixable:
+
+- **Directly on the admin page** (admin → 애프터파티): the *게스트 추가 · 수정* form adds
+  or edits one guest at a time, each row has a one-click **+1 허용/해제** toggle plus
+  수정/삭제 buttons. Best for day-to-day tweaks.
+- **CSV import** for the initial bulk load: maintain the list in Google Sheets/Excel with
+  **exactly these headers**, export as CSV, and import via **명단 가져오기**. Template with
+  sample rows: [`guest-list.template.csv`](guest-list.template.csv).
 
 | Column | Required | Meaning |
 |---|---|---|

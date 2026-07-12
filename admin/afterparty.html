@@ -23,6 +23,37 @@
     </div>
   </div>
 
+  <!-- (0) 게스트 직접 추가/수정 -->
+  <div class="card" id="guestFormCard">
+    <h2>게스트 추가 · 수정</h2>
+    <p class="hint" style="margin-bottom:10px;" id="guestFormMode">
+      새 게스트를 추가합니다. 아래 목록의 [수정] 을 누르면 이 폼에서 고칠 수 있습니다.
+    </p>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px;">
+      <label class="hint" style="display:block;">성함 *
+        <input id="gName" type="text" maxlength="80" placeholder="김민지"></label>
+      <label class="hint" style="display:block;">초대 코드
+        <input id="gCode" type="text" maxlength="40" placeholder="비우면 이름 조회만"></label>
+      <label class="hint" style="display:block;">측
+        <select id="gSide"><option value="groom">신랑</option><option value="bride">신부</option><option value="both" selected>공통</option></select></label>
+      <label class="hint" style="display:block;">언어
+        <select id="gLocale"><option value="en" selected>English</option><option value="ko">한국어</option></select></label>
+      <label class="hint" style="display:block;">배정 인원 (본인 포함)
+        <input id="gLimit" type="number" min="1" max="20" value="1"></label>
+      <label class="hint" style="display:block;">그룹
+        <input id="gGroup" type="text" maxlength="60" placeholder="A / B"></label>
+      <label class="hint" style="display:block; grid-column:1 / -1;">메모 (게스트에게 보이지 않음)
+        <input id="gNotes" type="text" maxlength="200"></label>
+    </div>
+    <p class="hint" style="margin:10px 0 0;">배정 인원 <b>2 = +1 허용 (그룹 A)</b> · <b>1 = 동반 불가 (그룹 B)</b></p>
+    <div class="btn-row">
+      <button class="btn btn-primary btn-sm" id="btnSaveGuest">저장</button>
+      <button class="btn btn-ghost btn-sm" id="btnGenCode">코드 자동 생성</button>
+      <button class="btn btn-ghost btn-sm" id="btnClearGuest">새로 입력</button>
+    </div>
+    <p class="hint" id="guestMsg" style="margin-top:10px;"></p>
+  </div>
+
   <!-- (a) CSV 명단 가져오기 -->
   <div class="card">
     <h2>초대 명단 가져오기 (CSV)</h2>
@@ -30,6 +61,7 @@
       첫 줄은 헤더여야 합니다:
       <code>display_name,invite_code,side,locale,party_limit,group_label</code><br>
       같은 <code>invite_code</code> 또는 같은 이름은 <b>덮어쓰기(수정)</b> 됩니다.
+      한두 명 고칠 때는 위의 <b>게스트 추가 · 수정</b> 폼이 빠릅니다.
     </p>
     <textarea id="csvBox" style="min-height:120px; font-family:monospace; font-size:12px;"
       placeholder="display_name,invite_code,side,locale,party_limit,group_label&#10;Jane Doe,ABC123,bride,en,2,College Friends"></textarea>
@@ -100,7 +132,7 @@
         <tbody id="rows"></tbody>
       </table>
     </div>
-    <p class="hint" id="emptyMsg" hidden>조건에 맞는 초대가 없습니다. 먼저 명단을 가져오세요.</p>
+    <p class="hint" id="emptyMsg" hidden>조건에 맞는 초대가 없습니다. 위에서 직접 추가하거나 CSV 명단을 가져오세요.</p>
   </div>
 </div>
 
@@ -129,6 +161,70 @@ Admin.gate(async function () {
   const set = function (id, v) { document.getElementById(id).textContent = v; };
 
   document.getElementById('enBase').textContent = enBase() || '(SITE_URLS.en 미설정)';
+
+  /* ---------- (0) 게스트 직접 추가/수정 ---------- */
+
+  let editingId = null;
+  const gf = function (id) { return document.getElementById(id); };
+
+  function fillGuestForm(g) {
+    gf('gName').value = g ? g.display_name : '';
+    gf('gCode').value = g && g.invite_code ? g.invite_code : '';
+    gf('gSide').value = g ? g.side : 'both';
+    gf('gLocale').value = g ? g.locale : 'en';
+    gf('gLimit').value = g ? g.party_limit : 1;
+    gf('gGroup').value = g ? (g.group_label || '') : '';
+    gf('gNotes').value = g ? (g.notes || '') : '';
+    editingId = g ? g.id : null;
+    gf('guestFormMode').innerHTML = g
+      ? '<b>수정 중: ' + esc(g.display_name) + '</b> — [저장] 을 누르면 반영됩니다. 새 게스트를 넣으려면 [새로 입력].'
+      : '새 게스트를 추가합니다. 아래 목록의 [수정] 을 누르면 이 폼에서 고칠 수 있습니다.';
+    gf('guestMsg').textContent = '';
+  }
+
+  gf('btnGenCode').addEventListener('click', function () {
+    // No easily-confused characters (0/O, 1/I/L).
+    const abc = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    let s = '';
+    for (let i = 0; i < 6; i++) s += abc[Math.floor(Math.random() * abc.length)];
+    gf('gCode').value = s;
+  });
+
+  gf('btnClearGuest').addEventListener('click', function () { fillGuestForm(null); });
+
+  gf('btnSaveGuest').addEventListener('click', async function () {
+    const msg = gf('guestMsg');
+    msg.style.color = '';
+    const fields = {
+      display_name: gf('gName').value.trim(),
+      invite_code: gf('gCode').value.trim(),
+      side: gf('gSide').value,
+      locale: gf('gLocale').value,
+      party_limit: gf('gLimit').value,
+      group_label: gf('gGroup').value.trim(),
+      notes: gf('gNotes').value.trim(),
+    };
+    if (!fields.display_name) { msg.style.color = '#b55'; msg.textContent = '성함을 입력해 주세요.'; return; }
+    try {
+      if (editingId) {
+        await store.updateAfterpartyGuest(editingId, fields);
+        msg.style.color = '#3a7d5a';
+        msg.textContent = '수정되었습니다: ' + fields.display_name;
+      } else {
+        const res = await store.importAfterpartyGuests([fields]);
+        if (res.skipped) throw new Error((res.errors && res.errors[0]) || '저장하지 못했습니다');
+        msg.style.color = '#3a7d5a';
+        msg.textContent = res.updated
+          ? '같은 이름/코드의 게스트가 이미 있어 그 게스트를 수정했습니다: ' + fields.display_name
+          : '추가되었습니다: ' + fields.display_name;
+      }
+      fillGuestForm(null);
+      await refresh();
+    } catch (e) {
+      msg.style.color = '#b55';
+      msg.textContent = '저장 실패: ' + (e && e.message ? e.message : e);
+    }
+  });
 
   /* ---------- (a) 명단 가져오기 ---------- */
 
@@ -250,7 +346,13 @@ Admin.gate(async function () {
         '<td>' + esc(comp) + '</td>' +
         '<td>' + esc(contact) + '</td>' +
         '<td>' + esc(r ? r.message : '') + '</td>' +
-        '<td><button class="btn btn-sm btn-danger" data-del="' + g.id + '">삭제</button></td>' +
+        '<td style="white-space:nowrap;">' +
+          '<button class="btn btn-sm btn-ghost" data-toggle="' + esc(g.id) + '" ' +
+            'title="배정 인원을 2(+1 허용)/1(동반 불가) 로 전환">' +
+            (g.party_limit >= 2 ? '+1 해제' : '+1 허용') + '</button> ' +
+          '<button class="btn btn-sm btn-ghost" data-edit="' + esc(g.id) + '">수정</button> ' +
+          '<button class="btn btn-sm btn-danger" data-del="' + esc(g.id) + '">삭제</button>' +
+        '</td>' +
         '</tr>';
     }).join('');
     document.getElementById('emptyMsg').hidden = list.length > 0;
@@ -268,11 +370,30 @@ Admin.gate(async function () {
   });
 
   document.getElementById('rows').addEventListener('click', async function (e) {
-    const btn = e.target.closest('[data-del]');
-    if (!btn) return;
-    if (!confirm('이 게스트와 응답을 명단에서 삭제할까요?')) return;
-    await store.deleteAfterpartyGuest(btn.dataset.del);
-    refresh();
+    const del = e.target.closest('[data-del]');
+    const edit = e.target.closest('[data-edit]');
+    const tog = e.target.closest('[data-toggle]');
+    if (del) {
+      if (!confirm('이 게스트와 응답을 명단에서 삭제할까요?')) return;
+      await store.deleteAfterpartyGuest(del.dataset.del);
+      if (editingId === del.dataset.del) fillGuestForm(null);
+      refresh();
+    } else if (edit) {
+      const x = joined.find(function (j) { return j.guest.id === edit.dataset.edit; });
+      if (!x) return;
+      fillGuestForm(x.guest);
+      document.getElementById('guestFormCard').scrollIntoView({ behavior: 'smooth' });
+    } else if (tog) {
+      const x = joined.find(function (j) { return j.guest.id === tog.dataset.toggle; });
+      if (!x) return;
+      const to = x.guest.party_limit >= 2 ? 1 : 2;
+      try {
+        await store.updateAfterpartyGuest(x.guest.id, { party_limit: to });
+        refresh();
+      } catch (err) {
+        alert('변경 실패: ' + (err && err.message ? err.message : err));
+      }
+    }
   });
 
   document.getElementById('btnCsv').addEventListener('click', function () {

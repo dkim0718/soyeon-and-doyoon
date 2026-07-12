@@ -193,6 +193,28 @@
     if (res && res.error) throw res.error;
   }
 
+  // Admin: patch one guest in place (inline editing on the admin page).
+  // Only the keys present in `patch` change; same validation as import.
+  // name_norm is a generated column, so it tracks display_name by itself.
+  async function updateAfterpartyGuest(id, patch) {
+    patch = patch || {};
+    var rec = {};
+    if (patch.display_name != null) {
+      var name = str(patch.display_name, 80);
+      if (!name) throw new Error('성함은 비울 수 없습니다');
+      rec.display_name = name;
+    }
+    if (patch.invite_code !== undefined) rec.invite_code = str(patch.invite_code, 40) || null;
+    if (patch.side != null && ['groom', 'bride', 'both'].indexOf(patch.side) >= 0) rec.side = patch.side;
+    if (patch.locale != null) rec.locale = patch.locale === 'ko' ? 'ko' : 'en';
+    if (patch.party_limit != null) rec.party_limit = Math.min(20, Math.max(1, toInt(patch.party_limit, 1)));
+    if (patch.group_label != null) rec.group_label = str(patch.group_label, 60);
+    if (patch.notes != null) rec.notes = str(patch.notes, 200);
+    if (!Object.keys(rec).length) return null;
+    return unwrap(await client.from('afterparty_guests')
+      .update(rec).eq('id', id).select('*').single());
+  }
+
   // PUBLIC: a guest looks up their own invitation via SECURITY
   // DEFINER RPC. Never selects the afterparty_guests table, so the
   // curated list can never be downloaded. Returns the same shapes
@@ -461,6 +483,7 @@
     importAfterpartyGuests: importAfterpartyGuests,
     listAfterpartyGuests: listAfterpartyGuests,
     deleteAfterpartyGuest: deleteAfterpartyGuest,
+    updateAfterpartyGuest: updateAfterpartyGuest,
     lookupAfterpartyGuest: lookupAfterpartyGuest,
     submitAfterpartyRsvp: submitAfterpartyRsvp,
     listAfterpartyRsvps: listAfterpartyRsvps,
