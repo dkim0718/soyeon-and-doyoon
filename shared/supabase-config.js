@@ -20,9 +20,9 @@
  * it AFTER this file (it's gitignored).
  * ========================================================= */
 window.SUPABASE_CONFIG = {
-  url: '',
-  anonKey: '',
+  url: 'https://tggzvaivpvkaqqvruwze.supabase.co',
+  anonKey: 'sb_publishable_zbWod8789xhWf6sLKbdB-A_zBdo4h2W',
   // Email addresses allowed into the admin dashboard (Supabase Auth
-  // magic-link). Only used when url/anonKey are set.
-  adminEmails: [],
+  // magic-link). Must ALSO be in the public.admins table (RLS gate).
+  adminEmails: ['dkim0718@gmail.com'],
 };
