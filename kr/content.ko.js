@@ -38,7 +38,7 @@ window.SITE = {
     maps: [
       { label: "네이버 지도", url: "https://map.naver.com/p/search/" + encodeURIComponent("신라호텔 영빈관") },
       { label: "구글 지도", url: "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("신라호텔 영빈관") },
-      { label: "애플 지도", url: "https://maps.apple.com/?q=" + encodeURIComponent("신라호텔 영빈관") },
+      { label: "카카오맵", url: "https://map.kakao.com/link/search/" + encodeURIComponent("신라호텔 영빈관") },
     ],
   },
 

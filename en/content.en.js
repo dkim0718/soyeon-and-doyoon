@@ -28,7 +28,7 @@ window.SITE = {
     // Venue links shown on the Travel page.
     maps: [
       { label: "Google Maps", url: "https://www.google.com/maps/search/?api=1&query=The+Shilla+Seoul" },
-      { label: "Apple Maps", url: "https://maps.apple.com/?q=The+Shilla+Seoul" },
+      { label: "Kakao Map", url: "https://map.kakao.com/link/search/" + encodeURIComponent("신라호텔 영빈관") },
       { label: "Naver Map", url: "https://map.naver.com/p/search/" + encodeURIComponent("신라호텔 영빈관") },
     ],
   },
