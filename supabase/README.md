@@ -45,9 +45,9 @@ the browser console logs `[Store] backend = supabase`.
 
 ## 5. Verify
 
-- Submit a wedding RSVP on `soyeondoyoon.com` → it appears in the admin dashboard
+- Submit a wedding RSVP on `soyeondoyoon.fun` → it appears in the admin dashboard
   (`doremi.soyeondoyoon.cloud`, after magic-link sign-in) **from a different browser**.
-- On `soyeondoyoon.com/en/?code=…` a seeded guest sees their name + allotment; a
+- On `soyeondoyoon.fun/en/?code=…` a seeded guest sees their name + allotment; a
   submit with more seats than allowed is rejected (`OVER_LIMIT`).
 - Browser console on any page: `Store.backend` → `"supabase"`;
   `supabase.from('afterparty_guests').select('*')` → empty/denied (RLS working).
@@ -74,7 +74,7 @@ Two ways to manage it, freely mixable:
 | Column | Required | Meaning |
 |---|---|---|
 | `display_name` | ✅ | Guest's name, as greeted on the RSVP page and matched on name lookup. |
-| `invite_code` | recommended | Unique token for their personal link `https://soyeondoyoon.com/en/?code=…`. Blank = name lookup only. |
+| `invite_code` | recommended | Unique token for their personal link `https://soyeondoyoon.fun/en/?code=…`. Blank = name lookup only. |
 | `side` | | `groom` \| `bride` \| `both`. |
 | `locale` | | `en` \| `ko` — which language site they'll likely use. |
 | `party_limit` | | **The +1 switch.** Total seats *including* the guest: `2` = Group A (+1 allowed), `1` = Group B (no +1). Max 20. |

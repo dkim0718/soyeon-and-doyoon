@@ -9,11 +9,11 @@
  *   /invite/  모청 (the widely-shared mobile invitation;
  *             its 웨딩 홈페이지 button points at SITE_URLS.kr)
  * The admin dashboard stays on its own private domain.
- * soyeondoyoon.fun is intentionally unused — reserved.
+ * soyeondoyoon.com is intentionally EMPTY (reserved).
  * ========================================================= */
 window.SITE_URLS = {
-  invite: 'https://soyeondoyoon.com/invite',    // 모청 (mass-shared with Korean guests)
-  kr:     'https://soyeondoyoon.com',           // Korean wedding website (apex)
-  en:     'https://soyeondoyoon.com/en',        // English site + afterparty RSVP (?code=…)
+  invite: 'https://soyeondoyoon.fun/invite',    // 모청 (mass-shared with Korean guests)
+  kr:     'https://soyeondoyoon.fun',           // Korean wedding website (apex)
+  en:     'https://soyeondoyoon.fun/en',        // English site + afterparty RSVP (?code=…)
   admin:  'https://doremi.soyeondoyoon.cloud',  // Admin dashboard (private; never linked)
 };

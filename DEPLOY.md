@@ -13,16 +13,17 @@ nav switches languages (it carries the current page across).
 
 | What | URL | Cloudflare Pages project | Build command | Output dir |
 |---|---|---|---|---|
-| Korean site (default) | **soyeondoyoon.com** | `soyeondoyoon-invite` (repurposed) | `npm run build:root` | `dist-root` |
-| English site + afterparty RSVP | **soyeondoyoon.com/en/** | ↑ same project | ↑ | ↑ |
-| 모청 (mobile invitation) | **soyeondoyoon.com/invite/** | ↑ same project | ↑ | ↑ |
+| Korean site (default) | **soyeondoyoon.fun** | `soyeondoyoon-invite` (repurposed) | `npm run build:root` | `dist-root` |
+| English site + afterparty RSVP | **soyeondoyoon.fun/en/** | ↑ same project | ↑ | ↑ |
+| 모청 (mobile invitation) | **soyeondoyoon.fun/invite/** | ↑ same project | ↑ | ↑ |
 | Admin (private) | **doremi.soyeondoyoon.cloud** | `soyeondoyoon-admin` | `npm run build:admin` | `admin` |
 
 Both projects deploy from the **`main`** branch of `github.com/dkim0718/soyeon-and-doyoon`.
-Retired: `kr.soyeondoyoon.com` and `suri.soyeondoyoon.fun` (and the `soyeondoyoon-kr` /
-`soyeondoyoon-en` projects). **soyeondoyoon.fun is reserved** for a separate fun project.
-The English page is no longer "unlisted" — it's linked from the language toggle; the
-afterparty guest list itself stays protected by per-code server-side lookups.
+Retired: `kr.soyeondoyoon.com`, `suri.soyeondoyoon.fun`, and the `soyeondoyoon-kr` /
+`soyeondoyoon-en` projects. **soyeondoyoon.com is deliberately EMPTY** (no site attached;
+reserved for whatever comes later). The English page is no longer "unlisted" — it's linked
+from the language toggle; the afterparty guest list itself stays protected by per-code
+server-side lookups.
 
 ---
 
@@ -64,9 +65,9 @@ Cloudflare, it wires the DNS for you and issues SSL automatically.
 
 ## Step 4 — Verify
 
-- `https://soyeondoyoon.com` → Korean site; nav **English** toggle → `/en/`, and back via **한국어**.
-- `https://soyeondoyoon.com/en/` → English site (afterparty RSVP by `?code=`).
-- `https://soyeondoyoon.com/invite/` → 모청; its **웨딩 홈페이지** button opens the apex.
+- `https://soyeondoyoon.fun` → Korean site; nav **English** toggle → `/en/`, and back via **한국어**.
+- `https://soyeondoyoon.fun/en/` → English site (afterparty RSVP by `?code=`).
+- `https://soyeondoyoon.fun/invite/` → 모청; its **웨딩 홈페이지** button opens the apex.
 - `https://doremi.soyeondoyoon.cloud` → admin (email magic-link sign-in).
 
 To ship an update: `git push` to `main` → both projects rebuild automatically (~1 min).
@@ -77,10 +78,11 @@ To ship an update: `git push` to `main` → both projects rebuild automatically 
 
 1. Project **soyeondoyoon-invite** → Settings → Builds & deployments: build command
    `npm run build:root`, build output directory `dist-root` → save, then **Retry** the
-   latest deployment. The apex now serves KR at `/`, EN at `/en/`, 모청 at `/invite/`.
-2. Project **soyeondoyoon-en** → Custom domains → remove `suri.soyeondoyoon.fun`
-   (frees the .fun domain entirely).
-3. Project **soyeondoyoon-kr** → Custom domains → remove `kr.soyeondoyoon.com`.
+   latest deployment (it now serves KR at `/`, EN at `/en/`, 모청 at `/invite/`).
+2. Same project → Custom domains → **add `soyeondoyoon.fun`** (the whole site goes live
+   there), then **remove `soyeondoyoon.com`** (leaves .com empty, DNS record deleted).
+3. Project **soyeondoyoon-en** → Custom domains → remove `suri.soyeondoyoon.fun`;
+   project **soyeondoyoon-kr** → Custom domains → remove `kr.soyeondoyoon.com`.
 4. Optional cleanup: delete the now-idle `soyeondoyoon-kr` / `soyeondoyoon-en` projects,
    and rename `soyeondoyoon-invite` → `soyeondoyoon-main` (Settings → General; renaming
    only changes the *.pages.dev URL, not the custom domain).
@@ -100,7 +102,7 @@ To ship an update: `git push` to `main` → both projects rebuild automatically 
   bank account and card-pay link (real values live in the gitignored `invite/config.private.js`).
   Before pasting them back and pushing: **make the GitHub repo private** (Cloudflare Pages keeps
   working; only the GitHub Pages staging mirror stops).
-- **Kakao share.** For a rich KakaoTalk preview of the 모청, register `soyeondoyoon.com` at
+- **Kakao share.** For a rich KakaoTalk preview of the 모청, register `soyeondoyoon.fun` at
   developers.kakao.com and put the JavaScript key in `invite/config.js` → `share.kakaoJsKey`
   (`og:image` is already an absolute URL).
 - **Afterparty guest list.** Fill `supabase/guest-list.template.csv` (Group A = `party_limit 2`,
