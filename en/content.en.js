@@ -251,6 +251,65 @@ window.SITE = {
         "did we check off that from our bucketlist, we drove through a " +
         "sandstorm, blizzard, rain, and hailstorm all in the same day!",
     },
+    {
+      q: "Who fell first?",
+      a: "Both of us insist it was the other one.",
+    },
+    {
+      q: "Best trip so far?",
+      a:
+        "Christmas dinner at Hotel Grones in the Dolomites — nothing beats a " +
+        "meal someone else cooks for you. (Napa, Cyprus, and Vienna are close " +
+        "runners-up.)",
+    },
+    {
+      q: "Do you two want a dog?",
+      a:
+        "For now the head of our household is a stuffed bear named Doremy, and " +
+        "honestly she's already a handful. A real dog is a someday-dream once " +
+        "we settle into the new place — pending Doremy's approval, of course.",
+    },
+    {
+      q: "When did you know you were ready to marry?",
+      a:
+        "It wasn't a grand moment. The day after Valentine's, snow coming down " +
+        "hard in Boston, the two of us in a snowed-in car watching YouTube " +
+        "while it melted — that's when I realized I could do absolutely nothing " +
+        "with this person and be happy. And once I noticed that even eight time " +
+        "zones apart my day never felt over until we'd talked, I was sure.",
+    },
+    {
+      q: "An inside joke only you two get?",
+      a:
+        "We have our own baby-talk dialect where we call ourselves 됴니 and 쇼니 " +
+        "in the third person — and there's a bear named Doremy with strong " +
+        "opinions.",
+    },
+    {
+      q: "Your perfect weekend?",
+      a:
+        "Hunting down one great restaurant, catching a ballet, and an evening " +
+        "of Doyoon playing guitar and singing to himself.",
+    },
+    {
+      q: "Each of your superpowers?",
+      a:
+        "Soyeon: Making things actually happen — plans, bookings, " +
+        "problem-solving all get finished once they reach her.\n" +
+        "Doyoon: Keeping things calm — and a human map of every good restaurant.",
+    },
+    {
+      q: "Your first-dance song?",
+      a:
+        "We're torn between Can't Take My Eyes Off You, Turning Page, Risk It " +
+        "All, and Die With a Smile.",
+    },
+    {
+      q: "Who is Doremy?",
+      a:
+        "Soyeon's stuffed bear and the unofficial third member of this " +
+        "relationship. Her wedding invite was genuinely debated.",
+    },
   ],
 
   registry: {
