@@ -81,10 +81,17 @@ Two ways to manage it, freely mixable:
 | `group_label` | | Your grouping tag shown in admin — use `A` / `B` (free text). |
 | `notes` | | Private admin notes; never shown to guests. |
 
-**How the +1 rule is enforced:** the RSVP form on the English site looks the guest up in
-this table and clamps the party-size stepper to `party_limit` — Group B guests never see
-a companion field, Group A guests get exactly one, and the server re-checks the limit on
-submit (`OVER_LIMIT`), so it can't be bypassed by editing the page.
+**How the +1 rules work (since 2026-07-12):**
+
+- **English site — open RSVP, automatic +1.** Anyone can RSVP by name (no code needed)
+  with up to **2 seats**; unknown names self-register a guest row here (`notes:
+  self-registered`, limit 2). Listed guests keep any *larger* allotment (e.g. a couple
+  invite with `party_limit 4`), and even a `party_limit 1` row gets 2 when submitting
+  from the EN site. The server enforces the cap on submit (`OVER_LIMIT`).
+- **Korean website — +1 only for listed names.** The KR RSVP form keeps the party
+  selector at 1 unless the typed name matches a row in this table with `party_limit ≥ 2`
+  (matching is client-side via the same lookup; the 모청's own RSVP form keeps its free
+  인원 count for parents' guests).
 
 **What you do NOT pre-load** — these are *response* data, filled in by the guest when
 they RSVP and visible in the admin joined table / CSV export (`응답 내보내기`):

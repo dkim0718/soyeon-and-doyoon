@@ -321,6 +321,9 @@ $$;
 -- Submit (or update) an afterparty RSVP. Re-resolves the guest's
 -- identity server-side (never trusts a guest_id from the client),
 -- enforces the party allotment, and upserts on guest_id.
+-- The EN site is OPEN: an unknown name self-registers a guest row
+-- with the standard +1 allotment (2 seats), and everyone submitting
+-- here is allowed at least 2 (listed guests keep larger allotments).
 -- Raises 'GUEST_NOT_FOUND' | 'AMBIGUOUS' | 'OVER_LIMIT' so the
 -- client can map them to friendly messages. Returns the saved row.
 create or replace function public.submit_afterparty(
@@ -344,6 +347,7 @@ declare
   v_row        public.afterparty_rsvps%rowtype;
   v_norm       text;
   v_count      integer;
+  v_allowed    integer;
   v_attending  boolean := coalesce(p_attending, true);
   v_party      integer := greatest(1, coalesce(p_party, 1));
   v_companions text[]  := coalesce(p_companions, '{}');
@@ -373,21 +377,32 @@ begin
     end if;
   end if;
 
+  -- Open RSVP: unknown names self-register with the standard +1
+  -- allotment instead of being turned away.
   if v_guest.id is null then
-    raise exception 'GUEST_NOT_FOUND';
+    if p_name is null or btrim(p_name) = '' then
+      raise exception 'GUEST_NOT_FOUND';
+    end if;
+    insert into public.afterparty_guests
+      (display_name, side, locale, party_limit, notes)
+    values
+      (left(btrim(regexp_replace(p_name, '\s+', ' ', 'g')), 80),
+       'both', v_locale, 2, 'self-registered')
+    returning * into v_guest;
   end if;
 
-  -- Enforce allotment.
-  if v_attending and v_party > v_guest.party_limit then
+  -- Enforce allotment: everyone here gets at least a +1.
+  v_allowed := greatest(v_guest.party_limit, 2);
+  if v_attending and v_party > v_allowed then
     raise exception 'OVER_LIMIT';
   end if;
   if not v_attending then
     v_party := 0;
   end if;
 
-  -- Keep at most (party_limit - 1) companions.
+  -- Keep at most (allowed - 1) companions.
   if array_length(v_companions, 1) is not null then
-    v_companions := v_companions[1:greatest(0, v_guest.party_limit - 1)];
+    v_companions := v_companions[1:greatest(0, v_allowed - 1)];
   end if;
 
   insert into public.afterparty_rsvps as r

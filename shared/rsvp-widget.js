@@ -59,9 +59,51 @@
       { value: 'yes', label: t('rsvp.attendingYes') },
       { value: 'no', label: t('rsvp.attendingNo') },
     ], 'yes');
+    // KR website rule: +1 only for names on the list. The party
+    // selector stays at 1 until the typed name matches a listed
+    // guest, then opens up to their allotment. (The 모청 has its own
+    // form and keeps a free count; this widget is the website's.)
+    var listGated = locale === 'ko' && typeof store.lookupAfterpartyGuest === 'function';
+    var maxParty = listGated ? 1 : 10;
     var party = el('select', { name: 'party' });
-    for (var i = 1; i <= 10; i++) party.append(el('option', { value: String(i), text: String(i) }));
-    var partyField = field(t('rsvp.partySize'), party);
+    var partyNote = el('p', { class: 'rsvp-hint muted' });
+    var partyField = field(t('rsvp.partySize'), el('div', {}, [party, partyNote]));
+
+    function rebuildParty() {
+      var cur = parseInt(party.value || '1', 10) || 1;
+      party.innerHTML = '';
+      for (var i = 1; i <= maxParty; i++) party.append(el('option', { value: String(i), text: String(i) }));
+      party.value = String(Math.min(Math.max(1, cur), maxParty));
+      if (listGated) {
+        partyNote.textContent = maxParty > 1 ? t('rsvp.plusOneOk', { n: maxParty }) : t('rsvp.plusOneInfo');
+      } else {
+        partyNote.style.display = 'none';
+      }
+    }
+    rebuildParty();
+
+    var lookupTimer = null;
+    var lastLooked = null;
+    function checkList() {
+      if (!listGated) return;
+      var v = name.value.trim();
+      if (v === lastLooked) return;
+      lastLooked = v;
+      if (!v) { maxParty = 1; rebuildParty(); return; }
+      Promise.resolve(store.lookupAfterpartyGuest({ name: v })).then(function (res) {
+        if (name.value.trim() !== v) return; // stale response
+        maxParty = (res && res.guest && res.guest.party_limit > 1) ? res.guest.party_limit : 1;
+        rebuildParty();
+      }).catch(function () { maxParty = 1; rebuildParty(); });
+    }
+    if (listGated) {
+      name.addEventListener('input', function () {
+        clearTimeout(lookupTimer);
+        lookupTimer = setTimeout(checkList, 450);
+      });
+      name.addEventListener('blur', checkList);
+    }
+
     var phone = el('input', { type: 'tel', name: 'phone', maxlength: 30 });
     var message = el('textarea', { name: 'message', rows: 3, maxlength: 500 });
     var status = statusLine();
@@ -94,7 +136,7 @@
         name: name.value,
         side: sideVal,
         attending: isAttending(),
-        partyCount: isAttending() ? parseInt(party.value, 10) : 0,
+        partyCount: isAttending() ? Math.min(parseInt(party.value, 10) || 1, maxParty) : 0,
         phone: phone.value,
         message: message.value,
         locale: locale,
@@ -150,7 +192,17 @@
       clear();
       root.append(el('p', { class: 'center muted', text: '…' }));
       Promise.resolve(store.lookupAfterpartyGuest(query)).then(function (res) {
-        if (!res) { showLookup(query.name || '', t('rsvp.notFound')); return; }
+        if (!res) {
+          // Open RSVP: an unknown NAME just proceeds as a new guest
+          // with the standard +1 allotment (self-registers on submit).
+          // An unknown personal code falls back to the name form.
+          if (query.name && query.name.trim()) {
+            showForm({ display_name: query.name.trim(), party_limit: 2, invite_code: null }, null, query);
+          } else {
+            showLookup('', t('rsvp.notFound'));
+          }
+          return;
+        }
         if (res.ambiguous) { showLookup(query.name || '', t('rsvp.ambiguous')); return; }
         showForm(res.guest, res.rsvp, query);
       }).catch(function () {
@@ -161,7 +213,9 @@
     /* --- step 2: the RSVP form --- */
     function showForm(guest, existing, identity) {
       clear();
-      var limit = Math.max(1, guest.party_limit || 1);
+      // The EN site is open: everyone may bring a +1, and listed
+      // guests keep any larger allotment.
+      var limit = Math.max(2, guest.party_limit || 1);
 
       var greeting = el('div', { class: 'ap-greeting' }, [
         el('h3', { text: t('rsvp.welcome', { name: guest.display_name }) }),

@@ -249,20 +249,36 @@ window.StoreLocal = (function () {
     };
   }
 
-  // Public: submit/update an afterparty RSVP. Enforces the allotment.
+  // Public: submit/update an afterparty RSVP. The EN site is OPEN:
+  // unknown names self-register with the standard +1 allotment (2),
+  // and everyone is allowed at least 2 (listed guests keep more).
   async function submitAfterpartyRsvp(data) {
-    const g = findGuest({ code: data.code, name: data.name });
-    if (!g) { const e = new Error('GUEST_NOT_FOUND'); e.code = 'GUEST_NOT_FOUND'; throw e; }
-    if (g._ambiguous) { const e = new Error('AMBIGUOUS'); e.code = 'AMBIGUOUS'; throw e; }
+    let g = findGuest({ code: data.code, name: data.name });
+    if (g && g._ambiguous) { const e = new Error('AMBIGUOUS'); e.code = 'AMBIGUOUS'; throw e; }
+    if (!g) {
+      const display_name = str(data.name, 80);
+      if (!display_name) { const e = new Error('GUEST_NOT_FOUND'); e.code = 'GUEST_NOT_FOUND'; throw e; }
+      const guests = readList(KEYS.apGuests);
+      g = {
+        id: uid(), created_at: Date.now(),
+        display_name: display_name, name_norm: normName(display_name),
+        invite_code: null, side: 'both',
+        locale: data.locale === 'ko' ? 'ko' : 'en',
+        party_limit: 2, group_label: '', notes: 'self-registered',
+      };
+      guests.push(g);
+      writeList(KEYS.apGuests, guests);
+    }
 
+    const allowed = Math.max(2, g.party_limit || 1);
     const attending = data.attending === false ? false : true;
     let partyCount = Math.max(1, toInt(data.partyCount, 1));
-    if (attending && partyCount > g.party_limit) {
-      const e = new Error('OVER_LIMIT'); e.code = 'OVER_LIMIT'; e.limit = g.party_limit; throw e;
+    if (attending && partyCount > allowed) {
+      const e = new Error('OVER_LIMIT'); e.code = 'OVER_LIMIT'; e.limit = allowed; throw e;
     }
     if (!attending) partyCount = 0;
     const companions = (Array.isArray(data.companions) ? data.companions : [])
-      .map((c) => str(c, 80)).filter(Boolean).slice(0, Math.max(0, g.party_limit - 1));
+      .map((c) => str(c, 80)).filter(Boolean).slice(0, Math.max(0, allowed - 1));
 
     const rsvps = readList(KEYS.apRsvps);
     let row = rsvps.find((r) => r.guest_id === g.id);
