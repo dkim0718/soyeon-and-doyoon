@@ -55,7 +55,7 @@ const DEFAULT_TITLES = {
   schedule: { script: "the",           title: "Schedule" },
   stay:     { script: "where to",      title: "Stay" },
   travel:   { script: "getting",       title: "There" },
-  qanda:    { script: "questions &",   title: "Answers" },
+  qanda:    { script: "",              title: "Questions & Answers" },
   registry: { script: "the",           title: "Registry" },
   moments:  { script: "our",           title: "Moments" },
   rsvp:     { script: "join",          title: "Us" },
@@ -171,7 +171,8 @@ function titleFor(id) {
 
 function pageTitle(id) {
   const s = titleFor(id);
-  return `<div class="page-title"><span class="script">${s.script || ""}</span><h2>${s.title || ""}</h2></div>`;
+  const eyebrow = s.script ? `<span class="script">${s.script}</span>` : "";
+  return `<div class="page-title">${eyebrow}<h2>${s.title || ""}</h2></div>`;
 }
 
 function renderWelcome() {
@@ -234,9 +235,23 @@ function renderStay() {
   return `${pageTitle("stay")}${intro}<div class="hotel-grid">${cards}</div>`;
 }
 
+// Multi-line travel bodies (one place per line) become a styled list;
+// a "Name — description" line gets its name emphasized.
+function travelBody(body) {
+  const lines = String(body || "").split("\n").map((s) => s.trim()).filter(Boolean);
+  if (lines.length <= 1) return `<p>${body}</p>`;
+  const items = lines.map((line) => {
+    const i = line.indexOf(" — ");
+    return i > 0
+      ? `<li><span class="tl-name">${line.slice(0, i)}</span> — ${line.slice(i + 3)}</li>`
+      : `<li>${line}</li>`;
+  }).join("");
+  return `<ul class="travel-list">${items}</ul>`;
+}
+
 function renderTravel() {
   const blocks = SITE.travel.map((t) => `
-    <div class="travel-block"><h3>${t.title}</h3><p>${t.body}</p></div>`).join("");
+    <div class="travel-block"><h3>${t.title}</h3>${travelBody(t.body)}</div>`).join("");
   return `
     ${pageTitle("travel")}
     <p class="center muted" style="margin-bottom:2.4rem">${SITE.wedding.venue} · ${SITE.wedding.venueAddress}</p>
