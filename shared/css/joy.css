@@ -13,8 +13,8 @@
   --c-muted: #8b7f7a;     /* soft text                  */
   --c-line: #e6d9d4;      /* hairlines                  */
 
-  --f-heading: "Playfair Display", Georgia, serif;
-  --f-script: "Clicker Script", cursive;
+  --f-heading: "Playfair Display", Georgia, serif;   /* page titles            */
+  --f-brand: "Clicker Script", cursive;              /* site title / monogram  */
   --f-body: "Montserrat", "Helvetica Neue", sans-serif;
 
   --w-content: 46rem;
@@ -73,14 +73,14 @@ html[data-header="inline"] .header-inner {
 html[data-header="inline"] .brand { flex-direction: row; gap: 0.8rem; align-items: baseline; }
 
 .brand-monogram {
-  font-family: var(--f-script);
+  font-family: var(--f-brand);
   font-size: 2.4rem;
   color: var(--c-accent);
   line-height: 1;
 }
 
 .brand-names {
-  font-family: var(--f-heading);
+  font-family: var(--f-brand);
   font-size: 1.05rem;
   letter-spacing: 0.35em;
   text-transform: uppercase;
@@ -150,13 +150,17 @@ html[data-mode="single"] .page { padding-bottom: 2rem; }
   margin-bottom: 2.6rem;
 }
 
+/* The small word above each page title. Same family as the title itself —
+   only the size/color differ — so every page title reads as one font. */
 .page-title .script {
   display: block;
-  font-family: var(--f-script);
-  font-size: 2rem;
+  font-family: var(--f-heading);
+  font-size: 1.1rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
   color: var(--c-alt);
   line-height: 1;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.55rem;
 }
 
 .page-title h2 {
@@ -191,7 +195,7 @@ html[data-mode="single"] .page { padding-bottom: 2rem; }
 }
 
 .hero-amp {
-  font-family: var(--f-script);
+  font-family: var(--f-brand);
   color: var(--c-accent);
   font-size: 0.8em;
   padding: 0 0.15em;
@@ -642,7 +646,7 @@ html[data-hero="minimal"] .hero-names { font-size: clamp(3rem, 9vw, 5.4rem); }
   border-top: 1px solid var(--c-line);
 }
 
-.footer-monogram { font-family: var(--f-script); font-size: 2.6rem; color: var(--c-accent); line-height: 1.2; }
+.footer-monogram { font-family: var(--f-brand); font-size: 2.6rem; color: var(--c-accent); line-height: 1.2; }
 
 .footer-line { font-size: 0.74rem; letter-spacing: 0.28em; text-transform: uppercase; margin-top: 0.5rem; }
 

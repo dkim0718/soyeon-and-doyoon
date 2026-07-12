@@ -17,7 +17,7 @@
 
 const FONT_CHOICES = {
   heading: ["Playfair Display", "Cormorant Garamond", "EB Garamond", "Libre Caslon Text", "DM Serif Display", "Marcellus", "Lora", "Nanum Myeongjo", "Noto Serif KR", "Gowun Batang"],
-  script: ["Clicker Script", "Great Vibes", "Parisienne", "Dancing Script", "Allura", "Charmonman", "Nanum Pen Script", "None"],
+  brand: ["Clicker Script", "Great Vibes", "Parisienne", "Dancing Script", "Allura", "Charmonman", "Nanum Pen Script", "None"],
   body: ["Montserrat", "Inter", "Lato", "Karla", "Bitter", "Jost", "Nunito Sans", "Noto Sans KR", "Gowun Dodum"],
 };
 
@@ -25,7 +25,7 @@ const FONT_CHOICES = {
    loaded up front by kr/index.html's static <link>, so switching is instant. */
 const FONT_CHOICES_KO = {
   heading: ["Nanum Myeongjo", "Noto Serif KR", "Gowun Batang", "Song Myung", "Hahmlet", "Black Han Sans", "Do Hyeon", "Jua"],
-  script: ["Nanum Pen Script", "Gaegu", "Gamja Flower", "None"],
+  brand: ["Nanum Pen Script", "Gaegu", "Gamja Flower", "None"],
   body: ["Noto Sans KR", "Gowun Dodum", "Nanum Gothic", "IBM Plex Sans KR", "Sunflower"],
 };
 
@@ -43,7 +43,7 @@ const PALETTES = [
 ];
 
 const DEFAULT_SETTINGS = {
-  fonts: { heading: "Playfair Display", script: "Clicker Script", body: "Montserrat" },
+  fonts: { heading: "Playfair Display", brand: "Clicker Script", body: "Montserrat" },
   colors: { preset: "magnolia", bg: "#f8f1ef", accent: "#875346", alt: "#5a6857", text: "#333333" },
   layout: { hero: "banner", header: "stacked", mode: "multi", width: "cozy" },
 };
@@ -66,15 +66,27 @@ const SETTINGS_KEY = "sd-design";
 let settings = loadSettings();
 let fontPickers = {};
 
+// The font role for the site title used to be called "script" (it also drove
+// the page-title eyebrows back then). Old saved settings / fontDefaults may
+// still carry that key — treat it as "brand" so nobody loses their pick.
+function normFonts(f) {
+  const out = { ...f };
+  if (out.script) {
+    if (!out.brand) out.brand = out.script;
+    delete out.script;
+  }
+  return out;
+}
+
 function loadSettings() {
   // Per-site defaults let the Korean site start with Korean-capable fonts
   // (content file may set SITE.fontDefaults). User overrides still win.
-  const siteFonts = (window.SITE && window.SITE.fontDefaults) || {};
+  const siteFonts = normFonts((window.SITE && window.SITE.fontDefaults) || {});
   const baseFonts = { ...DEFAULT_SETTINGS.fonts, ...siteFonts };
   try {
     const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
     return {
-      fonts: { ...baseFonts, ...saved.fonts },
+      fonts: { ...baseFonts, ...normFonts(saved.fonts || {}) },
       colors: { ...DEFAULT_SETTINGS.colors, ...saved.colors },
       layout: { ...DEFAULT_SETTINGS.layout, ...saved.layout },
     };
@@ -92,7 +104,7 @@ function applySettings() {
   const { fonts, colors, layout } = settings;
 
   d.style.setProperty("--f-heading", `"${fonts.heading}", Georgia, serif`);
-  d.style.setProperty("--f-script", fonts.script === "None" ? `"${fonts.heading}", serif` : `"${fonts.script}", cursive`);
+  d.style.setProperty("--f-brand", fonts.brand === "None" ? `"${fonts.heading}", serif` : `"${fonts.brand}", cursive`);
   d.style.setProperty("--f-body", `"${fonts.body}", "Helvetica Neue", sans-serif`);
 
   d.style.setProperty("--c-bg", colors.bg);
@@ -114,7 +126,7 @@ function applySettings() {
 
 function loadGoogleFonts() {
   const fams = new Set([settings.fonts.heading, settings.fonts.body]);
-  if (settings.fonts.script !== "None") fams.add(settings.fonts.script);
+  if (settings.fonts.brand !== "None") fams.add(settings.fonts.brand);
   // Request families WITHOUT a weight/italic axis: css2 rejects the whole
   // request if any one family lacks the requested axis (common with Korean and
   // single-weight display fonts), which would drop every font. Bold weights for
@@ -449,7 +461,7 @@ function designEnabled() {
    trigger can render in its own typeface. Dedicated link, no weight axis. */
 function ensurePreviewFonts() {
   const fams = new Set();
-  for (const role of ["heading", "script", "body"]) {
+  for (const role of ["heading", "brand", "body"]) {
     for (const f of fontChoices()[role]) if (f && f !== "None") fams.add(f);
     if (settings.fonts[role] && settings.fonts[role] !== "None") fams.add(settings.fonts[role]);
   }
@@ -489,7 +501,7 @@ function makeFontPicker(role) {
   picker.append(trigger, menu);
   label.appendChild(picker);
 
-  const fallback = role === "script" ? "cursive" : "serif";
+  const fallback = role === "brand" ? "cursive" : "serif";
   const styleAs = (elm, font) => { elm.style.fontFamily = (font && font !== "None") ? `"${font}", ${fallback}` : ""; };
   const setTrigger = (v) => { trigger.textContent = v === "None" ? "None" : v; styleAs(trigger, v); };
 
@@ -555,7 +567,7 @@ function buildDesignPanel() {
   ensurePreviewFonts();
   fontPickers = {
     heading: makeFontPicker("heading"),
-    script: makeFontPicker("script"),
+    brand: makeFontPicker("brand"),
     body: makeFontPicker("body"),
   };
   document.addEventListener("click", closeAllFontMenus);
@@ -612,7 +624,7 @@ function buildDesignPanel() {
 }
 
 function refreshPanelState() {
-  for (const role of ["heading", "script", "body"]) {
+  for (const role of ["heading", "brand", "body"]) {
     if (fontPickers[role]) { fontPickers[role].buildMenu(); fontPickers[role].setTrigger(settings.fonts[role]); }
   }
 

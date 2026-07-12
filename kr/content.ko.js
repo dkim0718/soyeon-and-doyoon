@@ -12,9 +12,10 @@ window.SITE = {
   designPanel: true,    // 글꼴을 바꿔볼 수 있도록 Design 버튼 표시 (배포 전 false 로)
 
   // 한글에 어울리는 기본 글꼴 (사용자가 디자인 패널에서 바꾸면 그 값이 우선)
+  // heading = 페이지 제목 전체, brand = 상단 사이트 타이틀(소연 & 도윤)
   fontDefaults: {
     heading: "Nanum Myeongjo",
-    script: "Nanum Pen Script",
+    brand: "Nanum Pen Script",
     body: "Noto Sans KR",
   },
 

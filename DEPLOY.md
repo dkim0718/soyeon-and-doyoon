@@ -74,22 +74,11 @@ To ship an update: `git push` to `main` → both projects rebuild automatically 
 
 ---
 
-## One-time Cloudflare flip for the consolidation (delete this section once done)
-
-1. Project **soyeondoyoon-invite** → Settings → Builds & deployments: build command
-   `npm run build:root`, build output directory `dist-root` → save, then **Retry** the
-   latest deployment (it now serves KR at `/`, EN at `/en/`, 모청 at `/invite/`).
-2. Same project → Custom domains → **add `soyeondoyoon.fun`** (the whole site goes live
-   there), then **remove `soyeondoyoon.com`** (leaves .com empty, DNS record deleted).
-3. Project **soyeondoyoon-en** → Custom domains → remove `suri.soyeondoyoon.fun`;
-   project **soyeondoyoon-kr** → Custom domains → remove `kr.soyeondoyoon.com`.
-4. Optional cleanup: delete the now-idle `soyeondoyoon-kr` / `soyeondoyoon-en` projects,
-   and rename `soyeondoyoon-invite` → `soyeondoyoon-main` (Settings → General; renaming
-   only changes the *.pages.dev URL, not the custom domain).
-
 ## Status (2026-07-12)
 
-- ✅ **All four sites live** on their real domains (table above), auto-deploying from `main`.
+- ✅ **Consolidated site live on soyeondoyoon.fun** (table above), auto-deploying from `main`.
+  soyeondoyoon.com is empty by choice; kr./suri. subdomains removed. The idle
+  `soyeondoyoon-kr` / `soyeondoyoon-en` projects can be deleted anytime (or kept as spares).
 - ✅ **Supabase backend ON** — project `soyeondoyoon-wedding` (Seoul), schema + RLS applied,
   admin = magic-link for the allow-listed email. RSVPs/guestbook/edits are shared everywhere.
   Setup + guest-list guide: **`supabase/README.md`**.
