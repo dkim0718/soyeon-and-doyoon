@@ -11,6 +11,7 @@
 /admin/invite/
 /admin/en/
 /admin/kr/
+/dist-root/
 
 # Local-only Supabase keys you don't want committed.
 shared/supabase-config.local.js

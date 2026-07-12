@@ -288,6 +288,19 @@ function buildNav() {
   nav.innerHTML = SITE.navigation
     .map((p) => `<a href="#/${p.id}" data-page="${p.id}">${p.label}</a>`)
     .join("");
+
+  // KR ⇄ EN language toggle. The two sites share page ids, so the
+  // current hash carries over (ids the other site lacks fall back
+  // to its first page). route() keeps the href in sync.
+  const urls = window.SITE_URLS || {};
+  const other = SITE.locale === "ko"
+    ? { url: urls.en, label: "English" }
+    : { url: urls.kr, label: "한국어" };
+  if (other.url) {
+    nav.innerHTML +=
+      `<a class="lang-toggle" id="langToggle" data-base="${other.url}/"` +
+      ` href="${other.url}/">${other.label}</a>`;
+  }
 }
 
 function renderAllPages() {
@@ -323,6 +336,9 @@ function route() {
   document.querySelectorAll("#siteNav a").forEach((a) => {
     a.classList.toggle("active", a.dataset.page === id);
   });
+
+  const lang = document.getElementById("langToggle");
+  if (lang) lang.href = lang.dataset.base + location.hash;
 
   if (multi) {
     window.scrollTo({ top: 0 });

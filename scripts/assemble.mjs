@@ -14,12 +14,16 @@
  * been copied in beside the page. This script does that copy.
  *
  * Usage:
- *   node scripts/assemble.mjs <invite|kr|en|admin|all>
+ *   node scripts/assemble.mjs <invite|kr|en|admin|all|root>
  *
  * It removes <site>/shared then re-copies the canonical
  * repo-root shared/ into it, so it is fully idempotent. The
  * assembled copies are gitignored — shared/ at the repo root
  * stays the single source of truth.
+ *
+ * `root` builds the CONSOLIDATED public site into dist-root/:
+ * the Korean page at /, English at /en/, 모청 at /invite/, one
+ * shared/ beside them (all same-origin paths on one domain).
  * ========================================================= */
 
 import { promises as fs } from 'node:fs';
@@ -36,9 +40,10 @@ const sharedDir = path.join(repoRoot, 'shared');
 
 function usage(msg) {
   if (msg) console.error('Error: ' + msg + '\n');
-  console.error('Usage: node scripts/assemble.mjs <invite|kr|en|admin|all>');
+  console.error('Usage: node scripts/assemble.mjs <invite|kr|en|admin|all|root>');
   console.error('  invite | kr | en | admin   assemble one site');
   console.error('  all                        assemble every site');
+  console.error('  root                       consolidated single-domain build → dist-root/');
 }
 
 function fmtBytes(n) {
@@ -50,14 +55,16 @@ function fmtBytes(n) {
 // Recursively copy src → dst, invoking onFile(absPath, size) per
 // regular file. Symlinks are recreated as links; everything else
 // (dirs) is walked. mkdir -p on every directory encountered.
-async function copyTree(src, dst, onFile) {
+// skip(name) — optional; matching entry names are not copied.
+async function copyTree(src, dst, onFile, skip) {
   await fs.mkdir(dst, { recursive: true });
   const entries = await fs.readdir(src, { withFileTypes: true });
   for (const entry of entries) {
+    if (skip && skip(entry.name)) continue;
     const s = path.join(src, entry.name);
     const d = path.join(dst, entry.name);
     if (entry.isDirectory()) {
-      await copyTree(s, d, onFile);
+      await copyTree(s, d, onFile, skip);
     } else if (entry.isSymbolicLink()) {
       const target = await fs.readlink(s);
       await fs.symlink(target, d);
@@ -121,10 +128,32 @@ async function assembleSite(site) {
   return { site, files, bytes };
 }
 
+// Consolidated single-domain build: KR at /, EN at /en/, 모청 at
+// /invite/, one shared/ for all three. Per-site `shared` copies and
+// local-only private config never ship.
+async function assembleRoot() {
+  const dist = path.join(repoRoot, 'dist-root');
+  await fs.rm(dist, { recursive: true, force: true });
+  const skipNames = new Set(['shared', 'config.private.js', '.DS_Store']);
+  const skip = (name) => skipNames.has(name);
+  let files = 0;
+  let bytes = 0;
+  const count = (abs, size) => { files += 1; bytes += size; };
+  await copyTree(path.join(repoRoot, 'kr'), dist, count, skip);
+  await copyTree(path.join(repoRoot, 'en'), path.join(dist, 'en'), count, skip);
+  await copyTree(path.join(repoRoot, 'invite'), path.join(dist, 'invite'), count, skip);
+  await copyTree(sharedDir, path.join(dist, 'shared'), count, skip);
+  console.log(
+    `root: ${files} files (${fmtBytes(bytes)}) → dist-root/  ` +
+    '(KR at /, EN at /en/, 모청 at /invite/)'
+  );
+  return { site: 'root', files, bytes };
+}
+
 async function main() {
   const arg = (process.argv[2] || '').trim();
   if (!arg) { usage('missing <site> argument'); process.exit(1); }
-  if (arg !== 'all' && !SITES.includes(arg)) {
+  if (arg !== 'all' && arg !== 'root' && !SITES.includes(arg)) {
     usage(`unknown site "${arg}"`); process.exit(1);
   }
 
@@ -137,12 +166,16 @@ async function main() {
     process.exit(1);
   }
 
-  const targets = arg === 'all' ? SITES : [arg];
   console.log(`Assembling from ${path.relative(repoRoot, sharedDir)}/ …\n`);
 
   const results = [];
-  for (const site of targets) {
-    results.push(await assembleSite(site));
+  if (arg === 'root') {
+    results.push(await assembleRoot());
+  } else {
+    const targets = arg === 'all' ? SITES : [arg];
+    for (const site of targets) {
+      results.push(await assembleSite(site));
+    }
   }
 
   const totalFiles = results.reduce((s, r) => s + r.files, 0);

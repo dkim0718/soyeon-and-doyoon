@@ -1,18 +1,19 @@
 /* =========================================================
- * Site URLs (shared across all three pages)
+ * Site URLs (shared across all pages)
  * ---------------------------------------------------------
- * The three landing pages live on separate subdomains.
- * Put your real URLs here (no trailing slash). Until you have
- * a domain, the placeholders below work for local dev — the
- * 모청 "웨딩 홈페이지" button just points at SITE_URLS.kr.
- *
- * IMPORTANT: the English site (en) is intentionally NOT linked
- * from anywhere. It is reachable only by its own URL. Do not
- * add SITE_URLS.en to any nav/button.
+ * Everything public lives on ONE domain as paths (one
+ * Cloudflare Pages project, built by `npm run build:root`):
+ *   /         Korean site (default)
+ *   /en/      English site — reachable via the nav language
+ *             toggle on both sites
+ *   /invite/  모청 (the widely-shared mobile invitation;
+ *             its 웨딩 홈페이지 button points at SITE_URLS.kr)
+ * The admin dashboard stays on its own private domain.
+ * soyeondoyoon.fun is intentionally unused — reserved.
  * ========================================================= */
 window.SITE_URLS = {
-  invite: 'https://soyeondoyoon.com',          // 모청 (widely shared; links to kr)
-  kr:     'https://kr.soyeondoyoon.com',        // Korean wedding website (linked from 모청)
-  en:     'https://suri.soyeondoyoon.fun',      // English / afterparty (unlisted; different TLD)
-  admin:  'https://doremi.soyeondoyoon.cloud',  // Admin dashboard (private; reference only — not linked)
+  invite: 'https://soyeondoyoon.com/invite',    // 모청 (mass-shared with Korean guests)
+  kr:     'https://soyeondoyoon.com',           // Korean wedding website (apex)
+  en:     'https://soyeondoyoon.com/en',        // English site + afterparty RSVP (?code=…)
+  admin:  'https://doremi.soyeondoyoon.cloud',  // Admin dashboard (private; never linked)
 };

@@ -1,21 +1,28 @@
-# Deploy — Cloudflare Pages (4 subdomains)
+# Deploy — Cloudflare Pages
 
-The three wedding pages + admin are **static** (the only backend is Supabase, hosted separately).
-So each one is served as its own Cloudflare Pages project — free, on Cloudflare's global CDN
-(fast in Seoul *and* the US), automatic HTTPS, and it shrugs off the invite-day traffic spike.
+Everything is **static** (the only backend is Supabase, hosted separately), served from
+Cloudflare Pages — free, on Cloudflare's global CDN (fast in Seoul *and* the US), automatic
+HTTPS, and it shrugs off the invite-day traffic spike.
 
-## Domain map
+## Domain map (consolidated 2026-07-12)
 
-| Page | Cloudflare Pages project | Custom domain | Build command | Output dir |
+The public pages live on **one domain as paths** — a single Pages project built by
+`npm run build:root` (output dir `dist-root`): the Korean site at the root, English at
+`/en/`, the 모청 at `/invite/`, one `shared/` beside them. A KR ⇄ EN toggle in the site
+nav switches languages (it carries the current page across).
+
+| What | URL | Cloudflare Pages project | Build command | Output dir |
 |---|---|---|---|---|
-| 모청 (mobile invitation) | `soyeondoyoon-invite` | **soyeondoyoon.com** (apex) | `npm run build:invite` | `invite` |
-| Korean wedding site | `soyeondoyoon-kr` | **kr.soyeondoyoon.com** | `npm run build:kr` | `kr` |
-| English / afterparty (unlisted) | `soyeondoyoon-en` | **suri.soyeondoyoon.fun** | `npm run build:en` | `en` |
-| Admin (private) | `soyeondoyoon-admin` | **doremi.soyeondoyoon.cloud** | `npm run build:admin` | `admin` |
+| Korean site (default) | **soyeondoyoon.com** | `soyeondoyoon-invite` (repurposed) | `npm run build:root` | `dist-root` |
+| English site + afterparty RSVP | **soyeondoyoon.com/en/** | ↑ same project | ↑ | ↑ |
+| 모청 (mobile invitation) | **soyeondoyoon.com/invite/** | ↑ same project | ↑ | ↑ |
+| Admin (private) | **doremi.soyeondoyoon.cloud** | `soyeondoyoon-admin` | `npm run build:admin` | `admin` |
 
-All four deploy from the **`main`** branch of `github.com/dkim0718/soyeon-and-doyoon`.
-(Each build just runs `node scripts/assemble.mjs <site>`, which copies `shared/` into the site
-folder so its `../shared/...` links resolve when that folder is the site root.)
+Both projects deploy from the **`main`** branch of `github.com/dkim0718/soyeon-and-doyoon`.
+Retired: `kr.soyeondoyoon.com` and `suri.soyeondoyoon.fun` (and the `soyeondoyoon-kr` /
+`soyeondoyoon-en` projects). **soyeondoyoon.fun is reserved** for a separate fun project.
+The English page is no longer "unlisted" — it's linked from the language toggle; the
+afterparty guest list itself stays protected by per-code server-side lookups.
 
 ---
 
@@ -57,14 +64,26 @@ Cloudflare, it wires the DNS for you and issues SSL automatically.
 
 ## Step 4 — Verify
 
-- `https://soyeondoyoon.com` → 모청; its **웨딩 홈페이지** button opens `https://kr.soyeondoyoon.com`.
-- `https://kr.soyeondoyoon.com` → Korean site.
-- `https://suri.soyeondoyoon.fun` → English/afterparty (RSVP by `?code=`; unlisted — linked from nowhere).
-- `https://doremi.soyeondoyoon.cloud` → admin (passcode `000000` on the current localStorage backend).
+- `https://soyeondoyoon.com` → Korean site; nav **English** toggle → `/en/`, and back via **한국어**.
+- `https://soyeondoyoon.com/en/` → English site (afterparty RSVP by `?code=`).
+- `https://soyeondoyoon.com/invite/` → 모청; its **웨딩 홈페이지** button opens the apex.
+- `https://doremi.soyeondoyoon.cloud` → admin (email magic-link sign-in).
 
-To ship an update: `git push` to `main` → all four projects rebuild automatically (~1 min).
+To ship an update: `git push` to `main` → both projects rebuild automatically (~1 min).
 
 ---
+
+## One-time Cloudflare flip for the consolidation (delete this section once done)
+
+1. Project **soyeondoyoon-invite** → Settings → Builds & deployments: build command
+   `npm run build:root`, build output directory `dist-root` → save, then **Retry** the
+   latest deployment. The apex now serves KR at `/`, EN at `/en/`, 모청 at `/invite/`.
+2. Project **soyeondoyoon-en** → Custom domains → remove `suri.soyeondoyoon.fun`
+   (frees the .fun domain entirely).
+3. Project **soyeondoyoon-kr** → Custom domains → remove `kr.soyeondoyoon.com`.
+4. Optional cleanup: delete the now-idle `soyeondoyoon-kr` / `soyeondoyoon-en` projects,
+   and rename `soyeondoyoon-invite` → `soyeondoyoon-main` (Settings → General; renaming
+   only changes the *.pages.dev URL, not the custom domain).
 
 ## Status (2026-07-12)
 
