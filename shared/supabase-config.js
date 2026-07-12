@@ -24,5 +24,5 @@ window.SUPABASE_CONFIG = {
   anonKey: 'sb_publishable_zbWod8789xhWf6sLKbdB-A_zBdo4h2W',
   // Email addresses allowed into the admin dashboard (Supabase Auth
   // magic-link). Must ALSO be in the public.admins table (RLS gate).
-  adminEmails: ['dkim0718@gmail.com'],
+  adminEmails: ['dkim0718@gmail.com', 'syeonniekim@gmail.com'],
 };
