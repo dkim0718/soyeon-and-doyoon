@@ -476,6 +476,24 @@ html[data-hero="minimal"] .hero-names { font-size: clamp(3rem, 9vw, 5.4rem); }
 /* Q&A page title: single line, all in the secondary color */
 #page-qanda .page-title h2 { color: var(--c-alt); }
 
+/* Venue map links on the Travel page */
+.travel-maps {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 2.4rem;
+}
+.travel-maps .map-pill {
+  border: 1px solid var(--c-accent);
+  border-radius: 999px;
+  padding: 0.35rem 1.05rem;
+  font-size: 0.85rem;
+  text-decoration: none;
+  color: var(--c-accent);
+}
+.travel-maps .map-pill:hover { background: var(--c-accent); color: var(--c-bg); }
+
 /* ---------------- Q&A ---------------- */
 
 .qa-item {

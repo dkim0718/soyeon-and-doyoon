@@ -34,6 +34,12 @@ window.SITE = {
     venue: "신라호텔 영빈관",
     venueAddress: "서울 중구 동호로 249",
     city: "서울",
+    // 오시는 길 페이지에 표시되는 지도 링크
+    maps: [
+      { label: "네이버 지도", url: "https://map.naver.com/p/search/" + encodeURIComponent("신라호텔 영빈관") },
+      { label: "구글 지도", url: "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("신라호텔 영빈관") },
+      { label: "애플 지도", url: "https://maps.apple.com/?q=" + encodeURIComponent("신라호텔 영빈관") },
+    ],
   },
 
   // 페이지별 제목 (script = 필기체 소제목, title = 큰 제목)
@@ -103,9 +109,8 @@ window.SITE = {
   ],
 
   stayIntro:
-    "편안한 준비를 위해 하객분들을 위한 특별 요금을 제공하는 호텔 몇 곳을 " +
-    "안내해 드립니다. 하룻밤 묵으실 예정이라면, 객실이 있을 때 미리 예약하시길 " +
-    "권해 드립니다.",
+    "편안한 준비를 위해 예식장 근처 호텔 몇 곳을 안내해 드립니다. " +
+    "하룻밤 묵으실 예정이라면, 객실이 있을 때 미리 예약하시길 권해 드립니다.",
 
   hotels: [
     {
@@ -331,7 +336,7 @@ window.SITE = {
   moments: {
     intro:
       "저희의 사진을 담는 공간입니다. 지금은 청첩 사진을, 결혼식 이후에는 그날의 " +
-      "소중한 추억을 함께 나누려 합니다. 사진을 누르면 크게 볼 수 있습니다.",
+      "소중한 추억을 함께 나누려 합니다. 새로운 사진도 계속 추가할 예정이에요!",
   },
 
   // 세 사이트가 공유하는 큐레이션 사진 (shared/photos/).

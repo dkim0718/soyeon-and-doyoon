@@ -25,6 +25,12 @@ window.SITE = {
     venue: "Yeong Bin Gwan, The Shilla Seoul",
     venueAddress: "249 Dongho-ro, Jung District, Seoul, South Korea",
     city: "Seoul, South Korea",
+    // Venue links shown on the Travel page.
+    maps: [
+      { label: "Google Maps", url: "https://www.google.com/maps/search/?api=1&query=The+Shilla+Seoul" },
+      { label: "Apple Maps", url: "https://maps.apple.com/?q=The+Shilla+Seoul" },
+      { label: "Naver Map", url: "https://map.naver.com/p/search/" + encodeURIComponent("신라호텔 영빈관") },
+    ],
   },
 
   welcome: {
@@ -83,9 +89,9 @@ window.SITE = {
   ],
 
   stayIntro:
-    "To make planning easier, we've listed a few hotels offering special rates " +
-    "just for our guests. If you'll be staying overnight, we recommend booking " +
-    "your room early while there's still availability.",
+    "To make planning easier, we've listed a few hotels near the venue. " +
+    "If you'll be staying overnight, we recommend booking your room early " +
+    "while there's still availability.",
 
   hotels: [
     {
@@ -338,7 +344,7 @@ window.SITE = {
   moments: {
     intro:
       "A place for photos — engagement pictures now, wedding-day memories later. " +
-      "Click any empty frame on the site to add a photo.",
+      "We'll keep updating our engagement photos here, so check back often!",
   },
 
   // Curated photos, shared across all three sites (shared/photos/).

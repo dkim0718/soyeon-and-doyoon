@@ -245,9 +245,13 @@ function travelBody(body) {
 function renderTravel() {
   const blocks = SITE.travel.map((t) => `
     <div class="travel-block"><h3>${t.title}</h3>${travelBody(t.body)}</div>`).join("");
+  const maps = (SITE.wedding.maps || []).map((m) =>
+    `<a class="map-pill" href="${m.url}" target="_blank" rel="noopener">${m.label}</a>`).join("");
+  const mapRow = maps ? `<div class="travel-maps">${maps}</div>` : "";
   return `
     ${pageTitle("travel")}
-    <p class="center muted" style="margin-bottom:2.4rem">${SITE.wedding.venue} · ${SITE.wedding.venueAddress}</p>
+    <p class="center muted" style="margin-bottom:${maps ? "1.1rem" : "2.4rem"}">${SITE.wedding.venue} · ${SITE.wedding.venueAddress}</p>
+    ${mapRow}
     ${blocks}`;
 }
 
