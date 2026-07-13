@@ -120,18 +120,6 @@ html[data-header="inline"] .brand.no-monogram .brand-names { display: inline; }
 .site-nav a:hover { color: var(--c-accent); }
 .site-nav a.active { color: var(--c-accent); border-bottom-color: var(--c-accent); }
 
-/* KR ⇄ EN language toggle — reads as a control, not a page */
-.site-nav a.lang-toggle {
-  border: 1px solid var(--c-accent);
-  border-radius: 999px;
-  padding: 0.3rem 0.9rem;
-  color: var(--c-accent);
-}
-.site-nav a.lang-toggle:hover {
-  background: var(--c-accent);
-  color: var(--c-bg, #fff);
-}
-
 /* ---------------- page shells ---------------- */
 
 main { min-height: 55vh; }

@@ -183,7 +183,8 @@
         doLookup({ name: name.value });
       });
       root.append(el('div', { class: 'ap-step' }, [
-        el('h3', { class: 'ap-heading', text: t('rsvp.lookupHeading') }), form,
+        t('rsvp.lookupHeading') ? el('h3', { class: 'ap-heading', text: t('rsvp.lookupHeading') }) : null,
+        form,
       ]));
       name.focus();
     }

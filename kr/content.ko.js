@@ -44,7 +44,7 @@ window.SITE = {
 
   // 페이지별 제목 (script = 필기체 소제목, title = 큰 제목)
   titles: {
-    welcome:  { script: "welcome", title: "" },
+    welcome:  { script: "", title: "" },
     story:    { script: "", title: "우리 이야기" },
     schedule: { script: "", title: "예식 안내" },
     stay:     { script: "", title: "숙소 안내" },

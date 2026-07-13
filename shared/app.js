@@ -43,22 +43,23 @@ const PALETTES = [
 ];
 
 const DEFAULT_SETTINGS = {
-  fonts: { heading: "Playfair Display", brand: "Clicker Script", body: "Montserrat" },
-  colors: { preset: "magnolia", bg: "#f8f1ef", accent: "#875346", alt: "#5a6857", text: "#333333" },
+  fonts: { heading: "EB Garamond", brand: "None", body: "Jost" },
+  colors: { preset: "porcelain", bg: "#f7f8fa", accent: "#2c3e5d", alt: "#8593ad", text: "#232a35" },
   layout: { hero: "banner", header: "stacked", mode: "multi", width: "cozy" },
 };
 
-/* Fallback section titles (English) if a content file omits SITE.titles */
+/* Fallback section titles (English) if a content file omits SITE.titles.
+   All single-line — no script/heading split. */
 const DEFAULT_TITLES = {
-  welcome:  { script: "welcome",       title: "" },
-  story:    { script: "our",           title: "Story" },
-  schedule: { script: "the",           title: "Schedule" },
-  stay:     { script: "where to",      title: "Stay" },
-  travel:   { script: "getting",       title: "There" },
-  qanda:    { script: "",              title: "Questions & Answers" },
-  registry: { script: "the",           title: "Registry" },
-  moments:  { script: "our",           title: "Moments" },
-  rsvp:     { script: "join",          title: "Us" },
+  welcome:  { script: "", title: "" },
+  story:    { script: "", title: "Our Story" },
+  schedule: { script: "", title: "Schedule" },
+  stay:     { script: "", title: "Where to Stay" },
+  travel:   { script: "", title: "Getting There" },
+  qanda:    { script: "", title: "Questions & Answers" },
+  registry: { script: "", title: "Registry" },
+  moments:  { script: "", title: "Our Moments" },
+  rsvp:     { script: "", title: "RSVP" },
 };
 
 const SETTINGS_KEY = "sd-design";
@@ -195,7 +196,7 @@ function renderWelcome() {
       <div class="countdown" id="countdown"></div>
     </section>
     <section class="page-body" style="max-width:var(--w-content);margin:0 auto;padding:3rem 1.5rem 0">
-      <div class="page-title"><span class="script">${titleFor("welcome").script}</span><h2>${SITE.welcome.heading}</h2></div>
+      <div class="page-title">${titleFor("welcome").script ? `<span class="script">${titleFor("welcome").script}</span>` : ""}<h2>${SITE.welcome.heading}</h2></div>
       <p class="center">${SITE.welcome.message}</p>
     </section>`;
 }
@@ -312,19 +313,6 @@ function buildNav() {
   nav.innerHTML = SITE.navigation
     .map((p) => `<a href="#/${p.id}" data-page="${p.id}">${p.label}</a>`)
     .join("");
-
-  // KR ⇄ EN language toggle. The two sites share page ids, so the
-  // current hash carries over (ids the other site lacks fall back
-  // to its first page). route() keeps the href in sync.
-  const urls = window.SITE_URLS || {};
-  const other = SITE.locale === "ko"
-    ? { url: urls.en, label: "English" }
-    : { url: urls.kr, label: "한국어" };
-  if (other.url) {
-    nav.innerHTML +=
-      `<a class="lang-toggle" id="langToggle" data-base="${other.url}/"` +
-      ` href="${other.url}/">${other.label}</a>`;
-  }
 }
 
 function renderAllPages() {
@@ -360,9 +348,6 @@ function route() {
   document.querySelectorAll("#siteNav a").forEach((a) => {
     a.classList.toggle("active", a.dataset.page === id);
   });
-
-  const lang = document.getElementById("langToggle");
-  if (lang) lang.href = lang.dataset.base + location.hash;
 
   if (multi) {
     window.scrollTo({ top: 0 });

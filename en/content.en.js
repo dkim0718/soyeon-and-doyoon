@@ -336,9 +336,7 @@ window.SITE = {
   rsvp: {
     email: "dkim0718@gmail.com", // RSVPs are sent to this address
     deadline: "September 15, 2026",
-    message:
-      "Please let us know whether you can make it by the date below — it helps " +
-      "us get an accurate headcount. We hope to see you there!",
+    message: "Please let us know if you can make it — we hope to see you there!",
   },
 
   moments: {
