@@ -37,6 +37,49 @@
     </div>
   </div>
 
+  <!-- 사이트 디자인 (모든 방문자에게 적용) -->
+  <div class="card" id="designCard">
+    <h2>🎨 사이트 디자인</h2>
+    <p class="hint" style="margin-bottom:12px;">
+      웨딩 홈페이지(영문+한국어)의 글꼴과 색상입니다. <b>저장하면 모든 방문자에게 적용됩니다.</b>
+      글꼴 이름은 Google Fonts 기준. 비워둔 칸은 기본값을 유지하고, 사이트 타이틀에
+      <code>None</code> 을 입력하면 제목 글꼴을 따라갑니다.
+    </p>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px;">
+      <label class="hint" style="display:block;">제목 글꼴 (EN)
+        <input id="dHeading" type="text" list="dlHeading" placeholder="EB Garamond"></label>
+      <label class="hint" style="display:block;">사이트 타이틀 글꼴 (EN)
+        <input id="dBrand" type="text" list="dlBrand" placeholder="None"></label>
+      <label class="hint" style="display:block;">본문 글꼴 (EN)
+        <input id="dBody" type="text" list="dlBody" placeholder="Jost"></label>
+      <label class="hint" style="display:block;">제목 글꼴 (한국어)
+        <input id="dHeadingKo" type="text" list="dlHeadingKo" placeholder="Nanum Myeongjo"></label>
+      <label class="hint" style="display:block;">사이트 타이틀 글꼴 (한국어)
+        <input id="dBrandKo" type="text" list="dlBrandKo" placeholder="Nanum Pen Script"></label>
+      <label class="hint" style="display:block;">본문 글꼴 (한국어)
+        <input id="dBodyKo" type="text" list="dlBodyKo" placeholder="Noto Sans KR"></label>
+    </div>
+    <datalist id="dlHeading"><option>Playfair Display</option><option>Cormorant Garamond</option><option>EB Garamond</option><option>Libre Caslon Text</option><option>DM Serif Display</option><option>Marcellus</option><option>Lora</option></datalist>
+    <datalist id="dlBrand"><option>None</option><option>Clicker Script</option><option>Great Vibes</option><option>Parisienne</option><option>Dancing Script</option><option>Allura</option><option>Charmonman</option></datalist>
+    <datalist id="dlBody"><option>Montserrat</option><option>Inter</option><option>Lato</option><option>Karla</option><option>Bitter</option><option>Jost</option><option>Nunito Sans</option></datalist>
+    <datalist id="dlHeadingKo"><option>Nanum Myeongjo</option><option>Noto Serif KR</option><option>Gowun Batang</option><option>Song Myung</option><option>Hahmlet</option></datalist>
+    <datalist id="dlBrandKo"><option>None</option><option>Nanum Pen Script</option><option>Gaegu</option><option>Gamja Flower</option></datalist>
+    <datalist id="dlBodyKo"><option>Noto Sans KR</option><option>Gowun Dodum</option><option>Nanum Gothic</option><option>IBM Plex Sans KR</option><option>Sunflower</option></datalist>
+    <p class="hint" style="margin:14px 0 6px;">색상 팔레트 (두 사이트 공통)</p>
+    <div id="dPalettes" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;"></div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px;">
+      <label class="hint" style="display:block;">배경 <input id="dBg" type="color"></label>
+      <label class="hint" style="display:block;">포인트 <input id="dAccent" type="color"></label>
+      <label class="hint" style="display:block;">보조 <input id="dAlt" type="color"></label>
+      <label class="hint" style="display:block;">본문 색 <input id="dText" type="color"></label>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary btn-sm" id="btnSaveDesign">디자인 저장 (모든 방문자)</button>
+      <button class="btn btn-ghost btn-sm" id="btnClearDesign">기본 디자인으로</button>
+    </div>
+    <p class="hint" id="designMsg" style="margin-top:10px;"></p>
+  </div>
+
   <div class="card">
     <p class="hint" style="margin:0 0 12px;">
       영어(EN) / 한국어(KR) 웨딩 홈페이지의 이야기·일정·Q&amp;A 등을 코드 수정 없이 편집합니다.
@@ -239,6 +282,92 @@ Admin.gate(function () {
   $('btnSave').addEventListener('click', save);
   $('btnReset').addEventListener('click', reset);
 
+  /* ---------- 사이트 디자인 (scope 'design' — 모든 방문자) ---------- */
+
+  var PALETTES = [
+    { id: 'magnolia',  bg: '#f8f1ef', accent: '#875346', alt: '#5a6857', text: '#333333' },
+    { id: 'forest',    bg: '#faf7f0', accent: '#2f4a3c', alt: '#b08d57', text: '#26302b' },
+    { id: 'porcelain', bg: '#f7f8fa', accent: '#2c3e5d', alt: '#8593ad', text: '#232a35' },
+    { id: 'champagne', bg: '#f9f4ec', accent: '#a67c52', alt: '#7d6b5d', text: '#3a332d' },
+    { id: 'blush',     bg: '#fdf4f5', accent: '#b0526c', alt: '#7a8574', text: '#3b3134' },
+    { id: 'noir',      bg: '#ffffff', accent: '#1a1a1a', alt: '#8c8c8c', text: '#111111' },
+  ];
+  var dPreset = 'custom';
+
+  $('dPalettes').innerHTML = PALETTES.map(function (p) {
+    return '<button type="button" class="btn btn-ghost btn-sm" data-pal="' + p.id + '"' +
+      ' style="display:inline-flex;gap:5px;align-items:center;">' +
+      '<i style="width:13px;height:13px;border-radius:50%;background:' + p.accent + ';display:inline-block;"></i>' +
+      '<i style="width:13px;height:13px;border-radius:50%;background:' + p.bg + ';border:1px solid #ccc;display:inline-block;"></i>' +
+      p.id + '</button>';
+  }).join('');
+  $('dPalettes').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-pal]');
+    if (!b) return;
+    var p = PALETTES.find(function (x) { return x.id === b.dataset.pal; });
+    $('dBg').value = p.bg; $('dAccent').value = p.accent;
+    $('dAlt').value = p.alt; $('dText').value = p.text;
+    dPreset = p.id;
+  });
+  ['dBg', 'dAccent', 'dAlt', 'dText'].forEach(function (id) {
+    $(id).addEventListener('input', function () { dPreset = 'custom'; });
+  });
+
+  async function loadDesign() {
+    var d = (await window.Store.getConfigOverride('design')) || {};
+    var f = d.fonts || {}, fk = d.fontsKo || {}, c = d.colors || {};
+    $('dHeading').value = f.heading || '';
+    $('dBrand').value = f.brand || '';
+    $('dBody').value = f.body || '';
+    $('dHeadingKo').value = fk.heading || '';
+    $('dBrandKo').value = fk.brand || '';
+    $('dBodyKo').value = fk.body || '';
+    $('dBg').value = c.bg || '#f7f8fa';
+    $('dAccent').value = c.accent || '#2c3e5d';
+    $('dAlt').value = c.alt || '#8593ad';
+    $('dText').value = c.text || '#232a35';
+    dPreset = c.preset || 'porcelain';
+  }
+
+  // Blank inputs = keep the site default for that role.
+  function designFonts(h, b, o) {
+    var out = {};
+    if ($(h).value.trim()) out.heading = $(h).value.trim();
+    if ($(b).value.trim()) out.brand = $(b).value.trim();
+    if ($(o).value.trim()) out.body = $(o).value.trim();
+    return out;
+  }
+
+  $('btnSaveDesign').addEventListener('click', async function () {
+    var msg = $('designMsg');
+    msg.style.color = '';
+    try {
+      await window.Store.saveConfigOverride('design', {
+        fonts: designFonts('dHeading', 'dBrand', 'dBody'),
+        fontsKo: designFonts('dHeadingKo', 'dBrandKo', 'dBodyKo'),
+        colors: {
+          preset: dPreset,
+          bg: $('dBg').value, accent: $('dAccent').value,
+          alt: $('dAlt').value, text: $('dText').value,
+        },
+      });
+      msg.style.color = '#3a7d5a';
+      msg.textContent = '디자인이 저장되었습니다 — 모든 방문자에게 적용됩니다.';
+    } catch (e) {
+      msg.style.color = '#b55';
+      msg.textContent = '저장 실패: ' + (e && e.message ? e.message : e);
+    }
+  });
+
+  $('btnClearDesign').addEventListener('click', async function () {
+    if (!confirm('저장된 디자인을 지우고 사이트 기본 디자인으로 되돌릴까요?')) return;
+    await window.Store.clearConfigOverride('design');
+    await loadDesign();
+    $('designMsg').style.color = '#8b7f7a';
+    $('designMsg').textContent = '기본 디자인으로 되돌렸습니다.';
+  });
+
+  loadDesign();
   loadSite('en');
 });
 </script>

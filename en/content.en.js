@@ -7,8 +7,8 @@
 window.SITE = {
   // — Site behavior (read by the shared Joy engine) —
   locale: "en",           // language for UI chrome (shared/i18n.js)
-  rsvpKind: "afterparty", // English site collects the curated afterparty RSVP
-  designPanel: true,      // font/design picker enabled for preview (set false before launch)
+  rsvpKind: "afterparty", // English site collects the open (+1) RSVP
+  designPanel: false,     // design is set from the admin site; ?design=1 shows the preview panel
 
   couple: {
     partner1: "Soyeon",

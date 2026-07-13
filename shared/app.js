@@ -64,6 +64,8 @@ const DEFAULT_TITLES = {
 
 const SETTINGS_KEY = "sd-design";
 
+let remoteDesign = null;      // admin-published design (config_overrides scope 'design')
+let hasLocalSettings = false; // this browser has its own panel experiments
 let settings = loadSettings();
 let fontPickers = {};
 
@@ -79,20 +81,38 @@ function normFonts(f) {
   return out;
 }
 
-function loadSettings() {
-  // Per-site defaults let the Korean site start with Korean-capable fonts
-  // (content file may set SITE.fontDefaults). User overrides still win.
+// The effective site design before this browser's own panel picks:
+// built-in defaults ← per-site fontDefaults ← the admin-published
+// design (fonts for this locale + shared colors).
+function baseSettings() {
   const siteFonts = normFonts((window.SITE && window.SITE.fontDefaults) || {});
-  const baseFonts = { ...DEFAULT_SETTINGS.fonts, ...siteFonts };
+  const s = {
+    fonts: { ...DEFAULT_SETTINGS.fonts, ...siteFonts },
+    colors: { ...DEFAULT_SETTINGS.colors },
+    layout: { ...DEFAULT_SETTINGS.layout },
+  };
+  if (remoteDesign) {
+    const rf = ((window.SITE && window.SITE.locale === "ko") ? remoteDesign.fontsKo : remoteDesign.fonts) || {};
+    s.fonts = { ...s.fonts, ...normFonts(rf) };
+    if (remoteDesign.colors) s.colors = { ...s.colors, ...remoteDesign.colors };
+  }
+  return s;
+}
+
+function loadSettings() {
+  const base = baseSettings();
   try {
-    const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    hasLocalSettings = !!raw;
+    const saved = raw ? JSON.parse(raw) : {};
     return {
-      fonts: { ...baseFonts, ...normFonts(saved.fonts || {}) },
-      colors: { ...DEFAULT_SETTINGS.colors, ...saved.colors },
-      layout: { ...DEFAULT_SETTINGS.layout, ...saved.layout },
+      fonts: { ...base.fonts, ...normFonts(saved.fonts || {}) },
+      colors: { ...base.colors, ...saved.colors },
+      layout: { ...base.layout, ...saved.layout },
     };
   } catch {
-    return { fonts: baseFonts, colors: { ...DEFAULT_SETTINGS.colors }, layout: { ...DEFAULT_SETTINGS.layout } };
+    hasLocalSettings = false;
+    return base;
   }
 }
 
@@ -122,7 +142,9 @@ function applySettings() {
   d.dataset.width = layout.width;
 
   loadGoogleFonts();
-  saveSettings();
+  // NOTE: deliberately no saveSettings() here — settings persist only
+  // when the visitor actually changes something in the design panel,
+  // so admin-published design updates reach returning visitors too.
 }
 
 function loadGoogleFonts() {
@@ -506,6 +528,8 @@ function makeFontPicker(role) {
     settings.fonts[role] = v;
     select.value = v;
     applySettings();
+    saveSettings();
+    hasLocalSettings = true;
     setTrigger(v);
     menu.hidden = true;
     menu.querySelectorAll(".fp-opt").forEach((o) => o.classList.toggle("selected", o.dataset.value === v));
@@ -580,6 +604,8 @@ function buildDesignPanel() {
     const p = PALETTES.find((x) => x.id === btn.dataset.palette);
     settings.colors = { preset: p.id, bg: p.bg, accent: p.accent, alt: p.alt, text: p.text };
     applySettings();
+    saveSettings();
+    hasLocalSettings = true;
     refreshPanelState();
   });
 
@@ -589,6 +615,8 @@ function buildDesignPanel() {
       settings.colors[key] = input.value;
       settings.colors.preset = "custom";
       applySettings();
+      saveSettings();
+      hasLocalSettings = true;
       refreshPanelState();
     });
   }
@@ -599,6 +627,8 @@ function buildDesignPanel() {
       if (!btn) return;
       settings.layout[group.dataset.setting] = btn.dataset.value;
       applySettings();
+      saveSettings();
+      hasLocalSettings = true;
       refreshPanelState();
       route();
       syncHeroText();
@@ -610,7 +640,8 @@ function buildDesignPanel() {
   document.getElementById("designClose").addEventListener("click", () => panel.classList.remove("open"));
   document.getElementById("designReset").addEventListener("click", () => {
     localStorage.removeItem(SETTINGS_KEY);
-    settings = structuredClone(DEFAULT_SETTINGS);
+    hasLocalSettings = false;
+    settings = baseSettings(); // defaults + site fonts + admin-published design
     applySettings();
     refreshPanelState();
     route();
@@ -663,12 +694,25 @@ async function applySiteOverride() {
   } catch (e) { /* fall back to the static content file */ }
 }
 
+// Admin-published design (fonts/colors for ALL visitors), saved from the
+// admin site under the shared scope 'design'. Browsers with their own
+// panel experiments keep those until they hit Reset.
+async function applyDesignOverride() {
+  try {
+    if (!window.Store || !window.Store.getConfigOverride) return;
+    const d = await window.Store.getConfigOverride("design");
+    if (!d || typeof d !== "object") return;
+    remoteDesign = d;
+    if (!hasLocalSettings) settings = baseSettings();
+  } catch (e) { /* keep the built-in defaults */ }
+}
+
 /* ----------------------------------------------------------
    Boot
    ---------------------------------------------------------- */
 
 async function boot() {
-  await applySiteOverride();
+  await Promise.all([applySiteOverride(), applyDesignOverride()]);
   document.documentElement.lang = SITE.locale || "en";
   document.title = `${SITE.couple.displayName} — ${SITE.wedding.dateDisplay}`;
   // An empty monogram means "no abbreviation" → show the full names as the

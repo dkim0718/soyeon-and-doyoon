@@ -9,7 +9,7 @@ window.SITE = {
   // — 사이트 동작 (공용 Joy 엔진이 읽습니다) —
   locale: "ko",         // UI 문구 언어 (shared/i18n.js)
   rsvpKind: "wedding",  // 한국어 사이트는 자유 참석 회신(오픈 self-report)을 받습니다
-  designPanel: true,    // 글꼴을 바꿔볼 수 있도록 Design 버튼 표시 (배포 전 false 로)
+  designPanel: false,   // 디자인은 관리자 페이지에서 설정 (?design=1 로 미리보기 패널 열림)
 
   // 한글에 어울리는 기본 글꼴 (사용자가 디자인 패널에서 바꾸면 그 값이 우선)
   // heading = 페이지 제목 전체, brand = 상단 사이트 타이틀(소연 & 도윤)

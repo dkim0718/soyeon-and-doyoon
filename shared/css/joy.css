@@ -156,6 +156,7 @@ html[data-mode="single"] .page { padding-bottom: 2rem; }
   font-weight: 500;
   font-size: 2.1rem;
   letter-spacing: 0.06em;
+  color: var(--c-alt); /* one color for every page title */
 }
 
 .page-title::after {
@@ -461,9 +462,6 @@ html[data-hero="minimal"] .hero-names { font-size: clamp(3rem, 9vw, 5.4rem); }
   font-size: 0.45em;
   color: var(--c-accent);
 }
-/* Q&A page title: single line, all in the secondary color */
-#page-qanda .page-title h2 { color: var(--c-alt); }
-
 /* Venue map links on the Travel page */
 .travel-maps {
   display: flex;
