@@ -672,6 +672,7 @@ html[data-hero="minimal"] .hero-names { font-size: clamp(3rem, 9vw, 5.4rem); }
 
 /* ---------------- design panel ---------------- */
 
+.design-toggle[hidden] { display: none; } /* the display:flex below would otherwise beat the hidden attribute */
 .design-toggle {
   position: fixed;
   right: 1.1rem;
