@@ -173,9 +173,11 @@ window.SITE = {
     {
       q: "What will the weather be like?",
       a:
-        "Welcome to Seoul! Late October is beautiful autumn weather — crisp and " +
-        "clear, with daytime highs around 55–65°F (13–18°C) and noticeably " +
-        "cooler evenings. Bring a light jacket or a layer for after sunset.",
+        "Late October is the loveliest stretch of Seoul's autumn — crisp, " +
+        "dry, and cool. On October 30th over the past five years, the day " +
+        "has averaged a high of about 18°C (64°F) and a low of 8°C (46°F). " +
+        "Expect mild afternoons and cool evenings; a light layer is perfect " +
+        "for the outdoor moments.",
     },
     {
       q: "Can I bring a date?",
@@ -191,22 +193,25 @@ window.SITE = {
     },
     {
       q: "What should I wear?",
-      a: "Check our Schedule for dress code details.",
-    },
-    {
-      q: "What shoes should I wear (or avoid)?",
       a:
-        "Ladies, please skip the stilettos—seriously! There's a lot of grass and " +
-        "uneven ground, so go for block heels or sandals. We want everyone's " +
-        "shoes (and ankles) to make it through the night.",
+        "There's no formal dress code, but you are welcome to dress to " +
+        "impress. Nighttime may get chilly, so bring a jacket or " +
+        "scarf.\n\nLadies, please skip the stilettos—seriously! There's a lot " +
+        "of grass and uneven ground, so go for block heels or sandals. We " +
+        "want everyone's shoes (and ankles) to make it through the night.",
     },
     {
       q: "Is the wedding indoors or outdoors?",
-      a: "Our wedding ceremony will be outdoors, and our reception will be right beside, indoors :)",
+      a:
+        "Our wedding ceremony will be outdoors, and our dinner reception " +
+        "will be right beside, indoors or outdoors (depending on the " +
+        "weather) :)",
     },
     {
       q: "Can we use our phones and cameras to take photos during the wedding?",
-      a: "Yes! We'd love for you to take photos and share them with us.",
+      a:
+        "Yes! We'd love for you to take photos and share them with us. We " +
+        "will provide a link where you can upload photos.",
     },
     {
       q: "How did you two meet?",
@@ -215,106 +220,85 @@ window.SITE = {
     {
       q: "Who made the first move? How did it happen?",
       a:
-        "Her:\n" +
         "Him: I made the first move by texting her \"I really enjoyed our " +
-        "conversation and would love to treat you out to dinner again!\"",
+        "conversation and would love to treat you out to dinner " +
+        "again!\"\nHer: His version isn’t quite how it happened lol! We had a " +
+        "great dinner and I went home… and then didn’t hear from him for 4 " +
+        "whole days, so I ended up texting him first!",
     },
     {
-      q: "Who takes out the trash?",
-      a: "Whoever's closest to the trash :) But he tends to be closer to the trash, most of the times.",
+      q: "Who fell first?",
+      a:
+        "It was definitely Doyoon. He is the single reason that they got " +
+        "beyond the first date.",
     },
     {
       q: "What's your most memorable date?",
       a:
-        "Her:\n" +
-        "Him: Our first date was definitely the most memorable! A close second: " +
-        "We went to a Celtics vs Lakers game and got to see all our favorite " +
-        "players in one game.",
+        "Her: The day after Valentine’s Day — at that point, meeting up " +
+        "with him ON Valentine’s Day itself felt like too much too soon, so " +
+        "I asked him to meet the next day instead. We went to the Samuel " +
+        "Adams Brewery in Boston while it was snowing like crazy, then " +
+        "grabbed dinner. When we came out, the car was totally buried in " +
+        "snow, so we just sat inside and watched YouTube together while it " +
+        "melted!\nHim: Our first date was definitely the most memorable! A " +
+        "close second: We went to a Celtics vs Lakers game and got to see " +
+        "all our favorite players in one game.",
     },
     {
       q: "What's your favorite activity to do together?",
       a:
-        "Watching movies, going to see ballet, and finding the most delicious " +
-        "restaurants. Most of all, we love traveling to new places and exploring " +
-        "the world!",
-    },
-    {
-      q: "Where are you going for your honeymoon?",
-      a: "We are going to Tanzania, hopefully to catch the start of the calving season!",
-    },
-    {
-      q: "What's the best meal you've shared together?",
-      a:
-        "Her:\n" +
-        "Him: Our best homemade meal was a delicious tomato sauce pasta that she " +
-        "made. Outside, there are so many to choose from, but Langosteria in " +
-        "Italy is one of them.",
+        "Playing with Soyeon’s toy Doremy, watching Doyoon play guitar and " +
+        "sing to himself, competing on who can make the tastiest pourover, " +
+        "crying after seeing ballet, and hunting down the most delicious " +
+        "restaurants. Most of all, we love traveling to new places and " +
+        "exploring the world together!",
     },
     {
       q: "What's the most memorable trip you've taken together?",
       a:
-        "Last December, we went to Iceland to see the Northern lights. Not only " +
-        "did we check off that from our bucketlist, we drove through a " +
+        "Last February, we went to Iceland to see the Northern lights. Not " +
+        "only did we check off that from our bucketlist, we drove through a " +
         "sandstorm, blizzard, rain, and hailstorm all in the same day!",
     },
     {
-      q: "Who fell first?",
-      a: "Both of us insist it was the other one.",
+      q: "Where are you going for your honeymoon?",
+      a:
+        "We are going to Tanzania, hopefully to catch the start of the " +
+        "calving season! After watching the big 5, we're wrapping it up by " +
+        "relaxing on the beach in the Maldives.",
     },
     {
-      q: "Best trip so far?",
+      q: "What's the best meal you've shared together?",
       a:
-        "Christmas dinner at Hotel Grones in the Dolomites — nothing beats a " +
-        "meal someone else cooks for you. (Napa, Cyprus, and Vienna are close " +
-        "runners-up.)",
+        "Her: So hard to pick! We went to the Dolomites for Christmas and " +
+        "had Christmas dinner at Hotel Grones. Nothing beats a meal someone " +
+        "else makes for you!\nHim: Our best homemade meal was a delicious " +
+        "tomato sauce pasta that she made. Outside, there are so many to " +
+        "choose from, but Langosteria in Italy is one of them.",
     },
     {
       q: "Do you two want a dog?",
       a:
-        "For now the head of our household is a stuffed bear named Doremy, and " +
-        "honestly she's already a handful. A real dog is a someday-dream once " +
-        "we settle into the new place — pending Doremy's approval, of course.",
-    },
-    {
-      q: "When did you know you were ready to marry?",
-      a:
-        "It wasn't a grand moment. The day after Valentine's, snow coming down " +
-        "hard in Boston, the two of us in a snowed-in car watching YouTube " +
-        "while it melted — that's when I realized I could do absolutely nothing " +
-        "with this person and be happy. And once I noticed that even eight time " +
-        "zones apart my day never felt over until we'd talked, I was sure.",
+        "For now the head of our household is a stuffed toy Llama named " +
+        "Doremy, and honestly she's already a handful (in addition to Pooh, " +
+        "Binu, Byuru, Dosuri...). A real dog is a someday-dream once we " +
+        "settle into the new place — pending Doremy's approval, of course.",
     },
     {
       q: "An inside joke only you two get?",
       a:
-        "We have our own baby-talk dialect where we call ourselves 됴니 and 쇼니 " +
-        "in the third person — and there's a bear named Doremy with strong " +
-        "opinions.",
-    },
-    {
-      q: "Your perfect weekend?",
-      a:
-        "Hunting down one great restaurant, catching a ballet, and an evening " +
-        "of Doyoon playing guitar and singing to himself.",
+        "We have our own baby-talk dialect where we call ourselves 됴니 and " +
+        "쇼니 in the third person — and there's a llama named Doremy with " +
+        "strong opinions.",
     },
     {
       q: "Each of your superpowers?",
       a:
-        "Soyeon: Making things actually happen — plans, bookings, " +
-        "problem-solving all get finished once they reach her.\n" +
-        "Doyoon: Keeping things calm — and a human map of every good restaurant.",
-    },
-    {
-      q: "Your first-dance song?",
-      a:
-        "We're torn between Can't Take My Eyes Off You, Turning Page, Risk It " +
-        "All, and Die With a Smile.",
-    },
-    {
-      q: "Who is Doremy?",
-      a:
-        "Soyeon's stuffed bear and the unofficial third member of this " +
-        "relationship. Her wedding invite was genuinely debated.",
+        "Her: Making things actually happen — plans, bookings, " +
+        "problem-solving all get finished once they reach her.\nHim: " +
+        "Automatic wintertime hand warmer, 24/7 massage parlor, belly " +
+        "dancer.",
     },
   ],
 
