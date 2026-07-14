@@ -133,12 +133,12 @@ window.Admin = (function () {
     if (isSupabase) {
       gateEl.innerHTML =
         '<h1>관리자 로그인</h1>' +
-        '<p>등록된 관리자 이메일로 로그인 링크와 6자리 코드를 보내드립니다.</p>' +
+        '<p>등록된 관리자 이메일로 로그인 링크를 보내드립니다.</p>' +
         '<input type="email" id="gateEmail" placeholder="admin@example.com" ' +
         'autocomplete="email" style="letter-spacing:normal;text-align:left;">' +
         '<button class="btn btn-primary btn-block" id="gateGo">로그인 링크 보내기</button>' +
         '<div style="margin-top:14px;padding-top:12px;border-top:1px solid #e5ddd6;">' +
-        '<p style="font-size:12px;color:#8b7f7a;margin:0 0 6px;">링크가 열리지 않으면 메일에 적힌 6자리 코드를 입력하세요.</p>' +
+        '<p style="font-size:12px;color:#8b7f7a;margin:0 0 6px;">메일에 6자리 코드가 함께 온 경우, 링크 대신 코드를 입력해도 됩니다.</p>' +
         '<input id="gateOtp" inputmode="numeric" autocomplete="one-time-code" ' +
         'placeholder="6자리 코드" maxlength="8" style="text-align:center;letter-spacing:0.25em;">' +
         '<button class="btn btn-ghost btn-block" id="gateOtpGo" style="margin-top:6px;">코드로 로그인</button>' +
@@ -202,8 +202,8 @@ window.Admin = (function () {
         try {
           await store.adminSignIn(email);
           msg.style.color = '#3a7d5a';
-          msg.textContent = '이메일을 보냈습니다. 링크를 누르거나 메일 속 6자리 코드를 입력해 주세요. ' +
-            '(메일은 시간당 몇 통만 보낼 수 있으니 여러 번 누르지 마세요.)';
+          msg.textContent = '이메일을 보냈습니다. 메일함에서 링크를 눌러 주세요. ' +
+            '(메일은 시간당 몇 통만 보낼 수 있으니 버튼을 여러 번 누르지 마세요.)';
         } catch (e) {
           msg.style.color = '#b55';
           msg.textContent = '메일 전송 실패: ' + (e && e.message ? e.message : e);
