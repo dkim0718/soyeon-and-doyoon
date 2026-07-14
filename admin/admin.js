@@ -133,10 +133,16 @@ window.Admin = (function () {
     if (isSupabase) {
       gateEl.innerHTML =
         '<h1>관리자 로그인</h1>' +
-        '<p>등록된 관리자 이메일로 로그인 링크를 보내드립니다.</p>' +
+        '<p>등록된 관리자 이메일로 로그인 링크와 6자리 코드를 보내드립니다.</p>' +
         '<input type="email" id="gateEmail" placeholder="admin@example.com" ' +
         'autocomplete="email" style="letter-spacing:normal;text-align:left;">' +
         '<button class="btn btn-primary btn-block" id="gateGo">로그인 링크 보내기</button>' +
+        '<div style="margin-top:14px;padding-top:12px;border-top:1px solid #e5ddd6;">' +
+        '<p style="font-size:12px;color:#8b7f7a;margin:0 0 6px;">링크가 열리지 않으면 메일에 적힌 6자리 코드를 입력하세요.</p>' +
+        '<input id="gateOtp" inputmode="numeric" autocomplete="one-time-code" ' +
+        'placeholder="6자리 코드" maxlength="8" style="text-align:center;letter-spacing:0.25em;">' +
+        '<button class="btn btn-ghost btn-block" id="gateOtpGo" style="margin-top:6px;">코드로 로그인</button>' +
+        '</div>' +
         '<p id="gateMsg" style="font-size:12px;color:#b55;margin:12px 0 0;min-height:1em;"></p>';
     } else {
       gateEl.innerHTML =
@@ -161,6 +167,20 @@ window.Admin = (function () {
     }
     const app = document.getElementById('adminApp');
 
+    // Auth links that fail (expired, already used, scanned by the mail
+    // provider) bounce back here with the reason in the URL hash — read it
+    // before it's lost, or the failure looks like a silent non-login.
+    let authErr = null;
+    if (/error/.test(location.hash)) {
+      const hp = new URLSearchParams(location.hash.slice(1));
+      if (hp.get('error') || hp.get('error_code')) {
+        authErr = hp.get('error_code') === 'otp_expired'
+          ? '로그인 링크가 만료되었거나 이미 사용되었습니다. 아래에서 새 링크를 받거나, 메일의 6자리 코드를 입력해 주세요.'
+          : '로그인 실패: ' + (hp.get('error_description') || hp.get('error'));
+        history.replaceState(null, '', location.pathname + location.search);
+      }
+    }
+
     if (await store.isAdmin()) {
       if (app) app.hidden = false;
       renderFn();
@@ -172,6 +192,7 @@ window.Admin = (function () {
     document.body.prepend(gateEl);
     const input = gateEl.querySelector('input');
     const msg = gateEl.querySelector('#gateMsg');
+    if (authErr) msg.textContent = authErr;
 
     async function submit() {
       msg.textContent = '';
@@ -181,10 +202,11 @@ window.Admin = (function () {
         try {
           await store.adminSignIn(email);
           msg.style.color = '#3a7d5a';
-          msg.textContent = '로그인 링크를 이메일로 보냈습니다. 메일함을 확인해 주세요.';
+          msg.textContent = '이메일을 보냈습니다. 링크를 누르거나 메일 속 6자리 코드를 입력해 주세요. ' +
+            '(메일은 시간당 몇 통만 보낼 수 있으니 여러 번 누르지 마세요.)';
         } catch (e) {
           msg.style.color = '#b55';
-          msg.textContent = '로그인 실패: ' + (e && e.message ? e.message : e);
+          msg.textContent = '메일 전송 실패: ' + (e && e.message ? e.message : e);
         }
       } else {
         const ok = await store.adminSignIn(input.value);
@@ -201,6 +223,27 @@ window.Admin = (function () {
 
     gateEl.querySelector('#gateGo').addEventListener('click', submit);
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+
+    const otpInput = gateEl.querySelector('#gateOtp');
+    const otpGo = gateEl.querySelector('#gateOtpGo');
+    if (otpGo) {
+      const submitOtp = async () => {
+        msg.style.color = '#b55';
+        msg.textContent = '';
+        const email = input.value.trim();
+        const code = otpInput.value.trim();
+        if (!email) { msg.textContent = '위에 이메일을 먼저 입력해 주세요.'; return; }
+        if (!code) { msg.textContent = '메일에 적힌 6자리 코드를 입력해 주세요.'; return; }
+        try {
+          await store.adminVerifyOtp(email, code);
+          location.reload();
+        } catch (e) {
+          msg.textContent = '코드 확인 실패: ' + (e && e.message ? e.message : e);
+        }
+      };
+      otpGo.addEventListener('click', submitOtp);
+      otpInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitOtp(); });
+    }
     input.focus();
   }
 

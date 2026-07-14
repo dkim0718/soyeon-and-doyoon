@@ -388,8 +388,27 @@
     // shouldCreateUser:false → a magic link is only sent to an existing user.
     // Combined with the is_admin() RLS check + "sign-ups off" in Supabase Auth,
     // a stranger can neither self-provision a session nor read admin tables.
-    var res = await client.auth.signInWithOtp({ email: addr, options: { shouldCreateUser: false } });
-    return !(res && res.error);
+    var res = await client.auth.signInWithOtp({
+      email: addr,
+      options: {
+        shouldCreateUser: false,
+        emailRedirectTo: location.origin + location.pathname,
+      },
+    });
+    if (res && res.error) throw res.error;
+    return true;
+  }
+
+  // Sign in by typing the 6-digit code from the same email — works even
+  // when the link itself fails (scanned/expired link, in-app browser).
+  async function adminVerifyOtp(email, code) {
+    var res = await client.auth.verifyOtp({
+      email: str(email),
+      token: str(code).replace(/\s+/g, ''),
+      type: 'email',
+    });
+    if (res && res.error) throw res.error;
+    return true;
   }
 
   async function adminSignOut() {
@@ -498,6 +517,7 @@
     clearConfigOverride: clearConfigOverride,
     // admin
     adminSignIn: adminSignIn,
+    adminVerifyOtp: adminVerifyOtp,
     adminSignOut: adminSignOut,
     isAdmin: isAdmin,
     // backup
