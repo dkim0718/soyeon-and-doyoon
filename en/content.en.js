@@ -282,7 +282,7 @@ window.SITE = {
       a:
         "For now the head of our household is a stuffed toy Llama named " +
         "Doremy, and honestly she's already a handful (in addition to Pooh, " +
-        "Binu, Byuru, Dosuri...). A real dog is a someday-dream once we " +
+        "Binu, Byeoru, Dosuri...). A real dog is a someday-dream once we " +
         "settle into the new place — pending Doremy's approval, of course.",
     },
     {
@@ -347,7 +347,9 @@ window.SITE = {
     { id: "stay",     label: "Where to Stay" },
     { id: "travel",   label: "Travel" },
     { id: "qanda",    label: "Q & A" },
-    { id: "registry", label: "Registry" },
+    // Registry page hidden for now — uncomment to bring it back
+    // (the content above stays ready, e.g. for an Amazon registry link):
+    // { id: "registry", label: "Registry" },
     { id: "moments",  label: "Moments" },
     { id: "rsvp",     label: "RSVP" },
   ],
