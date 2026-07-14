@@ -55,7 +55,7 @@ const DEFAULT_TITLES = {
   story:    { script: "", title: "Our Story" },
   schedule: { script: "", title: "Schedule" },
   stay:     { script: "", title: "Where to Stay" },
-  travel:   { script: "", title: "Getting There" },
+  travel:   { script: "", title: "Travel" },
   qanda:    { script: "", title: "Questions & Answers" },
   registry: { script: "", title: "Registry" },
   moments:  { script: "", title: "Our Moments" },
