@@ -487,6 +487,16 @@ html[data-hero="minimal"] .hero-names { font-size: clamp(3rem, 9vw, 5.4rem); }
   border-bottom: 1px solid var(--c-line);
 }
 
+/* Group headings inside the Q&A (rows whose question starts with "## ") */
+.qa-group {
+  font-family: var(--f-heading);
+  font-weight: 600;
+  font-size: 1.2rem;
+  margin: 2.8rem 0 0.5rem;
+}
+.qa-group::before { content: "— "; color: var(--c-accent); }
+.page-title + .qa-group { margin-top: 0.6rem; }
+
 .qa-item summary {
   cursor: pointer;
   list-style: none;

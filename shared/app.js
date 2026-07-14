@@ -299,11 +299,16 @@ function renderTravel() {
 }
 
 function renderQanda() {
-  const items = SITE.qanda.map((q) => `
+  // A row whose question starts with "## " is a group heading, not a question.
+  const items = SITE.qanda.map((q) => {
+    const group = /^##\s*(.*)/.exec(q.q || "");
+    if (group) return `<h3 class="qa-group">${group[1]}</h3>`;
+    return `
     <details class="qa-item">
       <summary>${q.q}</summary>
       <div class="qa-answer">${q.a}</div>
-    </details>`).join("");
+    </details>`;
+  }).join("");
   return `${pageTitle("qanda")}${items}`;
 }
 

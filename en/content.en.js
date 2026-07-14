@@ -185,6 +185,8 @@ window.SITE = {
   ],
 
   qanda: [
+    // Rows whose q starts with "## " render as group headings.
+    { q: "## The Logistics", a: "" },
     {
       q: "When is the RSVP deadline?",
       a: "Please RSVP by September 15 so we can get an accurate headcount. :)",
@@ -232,6 +234,7 @@ window.SITE = {
         "Yes! We'd love for you to take photos and share them with us. We " +
         "will provide a link where you can upload photos.",
     },
+    { q: "## About Us", a: "" },
     {
       q: "How did you two meet?",
       a: "Read Our Story!",
@@ -296,6 +299,7 @@ window.SITE = {
         "tomato sauce pasta that she made. Outside, there are so many to " +
         "choose from, but Langosteria in Italy is one of them.",
     },
+    { q: "## Tidbits", a: "" },
     {
       q: "Do you two want a dog?",
       a:
