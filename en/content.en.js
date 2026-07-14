@@ -141,27 +141,46 @@ window.SITE = {
   travel: [
     {
       title: "Getting In",
-      body: "We recommend flying into Incheon Airport (ICN)!",
+      body: "We recommend flying into Incheon Airport (ICN).",
     },
     {
       title: "Getting Downtown",
       body:
-        "There are plenty of ways to get downtown! You'll find several car " +
-        "rental options, and taxis or ride services are both easy and convenient.",
+        "There are plenty of ways to get to the hotel.\n\n- Taxi: From " +
+        "Incheon International Airport, about 1 hour and 30 minutes.\n- Bus: " +
+        "Take 6702 K BUS -> get off at Jangchung Gymnasium stop\n- Subway: " +
+        "Airport Railroad from Incheon Airport Station -> Transfer to Line " +
+        "6 at Gongdeok Station -> Transfer to Line 3 at Yaksu Station -> " +
+        "Get off at Dongguk University Station and use Exit 5.\n\nFor more " +
+        "details, please visit the hotel website at " +
+        "https://www.shillahotels.com/en/theshilla/seoul/introduction/location.do",
     },
     {
       title: "Our Favorite Restaurants",
       body:
-        "팔선 (Palsun) — a famous Chinese restaurant.\n" +
-        "태극당 (Taegeukdang) — serves famous ice cream monaka as well as other baked goods.\n" +
-        "오장동 흥남집 — serves cold buckwheat noodle dishes.",
+        "- Woo Rae Ok (우래옥) – Arguably Seoul’s most famous pyeongyang " +
+        "naengmyeon (cold noodles) spot, but the wait is no joke — go early " +
+        "and get your name on the waitlist before you do anything else!\n- " +
+        "Gyeongdong Market (경동시장) – One of the hottest traditional markets " +
+        "right now; try tteokbokki, jeon, and yukhoe.\n- Frozen Samgyeopsal " +
+        "spot near you (냉삼) – If you’ve already tried classic Korean BBQ, " +
+        "give frozen pork belly a shot.\n- Taegeukdang (태극당) — serves famous " +
+        "ice cream monaka as well as other baked goods.\n- Number One " +
+        "Yangkkochi (넘버원양꼬치) – Lamb skewers, lamb ribs, and corn noodles — " +
+        "the wait is worth it.",
     },
     {
       title: "Things to Do in Seoul",
       body:
-        "광장시장 — A traditional market in Seoul, famous for snacks!\n" +
-        "경복궁 — The old palace in Seoul. Try renting out 한복 (traditional Korean clothing) and doing a photoshoot!\n" +
-        "N Seoul Tower — Enjoy great views of Seoul.",
+        "- Seochon/Bukchon (서촌/북촌) – Explore royal palaces like " +
+        "Gyeongbokgung and Changdeokgung, try on a hanbok, and wander " +
+        "nearby temples and local eateries.\n- National Museum of Korea " +
+        "(국립중앙박물관) – Korea’s largest museum, packed with stunning artifacts " +
+        "and free admission — don’t miss the cool museum goods shop!\n- " +
+        "Seongsu (성수) – A must-visit if you’re into shopping and all things " +
+        "trendy.\n- Hangang Park (한강공원) – Perfect in fall for beer and Han " +
+        "River ramyeon by the water.\n- N Seoul Tower (남산타워) — Enjoy great " +
+        "views of Seoul.",
     },
   ],
 

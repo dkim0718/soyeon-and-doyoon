@@ -258,11 +258,31 @@ function renderStay() {
   return `${pageTitle("stay")}${intro}<div class="hotel-grid">${cards}</div>`;
 }
 
-// Multi-line travel bodies (one place per line) become a styled list.
+// Travel bodies: lines starting with "- " become a styled list; plain
+// lines stay as paragraphs, so an intro or outro can sit outside the
+// bullets. Bare URLs become clickable links.
+function travelLinkify(text) {
+  return text.replace(/https?:\/\/[^\s<]+/g, (url) =>
+    `<a href="${url}" target="_blank" rel="noopener">${url}</a>`);
+}
+
 function travelBody(body) {
   const lines = String(body || "").split("\n").map((s) => s.trim()).filter(Boolean);
-  if (lines.length <= 1) return `<p>${body}</p>`;
-  return `<ul class="travel-list">${lines.map((line) => `<li>${line}</li>`).join("")}</ul>`;
+  const parts = [];
+  let items = [];
+  const flush = () => {
+    if (items.length) {
+      parts.push(`<ul class="travel-list">${items.map((li) => `<li>${li}</li>`).join("")}</ul>`);
+      items = [];
+    }
+  };
+  lines.forEach((line) => {
+    const m = line.match(/^[-•]\s+(.*)/);
+    if (m) items.push(travelLinkify(m[1]));
+    else { flush(); parts.push(`<p>${travelLinkify(line)}</p>`); }
+  });
+  flush();
+  return parts.join("");
 }
 
 function renderTravel() {

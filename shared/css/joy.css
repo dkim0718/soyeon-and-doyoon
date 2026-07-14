@@ -450,6 +450,7 @@ html[data-hero="minimal"] .hero-names { font-size: clamp(3rem, 9vw, 5.4rem); }
 }
 
 .travel-block p { white-space: pre-line; }
+.travel-block a { overflow-wrap: anywhere; }
 
 /* Multi-line travel bodies (restaurants, things to do) as a delicate list */
 .travel-list { list-style: none; margin: 0.5rem 0 0; padding: 0; }

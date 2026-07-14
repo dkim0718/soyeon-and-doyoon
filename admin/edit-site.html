@@ -127,6 +127,7 @@ Admin.gate(function () {
   var SCOPE = { en: 'en', kr: 'kr' };
   var site = 'en';
   var collectors = [];  // per-section: () => [key, value]
+  var loadedJSON = {};  // section JSON as loaded into this form (change detection)
 
   // Which sections are editable, and their field schema.
   var SECTIONS = [
@@ -253,13 +254,28 @@ Admin.gate(function () {
       if (effective[sec.key] == null) return;
       collectors.push(renderSection(sec, effective[sec.key]));
     });
+    loadedJSON = {};
+    collectors.forEach(function (c) { var kv = c(); loadedJSON[kv[0]] = JSON.stringify(kv[1]); });
   }
 
   async function save() {
-    var override = {};
-    collectors.forEach(function (c) { var kv = c(); override[kv[0]] = kv[1]; });
     try {
-      await window.Store.saveConfigOverride(SCOPE[site], override);
+      // Write only the sections changed in THIS form, merged onto the
+      // freshest saved copy — so an old tab can't silently roll back
+      // edits made elsewhere (another tab, another person, or a script).
+      var fresh = (await window.Store.getConfigOverride(SCOPE[site])) || {};
+      var changed = 0;
+      collectors.forEach(function (c) {
+        var kv = c();
+        if (loadedJSON[kv[0]] !== JSON.stringify(kv[1])) { fresh[kv[0]] = kv[1]; changed++; }
+      });
+      if (!changed) {
+        $('status').style.color = '#8b7f7a';
+        $('status').textContent = '변경된 내용이 없습니다.';
+        return;
+      }
+      await window.Store.saveConfigOverride(SCOPE[site], fresh);
+      await loadSite(site);  // re-sync the form with what is now saved
       $('status').style.color = '#3a7d5a';
       $('status').textContent = '저장되었습니다. 미리보기에서 확인하세요. ' +
         (window.Store.backend === 'supabase' ? '(모든 방문자에게 반영됩니다)' : '(이 브라우저에만 반영됩니다)');
