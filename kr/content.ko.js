@@ -51,7 +51,7 @@ window.SITE = {
     travel:   { script: "", title: "오시는 길" },
     qanda:    { script: "", title: "자주 묻는 질문" },
     moments:  { script: "", title: "갤러리" },
-    rsvp:     { script: "", title: "참석 회신" },
+    rsvp:     { script: "", title: "RSVP" },
   },
 
   welcome: {
@@ -306,6 +306,6 @@ window.SITE = {
     { id: "schedule", label: "예식 안내" },
     { id: "qanda",    label: "자주 묻는 질문" },
     { id: "moments",  label: "갤러리" },
-    { id: "rsvp",     label: "참석 회신" },
+    { id: "rsvp",     label: "RSVP" },
   ],
 };
