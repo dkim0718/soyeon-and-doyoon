@@ -300,6 +300,9 @@
           message: message.value,
           locale: locale,
         })).then(function (saved) {
+          // Remember this browser has responded so the entry popup
+          // (maybeShowRsvpNudge in shared/app.js) stops nudging.
+          try { localStorage.setItem('sd-afterparty-responded', '1'); } catch (e) { /* ignore */ }
           showThanks(guest, saved, identity);
         }).catch(function (err) {
           submit.disabled = false;

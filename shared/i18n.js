@@ -43,6 +43,12 @@ window.STRINGS = {
       thanksYes: "You're on the list — see you there! 🎉",
       thanksNo: "Thanks for letting us know — we'll miss you!",
     },
+    nudge: {
+      title: 'Will you join us?',
+      cta: 'RSVP now',
+      today: "Don't show this again today",
+      close: 'Close',
+    },
   },
   ko: {
     count: { days: '일', hours: '시', minutes: '분', seconds: '초' },
@@ -75,6 +81,12 @@ window.STRINGS = {
       contactEmail: '연락처 이메일',
       thanksYes: '참석 명단에 등록되었습니다 — 그날 뵐게요! 🎉',
       thanksNo: '알려주셔서 감사합니다 — 함께하지 못해 아쉬워요!',
+    },
+    nudge: {
+      title: '참석 여부를 알려주세요',
+      cta: '참석의사 전달하기',
+      today: '오늘 그만보기',
+      close: '닫기',
     },
   },
 };

@@ -344,6 +344,7 @@ window.SITE = {
     email: "dkim0718@gmail.com", // RSVPs are sent to this address
     deadline: "September 15, 2026",
     message: "Please let us know if you can make it — we hope to see you there!",
+    popup: true, // entry popup nudging guests to RSVP by the deadline (like the 모청's)
   },
 
   moments: {

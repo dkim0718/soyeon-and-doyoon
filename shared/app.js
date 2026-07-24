@@ -733,6 +733,57 @@ async function applyDesignOverride() {
 }
 
 /* ----------------------------------------------------------
+   RSVP nudge — entry popup asking guests to respond by the
+   deadline (the Joy-engine cousin of the 모청's entry popup).
+   Shown when the content file sets rsvp.popup; skipped for
+   browsers that already submitted (flag set by rsvp-widget.js)
+   or that picked "don't show again today".
+   ---------------------------------------------------------- */
+
+const NUDGE_SNOOZE_KEY = "sd-rsvp-nudge-hideUntil";
+const NUDGE_DONE_KEY = "sd-afterparty-responded";
+
+function maybeShowRsvpNudge() {
+  const cfg = SITE.rsvp || {};
+  if (!cfg.popup || currentPage() === "rsvp") return;
+  try {
+    if (localStorage.getItem(NUDGE_DONE_KEY)) return;
+    if (Date.now() < parseInt(localStorage.getItem(NUDGE_SNOOZE_KEY) || "0", 10)) return;
+  } catch (e) { /* storage unavailable → just show it */ }
+
+  const wrap = document.createElement("div");
+  wrap.className = "nudge-overlay";
+  wrap.innerHTML = `
+    <div class="nudge" role="dialog" aria-modal="true" aria-label="${t("nudge.title")}">
+      <button class="nudge-x" aria-label="${t("nudge.close")}">✕</button>
+      <h3 class="nudge-title">${t("nudge.title")}</h3>
+      ${cfg.message ? `<p class="nudge-body">${cfg.message}</p>` : ""}
+      ${cfg.deadline ? `<p class="nudge-deadline">${t("respondBy", { date: cfg.deadline })}</p>` : ""}
+      <button class="btn nudge-go">${t("nudge.cta")}</button>
+      <button class="nudge-today">${t("nudge.today")}</button>
+    </div>`;
+
+  const close = () => wrap.remove();
+  wrap.addEventListener("click", (e) => { if (e.target === wrap) close(); });
+  wrap.querySelector(".nudge-x").addEventListener("click", close);
+  wrap.querySelector(".nudge-go").addEventListener("click", () => {
+    close();
+    location.hash = "#/rsvp";
+  });
+  wrap.querySelector(".nudge-today").addEventListener("click", () => {
+    const end = new Date();
+    end.setHours(23, 59, 59, 999);
+    try { localStorage.setItem(NUDGE_SNOOZE_KEY, String(end.getTime())); } catch (e) { /* ignore */ }
+    close();
+  });
+  document.addEventListener("keydown", function esc(e) {
+    if (e.key === "Escape") { close(); document.removeEventListener("keydown", esc); }
+  });
+
+  setTimeout(() => document.body.appendChild(wrap), 900);
+}
+
+/* ----------------------------------------------------------
    Boot
    ---------------------------------------------------------- */
 
@@ -773,6 +824,7 @@ async function boot() {
 
   route();
   syncHeroText();
+  maybeShowRsvpNudge();
 
   window.addEventListener("hashchange", route);
 

@@ -6,13 +6,19 @@ without re-investigating.
 
 ## 1. EN site: "kindly RSVP by September 15" popup
 
-- [ ] On page load of the EN afterparty site, show a JavaScript overlay (like
-      the 모청's RSVP overlay — **not** a browser window/alert) kindly asking
-      guests to RSVP by **September 15**.
-- Pointers: the 모청 overlay pattern lives in `shared/mochung/` (main.js +
-  style.css); EN page content is `en/content.en.js`, engine is `shared/app.js`.
-- Decide when implementing: show once per visitor (localStorage flag) vs. every
-  visit; suppress for guests who have already RSVP'd.
+- [x] Done 2026-07-24 (not yet committed). On EN page load, a Joy-styled
+      overlay asks guests to kindly RSVP by September 15 (deadline read from
+      `rsvp.deadline` in `en/content.en.js`).
+- How it landed: `maybeShowRsvpNudge()` in `shared/app.js`, gated on
+  `rsvp.popup: true` (set only in EN content); strings in `shared/i18n.js`
+  (`nudge.*`, en+ko); styles in `shared/css/joy.css` (`.nudge-*`).
+- Behavior (mirrors the 모청 entry popup): shows 900ms after load on every
+  visit; "RSVP now" → `#/rsvp`; "Don't show this again today" snoozes until
+  midnight (`sd-rsvp-nudge-hideUntil`); ✕/backdrop/Esc just close; suppressed
+  once this browser submits an afterparty RSVP (`sd-afterparty-responded`,
+  set in `shared/rsvp-widget.js`) or when already on the RSVP page.
+- Verified in browser 2026-07-24: popup, CTA routing, snooze, KR unaffected,
+  no console errors.
 
 ## 2. KR site: 마음 전하실 곳 page (accounts in place of registry)
 
