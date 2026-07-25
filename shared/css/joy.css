@@ -547,6 +547,67 @@ html[data-hero="minimal"] .hero-names { font-size: clamp(3rem, 9vw, 5.4rem); }
 
 .registry-card p { font-size: 0.88rem; color: var(--c-muted); }
 
+/* ---------------- accounts (마음 전하실 곳) ---------------- */
+
+.accounts { display: grid; gap: 1.1rem; margin-top: 2rem; }
+
+.acct-group {
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.acct-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--f-body);
+  font-size: 0.85rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--c-text);
+  padding: 1.15rem 1.6rem;
+}
+
+.acct-chevron { color: var(--c-muted); transition: transform 0.2s; }
+.acct-group.open .acct-chevron { transform: rotate(180deg); }
+
+.acct-body { display: none; border-top: 1px solid var(--c-line); padding: 0.4rem 1.6rem 1.2rem; }
+.acct-group.open .acct-body { display: block; }
+
+.acct-item { padding-top: 0.9rem; }
+.acct-item + .acct-item { margin-top: 0.9rem; border-top: 1px solid var(--c-line); }
+
+.acct-who { font-size: 0.88rem; color: var(--c-muted); }
+.acct-num { font-size: 0.98rem; margin-top: 0.15rem; }
+.acct-num b { font-weight: 600; letter-spacing: 0.02em; }
+
+.acct-empty { font-size: 0.88rem; color: var(--c-muted); padding: 0.9rem 0 0.5rem; }
+
+.acct-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.7rem; }
+
+.acct-copy,
+.acct-pay {
+  font-family: var(--f-body);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  background: transparent;
+  color: var(--c-accent);
+  border: 1px solid var(--c-line);
+  border-radius: 4px;
+  padding: 0.5rem 0.9rem;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.acct-copy:hover,
+.acct-pay:hover { border-color: var(--c-accent); }
+
 /* ---------------- moments gallery ---------------- */
 
 .gallery {

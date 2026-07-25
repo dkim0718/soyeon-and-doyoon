@@ -49,6 +49,12 @@ window.STRINGS = {
       today: "Don't show this again today",
       close: 'Close',
     },
+    accounts: {
+      groomSide: "Groom's side", brideSide: "Bride's side",
+      copy: 'Copy account number', copied: 'Copied!',
+      empty: 'No accounts listed yet.',
+      kakaopay: 'Kakao Pay', cardpay: 'Pay by card',
+    },
   },
   ko: {
     count: { days: '일', hours: '시', minutes: '분', seconds: '초' },
@@ -87,6 +93,12 @@ window.STRINGS = {
       cta: '참석의사 전달하기',
       today: '오늘 그만보기',
       close: '닫기',
+    },
+    accounts: {
+      groomSide: '신랑 측', brideSide: '신부 측',
+      copy: '계좌번호 복사', copied: '복사되었습니다',
+      empty: '등록된 계좌가 없습니다.',
+      kakaopay: '카카오페이', cardpay: '카드결제',
     },
   },
 };

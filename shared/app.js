@@ -58,6 +58,7 @@ const DEFAULT_TITLES = {
   travel:   { script: "", title: "Travel" },
   qanda:    { script: "", title: "Questions & Answers" },
   registry: { script: "", title: "Registry" },
+  accounts: { script: "", title: "Gifts" },
   moments:  { script: "", title: "Our Moments" },
   rsvp:     { script: "", title: "RSVP" },
 };
@@ -321,6 +322,80 @@ function renderRegistry() {
   return `${pageTitle("registry")}<p class="center">${SITE.registry.note}</p><div class="registry-links">${links}</div>`;
 }
 
+// 마음 전하실 곳 — the KR take on a registry: bank accounts for money
+// gifts, mirroring the 모청's accounts section (collapsible 신랑/신부
+// groups, copy-to-clipboard). Data shape matches invite/config.js
+// accounts so real values can be pasted 1:1 at launch.
+function renderAccounts() {
+  const a = SITE.accounts || {};
+  const item = (acc) => {
+    const pay = [
+      acc.kakaopayUrl ? `<a class="acct-pay" href="${acc.kakaopayUrl}" target="_blank" rel="noopener">${t("accounts.kakaopay")}</a>` : "",
+      acc.cardPayUrl ? `<a class="acct-pay" href="${acc.cardPayUrl}" target="_blank" rel="noopener">${t("accounts.cardpay")}</a>` : "",
+    ].join("");
+    return `
+      <div class="acct-item">
+        <p class="acct-who">${acc.label} ${acc.holder}</p>
+        <p class="acct-num">${acc.bank} <b>${acc.number}</b></p>
+        <div class="acct-btns">
+          <button class="acct-copy" type="button" data-copy="${acc.bank} ${acc.number}">${t("accounts.copy")}</button>
+          ${pay}
+        </div>
+      </div>`;
+  };
+  const group = (title, items) => {
+    const rows = (items || []).filter((x) => x.number);
+    const body = rows.length ? rows.map(item).join("") : `<p class="acct-empty">${t("accounts.empty")}</p>`;
+    return `
+      <div class="acct-group">
+        <button class="acct-head" type="button">${title}<span class="acct-chevron">⌄</span></button>
+        <div class="acct-body">${body}</div>
+      </div>`;
+  };
+  return `
+    ${pageTitle("accounts")}
+    ${a.notice ? `<p class="center">${a.notice}</p>` : ""}
+    <div class="accounts">
+      ${group(t("accounts.groomSide"), a.groom)}
+      ${group(t("accounts.brideSide"), a.bride)}
+    </div>`;
+}
+
+function mountAccounts() {
+  const sec = document.querySelector('section[data-page="accounts"]');
+  if (!sec) return;
+  sec.addEventListener("click", (e) => {
+    const head = e.target.closest(".acct-head");
+    if (head) { head.parentElement.classList.toggle("open"); return; }
+    const btn = e.target.closest(".acct-copy");
+    if (btn) copyAccountNumber(btn);
+  });
+}
+
+// navigator.clipboard needs a secure context; the textarea path covers
+// plain-http previews (same fallback as copyText in shared/mochung/main.js).
+function copyAccountNumber(btn) {
+  const text = btn.dataset.copy.trim();
+  const flash = () => {
+    const original = btn.textContent;
+    btn.textContent = t("accounts.copied");
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 1500);
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(flash);
+    return;
+  }
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.position = "fixed";
+  ta.style.opacity = "0";
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand("copy"); flash(); } catch (e) { /* ignore */ }
+  ta.remove();
+}
+
 function renderMoments() {
   return `
     ${pageTitle("moments")}
@@ -347,6 +422,7 @@ const PAGE_RENDERERS = {
   travel: renderTravel,
   qanda: renderQanda,
   registry: renderRegistry,
+  accounts: renderAccounts,
   moments: renderMoments,
   rsvp: renderRsvp,
 };
@@ -374,6 +450,7 @@ function renderAllPages() {
 
   renderGallery();
   mountRsvp();
+  mountAccounts();
   startCountdown();
   syncHeroText();
 }

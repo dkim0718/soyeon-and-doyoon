@@ -22,14 +22,21 @@ without re-investigating.
 
 ## 2. KR site: 마음 전하실 곳 page (accounts in place of registry)
 
-- [ ] Add a page titled **마음 전하실 곳** to the KR site — a registry-style
-      page, but instead of a registry it shows the bank account numbers guests
-      can send money to, much like the 모청's accounts section.
-- Pointers: the 모청's accounts section (data in `invite/config.js`
-  `MOCHUNG_DEFAULTS`, rendering in `shared/mochung/main.js`) is the model.
-  KR pages/nav are defined in `kr/content.ko.js`; the Joy engine
-  (`shared/app.js`) renders them. Note: a registry section was previously
-  hidden (commit 1d51143) — this replaces it in spirit.
+- [x] Done 2026-07-25. New `accounts` page on the KR site titled
+      마음 전하실 곳: notice line + collapsible 신랑 측 / 신부 측 groups with
+      bank/account rows, 계좌번호 복사 copy-to-clipboard, and optional
+      카카오페이/카드결제 links — mirroring the 모청's accounts section.
+- How it landed: `renderAccounts()`/`mountAccounts()` in `shared/app.js`,
+  strings in `shared/i18n.js` (`accounts.*`), styles in `shared/css/joy.css`
+  (`.acct-*`), data + nav entry in `kr/content.ko.js`. Data shape matches
+  `invite/config.js` accounts, so real values transfer 1:1.
+- ⚠️ Account numbers are PLACEHOLDERS (`0000000000000`), same scheme as the
+  모청 — paste real values into `kr/content.ko.js` at launch (real values
+  stashed in gitignored `invite/config.private.js`; repo should go private
+  first, per DEPLOY.md).
+- Not wired: admin edit-site.html editing for this block (edit the content
+  file directly). Verified in browser 2026-07-25 (expand/collapse, copy,
+  empty state, no console errors).
 
 ## 3. Visitor analytics (Cloudflare Web Analytics)
 
@@ -50,7 +57,23 @@ without re-investigating.
 - ⚠️ Counts only from enablement forward — enable well before the Sep 15
   RSVP deadline / invite-day spike.
 
-## 4. KR site: 소연 & 도윤 → "Soyeon & Doyoon" in titles
+## 4. KR site: nav labels 홈 → "Home", 자주 묻는 질문 → "FAQ"
+
+- [ ] In the KR nav (`navigation` in `kr/content.ko.js`), change the label
+      홈 to **Home** and 자주 묻는 질문 to **FAQ**.
+- Per repo precedent (commits c6d9ab2, 46fe885: page title matches its nav
+  tab), also change `titles.qanda` from 자주 묻는 질문 to "FAQ". The welcome
+  page title is empty, so 홈 → Home touches only the nav label.
+
+## 5. EN site: drop the "S & D" monogram at the top
+
+- [ ] Remove the "S & D" shown above the site name in the EN header — set
+      `couple.monogram` to `""` in `en/content.en.js`. The engine then hides
+      the monogram element and shows the full "Soyeon & Doyoon" as the brand
+      instead (`.brand.no-monogram` path in `shared/app.js` boot), same as
+      the KR site. The footer monogram disappears automatically too.
+
+## 6. KR site: 소연 & 도윤 → "Soyeon & Doyoon" in titles
 
 - [x] Done 2026-07-24 (not yet pushed). Switched the couple names to English in:
   - **On-page titles**: `partner1`, `partner2`, `displayName` in

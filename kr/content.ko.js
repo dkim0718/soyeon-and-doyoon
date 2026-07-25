@@ -51,6 +51,7 @@ window.SITE = {
     travel:   { script: "", title: "오시는 길" },
     qanda:    { script: "", title: "자주 묻는 질문" },
     moments:  { script: "", title: "갤러리" },
+    accounts: { script: "", title: "마음 전하실 곳" },
     rsvp:     { script: "", title: "RSVP" },
   },
 
@@ -298,14 +299,44 @@ window.SITE = {
   galleryDefaults: Array.from({ length: 15 }, (_, i) =>
     "../shared/photos/gallery-" + String(i + 1).padStart(2, "0") + ".jpg"),
 
+  // — 마음 전하실 곳 (축의금 계좌 안내) — 모청의 accounts 와 같은 구조라
+  // 실제 값을 invite/config.js 에서 1:1 로 옮겨 넣을 수 있습니다.
+  // ⚠️ 계좌번호는 자리표시자입니다. 실제 값은 공개 직전에 붙여넣으세요
+  // (모청과 같은 방식 — 실제 값 보관: invite/config.private.js).
+  accounts: {
+    notice: "참석이 어려워 직접 축하를 전하지 못하는 분들을 위해 기재했습니다. 너그러운 마음으로 양해 부탁드립니다.",
+    groom: [
+      {
+        label: "신랑",
+        holder: "김도윤",
+        bank: "신한은행",
+        number: "0000000000000", // PLACEHOLDER — 실제 계좌번호는 config.private.js
+        kakaopayUrl: "",         // 카카오페이 송금 링크 (https://qr.kakaopay.com/...)
+        cardPayUrl: "",          // PLACEHOLDER — 카드결제 링크
+      },
+    ],
+    bride: [
+      {
+        label: "신부",
+        holder: "김소연",
+        bank: "",
+        number: "",
+        kakaopayUrl: "",
+        cardPayUrl: "",
+      },
+    ],
+  },
+
   // 내비게이션에 이 순서대로 페이지가 나타납니다. 줄을 지우면 그 페이지가 숨겨집니다.
-  // (미국식 선물 등록[registry] 은 한국 하객 정서에 맞지 않아 생략했습니다.)
+  // (미국식 선물 등록[registry] 은 한국 하객 정서에 맞지 않아 생략했습니다 —
+  //  대신 '마음 전하실 곳' 계좌 안내 페이지를 씁니다.)
   navigation: [
     { id: "welcome",  label: "홈" },
     { id: "story",    label: "우리 이야기" },
     { id: "schedule", label: "예식 안내" },
     { id: "qanda",    label: "자주 묻는 질문" },
     { id: "moments",  label: "갤러리" },
+    { id: "accounts", label: "마음 전하실 곳" },
     { id: "rsvp",     label: "RSVP" },
   ],
 };
