@@ -12,10 +12,11 @@ window.SITE = {
   designPanel: false,   // 디자인은 관리자 페이지에서 설정 (?design=1 로 미리보기 패널 열림)
 
   // 한글에 어울리는 기본 글꼴 (사용자가 디자인 패널에서 바꾸면 그 값이 우선)
-  // heading = 페이지 제목 전체, brand = 상단 사이트 타이틀(Soyeon & Doyoon)
+  // heading = 페이지 제목 전체, brand = 상단 사이트 타이틀(S & D 모노그램 + 이름)
+  // brand 는 영어 사이트 헤더와 똑같이 보이도록 같은 세리프를 씁니다.
   fontDefaults: {
     heading: "Nanum Myeongjo",
-    brand: "Nanum Pen Script",
+    brand: "EB Garamond",
     body: "Noto Sans KR",
   },
 
@@ -23,7 +24,7 @@ window.SITE = {
     partner1: "Soyeon",
     partner2: "Doyoon",
     displayName: "Soyeon & Doyoon",
-    monogram: "",           // 빈 값 → 축약형 대신 전체 이름(Soyeon & Doyoon)을 크게 표시
+    monogram: "S & D",      // 영어 사이트와 동일한 헤더 구성 (모노그램 + SOYEON & DOYOON)
   },
 
   wedding: {
