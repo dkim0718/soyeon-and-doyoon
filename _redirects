@@ -1,0 +1,5 @@
+# Cloudflare Pages redirects — shipped into dist-root/ by
+# `assemble.mjs root`. The 모청 moved to its own domain
+# (soyeondoyoon.com); keep pre-split /invite/ links working.
+/invite https://soyeondoyoon.com/ 301
+/invite/* https://soyeondoyoon.com/:splat 301

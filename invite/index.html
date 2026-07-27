@@ -12,8 +12,8 @@
 <meta property="og:title" content="소연 ♥ 도윤 결혼식에 초대합니다">
 <meta property="og:description" content="2026년 10월 30일 금요일 오후 6시 30분 · 신라호텔 영빈관">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://soyeondoyoon.fun/invite">
-<meta property="og:image" content="https://soyeondoyoon.fun/shared/photos/og.jpg">
+<meta property="og:url" content="https://soyeondoyoon.com">
+<meta property="og:image" content="https://soyeondoyoon.com/shared/photos/og.jpg">
 <!-- 탭 아이콘은 래미 담당 -->
 <link rel="icon" type="image/png" sizes="32x32" href="../shared/doremy-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="../shared/doremy-192.png">
@@ -55,14 +55,6 @@
       <p class="greeting-body" data-bind="greeting.body"></p>
       <div class="family" id="familyLines"></div>
       <button class="btn btn-ghost btn-contact" id="btnContacts">📞&nbsp; 연락하기</button>
-    </section>
-
-    <!-- ===================== 웨딩 홈페이지 (한국어 사이트로 이동) ===================== -->
-    <section class="sec reveal" id="website">
-      <p class="sec-eyebrow">Wedding Website</p>
-      <h2 class="sec-title">웨딩 홈페이지</h2>
-      <p class="rsvp-notice">일정, 오시는 길, 갤러리 등 더 자세한 안내를<br>웨딩 홈페이지에서 확인하실 수 있습니다.</p>
-      <a class="btn btn-primary btn-block" id="btnWebsite" href="#">💌&nbsp; 웨딩 홈페이지 방문하기</a>
     </section>
 
     <!-- ===================== 예식 일시 / 달력 ===================== -->
@@ -303,7 +295,6 @@
 <!-- content/config -->
 <script src="config.js"></script>
 <!-- shared data backend (load order matters) -->
-<script src="../shared/site-config.js"></script>
 <script src="../shared/supabase-config.js"></script>
 <script>
   if (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url && window.SUPABASE_CONFIG.anonKey) {
@@ -316,12 +307,5 @@
 <!-- 모청 engine -->
 <script src="../shared/mochung/effects.js"></script>
 <script src="../shared/mochung/main.js"></script>
-<!-- link the "웨딩 홈페이지" button to the Korean wedding site -->
-<script>
-  (function () {
-    var b = document.getElementById('btnWebsite');
-    if (b && window.SITE_URLS && window.SITE_URLS.kr) b.href = window.SITE_URLS.kr;
-  })();
-</script>
 </body>
 </html>

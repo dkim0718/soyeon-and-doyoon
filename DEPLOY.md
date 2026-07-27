@@ -4,24 +4,27 @@ Everything is **static** (the only backend is Supabase, hosted separately), serv
 Cloudflare Pages — free, on Cloudflare's global CDN (fast in Seoul *and* the US), automatic
 HTTPS, and it shrugs off the invite-day traffic spike.
 
-## Domain map (consolidated 2026-07-12)
+## Domain map (모청 split off 2026-07-27)
 
-The public pages live on **one domain as paths** — a single Pages project built by
+The **모청 lives on its own apex domain** so invitation traffic stays fully separate from
+the website's (its own Pages project, `npm run build:invite`). The rest of the public
+pages live on **soyeondoyoon.fun as paths** — a single Pages project built by
 `npm run build:root` (output dir `dist-root`): the Korean site at the root, English at
-`/en/`, the 모청 at `/invite/`, one `shared/` beside them. A KR ⇄ EN toggle in the site
-nav switches languages (it carries the current page across).
+`/en/`, one `shared/` beside them. A KR ⇄ EN toggle in the site nav switches languages
+(it carries the current page across). The pre-split `/invite/` path 301-redirects to the
+모청's domain (`_redirects`), so links shared before the split keep working.
 
 | What | URL | Cloudflare Pages project | Build command | Output dir |
 |---|---|---|---|---|
+| 모청 (mobile invitation) | **soyeondoyoon.com** | `soyeondoyoon-mochung` (new) | `npm run build:invite` | `invite` |
 | Korean site (default) | **soyeondoyoon.fun** | `soyeondoyoon-invite` (repurposed) | `npm run build:root` | `dist-root` |
 | English site + afterparty RSVP | **soyeondoyoon.fun/en/** | ↑ same project | ↑ | ↑ |
-| 모청 (mobile invitation) | **soyeondoyoon.fun/invite/** | ↑ same project | ↑ | ↑ |
 | Admin (private) | **doremi.soyeondoyoon.cloud** | `soyeondoyoon-admin` | `npm run build:admin` | `admin` |
 
-Both projects deploy from the **`main`** branch of `github.com/dkim0718/soyeon-and-doyoon`.
+All projects deploy from the **`main`** branch of `github.com/dkim0718/soyeon-and-doyoon`.
 Retired: `kr.soyeondoyoon.com`, `suri.soyeondoyoon.fun`, and the `soyeondoyoon-kr` /
-`soyeondoyoon-en` projects. **soyeondoyoon.com is deliberately EMPTY** (no site attached;
-reserved for whatever comes later). The English page is no longer "unlisted" — it's linked
+`soyeondoyoon-en` projects. **soyeondoyoon.com now hosts the 모청** (it sat empty/reserved
+until the split). The English page is no longer "unlisted" — it's linked
 from the language toggle; the afterparty guest list itself stays protected by per-code
 server-side lookups.
 
@@ -60,25 +63,30 @@ to confirm the site works before attaching the real domain.
 ## Step 3 — Attach the custom domains
 
 In each project → **Custom domains** → **Set up a domain** → enter the domain from the table
-(`soyeondoyoon.com` for invite, `kr.soyeondoyoon.com` for kr, etc.). Because the zones are on
+(`soyeondoyoon.com` for the 모청 project, `soyeondoyoon.fun` for the consolidated site,
+`doremi.soyeondoyoon.cloud` for admin). Because the zones are on
 Cloudflare, it wires the DNS for you and issues SSL automatically.
 
 ## Step 4 — Verify
 
+- `https://soyeondoyoon.com` → 모청 (self-contained; links to no other page).
 - `https://soyeondoyoon.fun` → Korean site; nav **English** toggle → `/en/`, and back via **한국어**.
 - `https://soyeondoyoon.fun/en/` → English site (afterparty RSVP by `?code=`).
-- `https://soyeondoyoon.fun/invite/` → 모청; its **웨딩 홈페이지** button opens the apex.
+- `https://soyeondoyoon.fun/invite/` → 301 to `https://soyeondoyoon.com` (pre-split links).
 - `https://doremi.soyeondoyoon.cloud` → admin (email magic-link sign-in).
 
-To ship an update: `git push` to `main` → both projects rebuild automatically (~1 min).
+To ship an update: `git push` to `main` → all projects rebuild automatically (~1 min).
 
 ---
 
 ## Status (2026-07-12)
 
 - ✅ **Consolidated site live on soyeondoyoon.fun** (table above), auto-deploying from `main`.
-  soyeondoyoon.com is empty by choice; kr./suri. subdomains removed. The idle
+  kr./suri. subdomains removed. The idle
   `soyeondoyoon-kr` / `soyeondoyoon-en` projects can be deleted anytime (or kept as spares).
+- ⏳ **모청 split to soyeondoyoon.com** — repo side done (own build, `_redirects` in the
+  consolidated build); the Pages project + custom domain still need to be created. **Do
+  that BEFORE pushing** — see the first open item below.
 - ✅ **Supabase backend ON** — project `soyeondoyoon-wedding` (Seoul), schema + RLS applied,
   admin = magic-link for the allow-listed email. RSVPs/guestbook/edits are shared everywhere.
   Setup + guest-list guide: **`supabase/README.md`**.
@@ -87,11 +95,18 @@ To ship an update: `git push` to `main` → both projects rebuild automatically 
 
 ## Before the real launch (still open)
 
+- **모청 domain split — create the project BEFORE pushing the split commit.** The commit
+  that moved the 모청 to soyeondoyoon.com also drops `/invite/` from the consolidated
+  build and 301s it there, so pushing first would strand every previously shared link on
+  a domain with nothing behind it. Order: (1) create the `soyeondoyoon-mochung` Pages
+  project (build `npm run build:invite`, output dir `invite`, branch `main`); (2) check
+  its `*.pages.dev` preview; (3) attach `soyeondoyoon.com` as its custom domain; (4) then
+  `git push`.
 - **Real private data.** The committed `invite/config.js` uses **placeholders** for phone numbers,
   bank account and card-pay link (real values live in the gitignored `invite/config.private.js`).
   Before pasting them back and pushing: **make the GitHub repo private** (Cloudflare Pages keeps
   working; only the GitHub Pages staging mirror stops).
-- **Kakao share.** For a rich KakaoTalk preview of the 모청, register `soyeondoyoon.fun` at
+- **Kakao share.** For a rich KakaoTalk preview of the 모청, register `soyeondoyoon.com` at
   developers.kakao.com and put the JavaScript key in `invite/config.js` → `share.kakaoJsKey`
   (`og:image` is already an absolute URL).
 - **Afterparty guest list.** Fill `supabase/guest-list.template.csv` (Group A = `party_limit 2`,

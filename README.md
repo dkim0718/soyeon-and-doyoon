@@ -9,17 +9,25 @@ script vendors the shared code into each deploy root; that is the only "build".
 
 ## The three pages (and the admin)
 
-| Dir       | Subdomain (set in `shared/site-config.js`) | What it is | Linked from |
-|-----------|--------------------------------------------|------------|-------------|
-| `invite/` | `invite.…` | **모청** — the Korean mobile invitation (모바일 청첩장). Single scrolling page: greeting, calendar/D-day, gallery, map, accounts, RSVP overlay. | shared everywhere (KakaoTalk, etc.) |
-| `kr/`     | `kr.…`     | **Korean wedding website** — the full Joy-style multi-page site (welcome, story, schedule, travel, Q&A, gallery, RSVP). | the 모청's "웨딩 홈페이지" button (`SITE_URLS.kr`) |
-| `en/`     | `en.…`     | **English afterparty invite** — same Joy engine, English content, curated-list RSVP with +1 allotments. | **nowhere** — unlisted (see below) |
+| Dir       | URL (set in `shared/site-config.js`) | What it is | Linked from |
+|-----------|--------------------------------------|------------|-------------|
+| `invite/` | `soyeondoyoon.com` (own domain) | **모청** — the Korean mobile invitation (모바일 청첩장). Single scrolling page: greeting, calendar/D-day, gallery, map, accounts, RSVP overlay. | shared everywhere (KakaoTalk, etc.) |
+| `kr/`     | `soyeondoyoon.fun`     | **Korean wedding website** — the full Joy-style multi-page site (welcome, story, schedule, travel, Q&A, gallery, RSVP). | its own URL (the apex); the EN site's **한국어** nav toggle |
+| `en/`     | `soyeondoyoon.fun/en/` | **English afterparty invite** — same Joy engine, English content, curated-list RSVP with +1 allotments. | **nowhere** — unlisted (see below) |
 | `admin/`  | private    | Dashboard: RSVP lists, guestbook moderation, content editor, afterparty guest-list import, JSON backup. | not public |
 
-**The 모청 links _only_ to the KR site.** The English page is the afterparty
-invitation and is reachable **only by its own URL** — it is deliberately linked
-from nowhere. `SITE_URLS.en` exists so the page knows its own address, but it is
-never rendered into any nav or button. Don't add it to one.
+The 모청 deliberately sits on its **own domain** (not a path on the website's
+domain) so invitation visitors stay isolated from website visitors — separate
+Pages projects mean separate analytics, and trimming the 모청's URL leads
+nowhere. The old `soyeondoyoon.fun/invite/` path 301-redirects to it
+(`_redirects`), so pre-split shared links keep working.
+
+**The 모청 links to no other page.** It is fully self-contained (its own
+calendar, map, gallery, and RSVP); the former "웨딩 홈페이지" button to the KR
+site was removed. The English page is the afterparty invitation and is reachable
+**only by its own URL** — it is deliberately linked from nowhere. `SITE_URLS.en`
+exists so the page knows its own address, but it is never rendered into any nav
+or button. Don't add it to one.
 
 ### Shared, not duplicated
 
@@ -27,7 +35,7 @@ Everything reused across pages lives in **`shared/`** — the single source of t
 
 ```
 shared/
-  site-config.js        the three subdomain URLs
+  site-config.js        the public site URLs
   supabase-config.js    backend keys (empty ⇒ localStorage fallback)
   store.js              adapter selector (façade)
   store.localStorage.js localStorage backend (local dev / demo)
@@ -204,8 +212,8 @@ assembled copies are gitignored — `shared/` at the repo root stays canonical.
 Before the first deploy:
 
 1. **Set the real URLs** in `shared/site-config.js` (`SITE_URLS.invite/kr/en`,
-   no trailing slash). The 모청's "웨딩 홈페이지" button and any cross-links read
-   from here.
+   no trailing slash). The admin's afterparty invite-link generator reads
+   `SITE_URLS.en` from here.
 2. **Point DNS** — one subdomain per project (`invite.`, `kr.`, `en.`).
 3. **For the 모청 KakaoTalk share, set an absolute `og:image`.** Kakao (and
    every other scraper) can't use a relative image path. In `invite/config.js`

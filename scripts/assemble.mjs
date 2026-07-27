@@ -22,8 +22,10 @@
  * stays the single source of truth.
  *
  * `root` builds the CONSOLIDATED public site into dist-root/:
- * the Korean page at /, English at /en/, 모청 at /invite/, one
- * shared/ beside them (all same-origin paths on one domain).
+ * the Korean page at /, English at /en/, one shared/ beside
+ * them (same-origin paths on one domain). The 모청 deploys
+ * separately (`assemble.mjs invite`) on its own domain; the
+ * legacy /invite/ path 301s there via _redirects.
  * ========================================================= */
 
 import { promises as fs } from 'node:fs';
@@ -128,9 +130,10 @@ async function assembleSite(site) {
   return { site, files, bytes };
 }
 
-// Consolidated single-domain build: KR at /, EN at /en/, 모청 at
-// /invite/, one shared/ for all three. Per-site `shared` copies and
-// local-only private config never ship.
+// Consolidated single-domain build: KR at /, EN at /en/, one
+// shared/ for both. The 모청 lives on its own domain — the legacy
+// /invite/ path is covered by _redirects. Per-site `shared` copies
+// and local-only private config never ship.
 async function assembleRoot() {
   const dist = path.join(repoRoot, 'dist-root');
   await fs.rm(dist, { recursive: true, force: true });
@@ -141,11 +144,13 @@ async function assembleRoot() {
   const count = (abs, size) => { files += 1; bytes += size; };
   await copyTree(path.join(repoRoot, 'kr'), dist, count, skip);
   await copyTree(path.join(repoRoot, 'en'), path.join(dist, 'en'), count, skip);
-  await copyTree(path.join(repoRoot, 'invite'), path.join(dist, 'invite'), count, skip);
   await copyTree(sharedDir, path.join(dist, 'shared'), count, skip);
+  const redirects = path.join(dist, '_redirects');
+  await fs.copyFile(path.join(repoRoot, '_redirects'), redirects);
+  count(redirects, (await fs.stat(redirects)).size);
   console.log(
     `root: ${files} files (${fmtBytes(bytes)}) → dist-root/  ` +
-    '(KR at /, EN at /en/, 모청 at /invite/)'
+    '(KR at /, EN at /en/, /invite/ → 모청 domain)'
   );
   return { site: 'root', files, bytes };
 }

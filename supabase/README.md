@@ -45,7 +45,7 @@ the browser console logs `[Store] backend = supabase`.
 
 ## 5. Verify
 
-- Submit a wedding RSVP on `soyeondoyoon.fun` → it appears in the admin dashboard
+- Submit a wedding RSVP on the 모청 (`soyeondoyoon.com`) or on `soyeondoyoon.fun` → it appears in the admin dashboard
   (`doremi.soyeondoyoon.cloud`, after magic-link sign-in) **from a different browser**.
 - On `soyeondoyoon.fun/en/?code=…` a seeded guest sees their name + allotment; a
   submit with more seats than allowed is rejected (`OVER_LIMIT`).
