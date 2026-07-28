@@ -238,7 +238,7 @@ function renderSchedule() {
   const items = SITE.schedule.map((it) => `
     <div class="timeline-item">
       <h3>${it.title}</h3>
-      <div class="timeline-when">${it.date} · ${it.time}</div>
+      <div class="timeline-when">${it.time || ""}</div>
       <div class="timeline-where">${it.location}</div>
       <p style="font-size:0.92rem;margin-top:0.35rem">${it.note || ""}</p>
     </div>`).join("");

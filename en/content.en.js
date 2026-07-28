@@ -59,30 +59,22 @@ window.SITE = {
   // Add, remove, or reorder schedule items freely.
   schedule: [
     {
-      title: "Welcome Drinks",
-      date: "Friday, October 30, 2026",
-      time: "5:30 – 6:30 PM",
+      title: "Welcome Drinks",      time: "5:30 – 6:30 PM",
       location: "Yeong Bin Gwan, The Shilla Seoul",
       note: "Cocktail attire.",
     },
     {
-      title: "Ceremony",
-      date: "Friday, October 30, 2026",
-      time: "6:30 – 7:00 PM",
+      title: "Ceremony",      time: "6:30 – 7:00 PM",
       location: "Yeong Bin Gwan, The Shilla Seoul",
       note: "We're getting married! We can't wait to celebrate with you all. Cocktail attire.",
     },
     {
-      title: "Dinner",
-      date: "Friday, October 30, 2026",
-      time: "7:00 – 9:00 PM",
+      title: "Dinner",      time: "7:00 – 9:00 PM",
       location: "Yeong Bin Gwan, The Shilla Seoul",
       note: "Dinner will be indoors or outdoors depending on the weather that evening.",
     },
     {
-      title: "After Party",
-      date: "Friday, October 30, 2026",
-      time: "9:00 PM",
+      title: "After Party",      time: "9:00 PM",
       location: "Yeong Bin Gwan, The Shilla Seoul",
       note: "",
     },
