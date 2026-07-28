@@ -304,7 +304,7 @@ table.cal td.wday::after {
   border: 1px solid var(--line); box-shadow: var(--shadow);
   background: #fff;
 }
-.map-canvas { width: 100%; height: 220px; background: linear-gradient(145deg, #ece6ef, #f6efe9); position: relative; }
+.map-canvas { display: block; width: 100%; height: 220px; background: linear-gradient(145deg, #ece6ef, #f6efe9); position: relative; }
 .map-canvas .pin { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -100%); text-align: center; }
 .map-canvas .pin .dot { font-size: 30px; }
 .map-canvas .pin .label {
