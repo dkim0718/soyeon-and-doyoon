@@ -31,8 +31,8 @@ window.MOCHUNG_DEFAULTS = {
       enName: 'DOYOON',
       phone: '010-0000-0000',           // PLACEHOLDER — real value in config.private.js
       role: '아들',
-      father: { name: '김효종', deceased: true, phone: '010-0000-0000' },
-      mother: { name: '주영실', deceased: true, phone: '010-0000-0000' },
+      father: { name: '김효종', phone: '010-0000-0000' },
+      mother: { name: '주영실', phone: '010-0000-0000' },
     },
     bride: {
       fullName: '김소연',
@@ -40,8 +40,8 @@ window.MOCHUNG_DEFAULTS = {
       enName: 'SOYEON',
       phone: '010-0000-0000',           // PLACEHOLDER — real value in config.private.js
       role: '딸',
-      father: { name: '김성용', deceased: true, phone: '' },
-      mother: { name: '박영식', deceased: true, phone: '' },
+      father: { name: '김성용', phone: '' },
+      mother: { name: '박영식', phone: '' },
     },
   },
 
