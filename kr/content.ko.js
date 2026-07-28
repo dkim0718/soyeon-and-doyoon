@@ -329,13 +329,15 @@ window.SITE = {
   },
 
   // 내비게이션에 이 순서대로 페이지가 나타납니다. 줄을 지우면 그 페이지가 숨겨집니다.
+  // 탭 이름은 영어/한국어 혼용: 하객이 바로 알아봐야 하는 페이지(홈·갤러리·
+  // 마음 전하실 곳)는 한국어, 나머지는 영어 사이트 헤더와 동일하게 씁니다.
   // (미국식 선물 등록[registry] 은 한국 하객 정서에 맞지 않아 생략했습니다 —
   //  대신 '마음 전하실 곳' 계좌 안내 페이지를 씁니다.)
   navigation: [
     { id: "welcome",  label: "홈" },
-    { id: "story",    label: "우리 이야기" },
-    { id: "schedule", label: "예식 안내" },
-    { id: "qanda",    label: "자주 묻는 질문" },
+    { id: "story",    label: "Our Story" },
+    { id: "schedule", label: "Schedule" },
+    { id: "qanda",    label: "Q & A" },
     { id: "moments",  label: "갤러리" },
     { id: "accounts", label: "마음 전하실 곳" },
     { id: "rsvp",     label: "RSVP" },
