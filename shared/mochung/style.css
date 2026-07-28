@@ -311,6 +311,11 @@ table.cal td.wday::after {
   background: #fff; border-radius: 8px; padding: 4px 10px; font-size: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12); white-space: nowrap;
 }
+/* 실제 지도. pointer-events:none — 스크롤을 잡아먹지 않고, 탭하면 카카오맵 링크로 이동 */
+.map-canvas iframe {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  border: 0; pointer-events: none;
+}
 .map-actions { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); }
 .map-actions a {
   padding: 13px 4px; font-size: 0.85em; color: var(--ink-soft);

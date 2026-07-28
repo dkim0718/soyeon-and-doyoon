@@ -104,6 +104,8 @@
             <span class="dot">📍</span>
             <span class="label" data-bind="wedding.venueName">신라호텔 영빈관</span>
           </span>
+          <!-- src 는 main.js 가 config 의 좌표로 채움. 로드 전/실패 시엔 위의 핀이 보임 -->
+          <iframe id="mapFrame" title="오시는 길 지도" loading="lazy"></iframe>
         </a>
         <div class="map-actions">
           <a id="mapNaver" target="_blank" rel="noopener">네이버 지도</a>

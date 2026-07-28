@@ -254,6 +254,8 @@
     $('#mapKakao').href = 'https://map.kakao.com/link/search/' + q;
     $('#mapTmap').href = 'https://surl.tmap.co.kr/?searchName=' + q;
     $('#mapCanvas').href = 'https://map.kakao.com/link/map/' + q + ',' + w.lat + ',' + w.lng;
+    const frame = $('#mapFrame');
+    if (frame) frame.src = 'https://maps.google.com/maps?hl=ko&q=' + w.lat + ',' + w.lng + '&z=16&output=embed';
     $('#btnCopyAddr').addEventListener('click', () => copyText(w.address, '주소가 복사되었습니다.'));
   }
 
