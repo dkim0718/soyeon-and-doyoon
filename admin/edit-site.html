@@ -119,6 +119,9 @@
 <script src="../shared/store.supabase.js"></script>
 <script src="../shared/store.js"></script>
 <script src="admin.js"></script>
+<!-- inline rich-text editor (sanitizer + widget) -->
+<script src="../shared/richtext.js"></script>
+<script src="../shared/richtext-editor.js"></script>
 <!-- load BOTH content files and snapshot their defaults -->
 <script src="../en/content.en.js"></script>
 <script>window.__DEF_EN = window.SITE;</script>
@@ -135,23 +138,28 @@ Admin.gate(function () {
   var preview = null;   // side-by-side iframe (mounted after gate; driven by loadSite)
 
   // Which sections are editable, and their field schema.
+  // Field tuple: [key, label, inputType, rich?]. A truthy 4th element attaches
+  // the inline rich-text editor (per-word size/weight/spacing/case). Fields
+  // whose value is parsed as text elsewhere are deliberately left plain:
+  //   hotels[].stars (numeric), travel[].body (bullet/URL parser),
+  //   qanda[].q ('## ' group-heading sniff in shared/app.js).
   var SECTIONS = [
     { key:'welcome',  navId:'welcome',  label:'환영 인사 (Welcome)',   type:'fields',
-      fields:[['heading','제목 (heading)','text'],['message','메시지 (message)','textarea']] },
+      fields:[['heading','제목 (heading)','text',1],['message','메시지 (message)','textarea',1]] },
     { key:'story',    navId:'story',    label:'우리 이야기 (Story)',   type:'fields',
-      fields:[['intro','소제목 (intro)','text'],['text','본문 (text)','textarea']] },
+      fields:[['intro','소제목 (intro)','text',1],['text','본문 (text)','textarea',1]] },
     { key:'schedule', navId:'schedule', label:'일정 (Schedule)',       type:'list',
-      itemFields:[['title','제목'],['time','시간'],['location','장소'],['note','비고','textarea']] },
+      itemFields:[['title','제목','text',1],['time','시간','text',1],['location','장소','text',1],['note','비고','textarea',1]] },
     { key:'hotels',   navId:'stay',     label:'숙소 (Where to Stay)',  type:'list',
-      itemFields:[['name','이름'],['address','주소'],['stars','별점'],['blurb','설명','textarea']] },
+      itemFields:[['name','이름','text',1],['address','주소','text',1],['stars','별점'],['blurb','설명','textarea',1]] },
     { key:'travel',   navId:'travel',   label:'여행/오시는 길 (Travel)', type:'list',
-      itemFields:[['title','제목'],['body','내용','textarea']] },
+      itemFields:[['title','제목','text',1],['body','내용','textarea']] },
     { key:'qanda',    navId:'qanda',    label:'자주 묻는 질문 (Q&A)',  type:'list',
-      itemFields:[['q','질문'],['a','답변','textarea']] },
+      itemFields:[['q','질문'],['a','답변','textarea',1]] },
     { key:'moments',  navId:'moments',  label:'갤러리 소개 (Gallery)', type:'fields',
-      fields:[['intro','소개 문구','textarea']] },
+      fields:[['intro','소개 문구','textarea',1]] },
     { key:'rsvp',     navId:'rsvp',     label:'참석 회신 (RSVP)',      type:'fields',
-      fields:[['message','안내 문구','textarea'],['deadline','회신 마감일','text']] },
+      fields:[['message','안내 문구','textarea',1],['deadline','회신 마감일','text',1]] },
   ];
 
   var $ = function (id) { return document.getElementById(id); };
@@ -183,6 +191,7 @@ Admin.gate(function () {
         var r = fieldRow(f[1], f[2] || 'text', obj[f[0]]);
         rows[f[0]] = r.inp;
         card.appendChild(r.wrap);
+        if (f[3] && window.RichTextEditor) RichTextEditor.attach(r.inp);
       });
       $('sections').appendChild(card);
       return function () {
@@ -208,6 +217,7 @@ Admin.gate(function () {
         var r = fieldRow(f[1], f[2] || 'text', (itemData || {})[f[0]]);
         map[f[0]] = r.inp;
         box.appendChild(r.wrap);
+        if (f[3] && window.RichTextEditor) RichTextEditor.attach(r.inp);
       });
       var ref = { map: map, box: box };
       itemInputs.push(ref);

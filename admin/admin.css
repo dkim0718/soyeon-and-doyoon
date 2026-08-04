@@ -115,3 +115,28 @@ table.data .num { text-align: center; }
   .admin-wrap.split { grid-template-columns: 1fr; max-width: 760px; }
   .admin-wrap.split > .preview-pane { grid-column: 1; position: static; height: 70vh; }
 }
+
+/* ---------- 인라인 리치텍스트 편집기 (richtext-editor.js) ---------- */
+.rt-field { position: relative; }
+.rt-editor {
+  min-height: 44px;
+  border: 1px solid var(--line); border-radius: 10px;
+  padding: 12px 14px; background: #fff;
+  font: inherit; line-height: 1.6; color: var(--ink);
+  outline: none; white-space: pre-wrap; word-break: break-word;
+}
+.rt-editor.rt-multiline { min-height: 96px; }
+.rt-editor:focus { border-color: var(--accent); }
+.rt-editor:empty::before { content: attr(data-placeholder); color: var(--ink-faint); }
+.rt-toolbar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  padding: 8px 10px; margin-bottom: 6px;
+  background: var(--bg-soft); border: 1px solid var(--line); border-radius: 10px;
+}
+.rt-ctl { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--ink-soft); }
+.rt-range { width: 92px; }
+.rt-btn {
+  font-size: 12px; padding: 5px 10px; border-radius: 7px;
+  background: #fff; border: 1px solid var(--line); color: var(--ink-soft); cursor: pointer;
+}
+.rt-btn:hover { border-color: var(--accent); color: var(--accent-deep); }
