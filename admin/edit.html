@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="admin.css">
 </head>
 <body>
-<div class="admin-wrap" id="adminApp" hidden>
+<div class="admin-wrap split" id="adminApp" hidden>
   <div class="admin-head">
     <h1>✏️ 청첩장 수정</h1>
     <div class="admin-nav">
@@ -24,6 +24,7 @@
     </div>
   </div>
 
+  <div class="form-col">
   <div class="notice-bar">
     수정 내용은 <b>이 브라우저의 localStorage</b>(또는 연결된 백엔드)에 <code>invite</code> 범위 override로
     저장되어 즉시 미리보기에 반영됩니다. 모든 방문자에게 영구 반영하려면 "설정 JSON 내보내기"로 받은 내용을
@@ -182,6 +183,9 @@
     </div>
     <p class="hint" style="margin-top:10px;">저장하면 이 브라우저에서 보는 청첩장에 즉시 반영됩니다.</p>
   </div>
+  </div><!-- /.form-col -->
+
+  <aside class="preview-pane" id="previewPane"></aside>
 </div>
 
 <!-- 모청 기본값 (defaults/passcode) -->
@@ -233,6 +237,10 @@ Admin.gate(async function () {
     wd.getFullYear() + '-' + p(wd.getMonth() + 1) + '-' + p(wd.getDate());
   document.getElementById('weddingTime').value = p(wd.getHours()) + ':' + p(wd.getMinutes());
 
+  // 미리보기 — 모청은 480px 폭에 1:1 (스케일 없음)
+  const preview = Admin.mountPreview(
+    document.getElementById('previewPane'), 'invite', { pin: 480, bg: '#efe9e4' });
+
   // 저장
   document.getElementById('btnSave').addEventListener('click', async function () {
     const out = JSON.parse(JSON.stringify(cfg));
@@ -247,6 +255,7 @@ Admin.gate(async function () {
     const t = document.getElementById('weddingTime').value;
     if (d && t) out.wedding.dateISO = d + 'T' + t + ':00+09:00';
     await store.saveConfigOverride('invite', out);
+    preview.reload();
     alert('저장되었습니다. 미리보기에서 확인하세요.');
   });
 

@@ -24,7 +24,7 @@
 </style>
 </head>
 <body>
-<div class="admin-wrap" id="adminApp" hidden>
+<div class="admin-wrap split" id="adminApp" hidden>
   <div class="admin-head">
     <h1>📝 웹사이트 수정</h1>
     <div class="admin-nav">
@@ -37,6 +37,7 @@
     </div>
   </div>
 
+  <div class="form-col">
   <!-- 사이트 디자인 (모든 방문자에게 적용) -->
   <div class="card" id="designCard">
     <h2>🎨 사이트 디자인</h2>
@@ -100,6 +101,9 @@
     <button class="btn btn-ghost btn-sm" id="btnReset">기본값으로 되돌리기</button>
     <span id="status"></span>
   </div>
+  </div><!-- /.form-col -->
+
+  <aside class="preview-pane" id="previewPane"></aside>
 </div>
 
 <!-- shared data backend (load order matters) -->
@@ -128,6 +132,7 @@ Admin.gate(function () {
   var site = 'en';
   var collectors = [];  // per-section: () => [key, value]
   var loadedJSON = {};  // section JSON as loaded into this form (change detection)
+  var preview = null;   // side-by-side iframe (mounted after gate; driven by loadSite)
 
   // Which sections are editable, and their field schema.
   var SECTIONS = [
@@ -241,6 +246,7 @@ Admin.gate(function () {
     $('tabEn').classList.toggle('on', site === 'en');
     $('tabKr').classList.toggle('on', site === 'kr');
     $('previewLink').href = Admin.siteUrl(site);
+    if (preview) preview.setSite(site);   // repoint the live preview to this locale
     $('status').textContent = '';
     var base = defaults[site] || {};
     var override = (await window.Store.getConfigOverride(SCOPE[site])) || {};
@@ -369,6 +375,7 @@ Admin.gate(function () {
       });
       msg.style.color = '#3a7d5a';
       msg.textContent = '디자인이 저장되었습니다 — 모든 방문자에게 적용됩니다.';
+      if (preview) preview.reload();
     } catch (e) {
       msg.style.color = '#b55';
       msg.textContent = '저장 실패: ' + (e && e.message ? e.message : e);
@@ -382,6 +389,11 @@ Admin.gate(function () {
     $('designMsg').style.color = '#8b7f7a';
     $('designMsg').textContent = '기본 디자인으로 되돌렸습니다.';
   });
+
+  // Website preview renders at a real device width (1280) then scales to fit;
+  // defer the first load so loadSite() drives it to the initial 'en' tab.
+  preview = Admin.mountPreview(
+    document.getElementById('previewPane'), site, { devWidth: 1280, defer: true });
 
   loadDesign();
   loadSite('en');

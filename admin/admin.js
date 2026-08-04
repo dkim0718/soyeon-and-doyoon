@@ -141,6 +141,139 @@ window.Admin = (function () {
     });
   }
 
+  /* ---------- 사이트 미리보기 (side-by-side iframe) ---------- */
+
+  // Mount a live preview of a public site into `host` (a .preview-pane el).
+  //   which : 'invite' | 'kr' | 'en'   (the site to frame, via siteUrl())
+  //   opts  : { pin, devWidth, defer, bg }
+  //     pin      — fixed pane width in px (모청: 480, no scaling, no device tabs)
+  //     devWidth — initial device width to render then scale-to-fit (website)
+  //     defer    — don't auto-load; caller drives the first frame via setSite()
+  //     bg       — stage background shown during load (match the site's bg)
+  // Returns { reload, setSite, frame }.
+  //
+  // The frame is cross-origin in production (admin is its own domain), so it is
+  // NOT sandboxed (the sites read their own localStorage) and cannot be reloaded
+  // via contentWindow — reload() re-assigns src with a cache-busting ?t=.
+  var PREVIEW_WIDTHS = [
+    { w: 390,  label: '📱', title: '모바일 390' },
+    { w: 820,  label: '📲', title: '태블릿 820' },
+    { w: 1280, label: '🖥', title: '데스크톱 1280' },
+  ];
+  var PREVIEW_WIDTH_KEY = 'sd-admin-preview-width';
+
+  function mountPreview(host, which, opts) {
+    opts = opts || {};
+    var scaled = !opts.pin;               // 모청 is pinned & unscaled; website scales
+    var devWidth = opts.devWidth || 1280;
+
+    if (opts.pin) {
+      var wrap = host.closest ? host.closest('.split') : null;
+      if (wrap) wrap.style.setProperty('--pane', opts.pin + 'px');
+    }
+
+    var bar = document.createElement('div');
+    bar.className = 'preview-bar';
+
+    var tabs = null;
+    if (scaled) {
+      var saved = parseInt(localStorage.getItem(PREVIEW_WIDTH_KEY), 10);
+      if (PREVIEW_WIDTHS.some(function (x) { return x.w === saved; })) devWidth = saved;
+      tabs = document.createElement('div');
+      tabs.className = 'dev-tabs';
+      PREVIEW_WIDTHS.forEach(function (x) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'btn btn-ghost btn-sm' + (x.w === devWidth ? ' on' : '');
+        b.textContent = x.label;
+        b.title = x.title;
+        b.addEventListener('click', function () {
+          devWidth = x.w;
+          try { localStorage.setItem(PREVIEW_WIDTH_KEY, String(x.w)); } catch (e) { /* private mode */ }
+          Array.prototype.forEach.call(tabs.children, function (c) { c.classList.remove('on'); });
+          b.classList.add('on');
+          rescale();
+        });
+        tabs.appendChild(b);
+      });
+      bar.appendChild(tabs);
+    }
+
+    var reloadBtn = document.createElement('button');
+    reloadBtn.type = 'button';
+    reloadBtn.className = 'btn btn-ghost btn-sm';
+    reloadBtn.textContent = '↻ 새로고침';
+    reloadBtn.style.marginLeft = 'auto';
+    bar.appendChild(reloadBtn);
+
+    var hint = document.createElement('div');
+    hint.className = 'preview-hint';
+    hint.hidden = true;
+    // Cross-origin localStorage is per-origin: on the localStorage backend the
+    // admin's saved override is invisible to the framed site (different domain),
+    // so the preview would show the plain defaults. In local dev both are the
+    // same origin (localhost), so it works there even without Supabase.
+    if (backend() !== 'supabase' && !isLocalPreview()) {
+      hint.hidden = false;
+      hint.textContent =
+        'localStorage 백엔드에서는 저장한 내용이 미리보기(다른 도메인)에 보이지 않습니다. ' +
+        'Supabase 연결 시 정상 반영됩니다.';
+    }
+
+    var stage = document.createElement('div');
+    stage.className = 'preview-stage';
+    if (opts.bg) stage.style.background = opts.bg;
+
+    var frame = document.createElement('iframe');
+    frame.title = '미리보기';
+    frame.setAttribute('loading', 'lazy');
+    frame.setAttribute('referrerpolicy', 'no-referrer');
+
+    if (scaled) {
+      var scaleWrap = document.createElement('div');
+      scaleWrap.className = 'preview-scale';
+      scaleWrap.appendChild(frame);
+      stage.appendChild(scaleWrap);
+    } else {
+      stage.appendChild(frame);
+    }
+
+    host.appendChild(bar);
+    host.appendChild(hint);
+    host.appendChild(stage);
+
+    var currentSite = which;
+
+    function srcFor(site) {
+      var base = siteUrl(site);
+      return base + (base.indexOf('?') >= 0 ? '&' : '?') + 't=' + Date.now();
+    }
+    function setSite(site) { currentSite = site; frame.src = srcFor(site); }
+    function reload() { setSite(currentSite); }
+
+    function rescale() {
+      if (!scaled) return;
+      var w = stage.clientWidth || 1;
+      stage.style.setProperty('--scale', w / devWidth);
+      stage.style.setProperty('--dev-w', devWidth + 'px');
+    }
+
+    reloadBtn.addEventListener('click', reload);
+    frame.addEventListener('load', rescale);
+    if (scaled) {
+      if (window.ResizeObserver) {
+        new ResizeObserver(rescale).observe(stage);
+      } else {
+        window.addEventListener('resize', rescale);
+      }
+    }
+
+    if (!opts.defer) setSite(which);
+    rescale();
+
+    return { reload: reload, setSite: setSite, frame: frame };
+  }
+
   /* ---------- config override 병합 ---------- */
 
   function deepMerge(base, over) {
@@ -309,6 +442,7 @@ window.Admin = (function () {
     backend: backend,
     siteUrl: siteUrl,
     wireSiteLinks: wireSiteLinks,
+    mountPreview: mountPreview,
     gate: gate,
     logout: logout,
   };
