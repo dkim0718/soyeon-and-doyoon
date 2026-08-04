@@ -89,7 +89,7 @@
     <div class="site-tabs">
       <button class="btn btn-ghost btn-sm" id="tabEn" data-site="en">🇬🇧 English site</button>
       <button class="btn btn-ghost btn-sm" id="tabKr" data-site="kr">🇰🇷 한국어 사이트</button>
-      <a class="btn btn-ghost btn-sm" id="previewLink" href="../en/" target="_blank" rel="noopener" style="margin-left:auto;">미리보기 ↗</a>
+      <a class="btn btn-ghost btn-sm" id="previewLink" href="../en/index.html" data-site-link="en" target="_blank" rel="noopener" style="margin-left:auto;">미리보기 ↗</a>
     </div>
   </div>
 
@@ -240,7 +240,7 @@ Admin.gate(function () {
     site = which;
     $('tabEn').classList.toggle('on', site === 'en');
     $('tabKr').classList.toggle('on', site === 'kr');
-    $('previewLink').href = site === 'en' ? '../en/' : '../kr/';
+    $('previewLink').href = Admin.siteUrl(site);
     $('status').textContent = '';
     var base = defaults[site] || {};
     var override = (await window.Store.getConfigOverride(SCOPE[site])) || {};

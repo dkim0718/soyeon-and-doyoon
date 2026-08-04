@@ -104,6 +104,43 @@ window.Admin = (function () {
     } catch (e) { return false; }
   }
 
+  /* ---------- 사이트 바로가기 링크 ---------- */
+
+  // 배포된 admin 은 자체 도메인(doremi.…)의 독립 루트입니다. 따라서
+  // "../invite/" 같은 상대경로는 admin 도메인의 /invite/ 로 붙는데,
+  // 그곳에는 assemble.mjs 가 config.js 만 복사해 두므로 페이지가 없어
+  // 404 가 납니다. 배포 환경에서는 site-config.js 의 절대 URL 을 씁니다.
+  // 반대로 로컬 개발은 저장소 루트를 그대로 서빙하므로 상대경로가
+  // 맞습니다 — 그래야 배포본이 아니라 "지금 수정 중인" 사본이 열립니다.
+  var LOCAL_SITE_PATHS = {
+    invite: '../invite/index.html',
+    kr: '../kr/index.html',
+    en: '../en/index.html',
+  };
+
+  function isLocalPreview() {
+    var h = location.hostname;
+    return location.protocol === 'file:' ||
+      h === '' || h === 'localhost' || h === '127.0.0.1' || h === '::1' || h === '[::1]';
+  }
+
+  function siteUrl(which) {
+    var local = LOCAL_SITE_PATHS[which] || '../' + which + '/';
+    if (isLocalPreview()) return local;
+    return (window.SITE_URLS && window.SITE_URLS[which]) || local;
+  }
+
+  // [data-site-link="invite|kr|en"] 앵커를 환경에 맞는 주소로 맞춰 줍니다.
+  // 마크업의 href 는 JS 가 죽었을 때를 위한 로컬 폴백으로 남겨 둡니다.
+  function wireSiteLinks(root) {
+    var els = (root || document).querySelectorAll('[data-site-link]');
+    Array.prototype.forEach.call(els, function (a) {
+      a.href = siteUrl(a.getAttribute('data-site-link'));
+      a.target = '_blank';
+      a.rel = 'noopener';
+    });
+  }
+
   /* ---------- config override 병합 ---------- */
 
   function deepMerge(base, over) {
@@ -252,6 +289,14 @@ window.Admin = (function () {
     location.reload();
   }
 
+  // admin.js 는 항상 site-config.js 뒤, </body> 직전에서 로드되므로
+  // 이 시점에 DOM 과 SITE_URLS 가 모두 준비되어 있습니다.
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { wireSiteLinks(); });
+  } else {
+    wireSiteLinks();
+  }
+
   return {
     esc: esc,
     fmtDateTime: fmtDateTime,
@@ -262,6 +307,8 @@ window.Admin = (function () {
     deepMerge: deepMerge,
     mergedInviteConfig: mergedInviteConfig,
     backend: backend,
+    siteUrl: siteUrl,
+    wireSiteLinks: wireSiteLinks,
     gate: gate,
     logout: logout,
   };
