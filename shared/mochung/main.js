@@ -91,6 +91,33 @@
     document.documentElement.style.setProperty('--font-scale', cfg.theme.fontScale || 1);
   }
 
+  /* ---------- 라이브 디자인 미리보기 (관리자 → 임베드된 청첩장) ----------
+     admin/edit.html 이 이 페이지를 iframe 으로 띄우고 디자인 컨트롤(폰트
+     프리셋·글자 크기)을 실시간으로 post 합니다. 미리보기 전용: 메모리에만
+     적용, 저장·공유 안 함. 하객은 이 페이지를 최상위(top-level)로 보므로
+     window.parent === window 가드에 걸려 메시지를 받지 않습니다. */
+  function trustedAdminOrigin(origin) {
+    if (origin === 'https://doremi.soyeondoyoon.cloud') return true;
+    return /^https?:\/\/(localhost|127\.0\.0\.1|(?:192\.168|10\.\d{1,3})\.\d{1,3}\.\d{1,3})(?::\d+)?$/.test(origin);
+  }
+  function applyThemePreview(theme) {
+    if (!theme || typeof theme !== 'object') return;
+    const root = document.documentElement;
+    if (typeof theme.fontPreset === 'string' && /^[\w-]{1,32}$/.test(theme.fontPreset)) {
+      root.dataset.fontPreset = theme.fontPreset;
+    }
+    if (theme.fontScale != null) {
+      const n = parseFloat(theme.fontScale);
+      if (n >= 0.5 && n <= 2) root.style.setProperty('--font-scale', n);
+    }
+  }
+  window.addEventListener('message', function (e) {
+    if (window.parent === window) return;            // 임베드 상태에서만 반영
+    if (!trustedAdminOrigin(e.origin)) return;
+    const d = e.data;
+    if (d && d.__sdThemePreview) applyThemePreview(d.theme);
+  });
+
   function personLine(parent) {
     if (!parent || !parent.name) return '';
     return (parent.deceased ? '<span class="deceased">故</span>' : '') + parent.name;

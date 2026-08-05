@@ -244,12 +244,33 @@ window.Admin = (function () {
 
     var currentSite = which;
 
+    var loaded = false;     // the frame's current document has fired 'load'
+    var lastPost = null;    // most recent preview message (re-sent after reload)
+
     function srcFor(site) {
       var base = siteUrl(site);
       return base + (base.indexOf('?') >= 0 ? '&' : '?') + 't=' + Date.now();
     }
-    function setSite(site) { currentSite = site; frame.src = srcFor(site); }
+    // The framed site's origin (same-origin in local dev where siteUrl is
+    // relative; the site's own domain in production). Used as postMessage's
+    // targetOrigin so a preview message can only reach the intended site.
+    function targetOrigin() {
+      try { return new URL(siteUrl(currentSite), location.href).origin; }
+      catch (e) { return '*'; }
+    }
+    function setSite(site) { currentSite = site; loaded = false; frame.src = srcFor(site); }
     function reload() { setSite(currentSite); }
+
+    // Push a live message to the framed site. The site applies it in memory and
+    // never persists it (preview only). Held until the frame's 'load', then
+    // re-sent after every navigation so the preview re-syncs on reload / tab
+    // switch. No-op if the site engine has no receiver (older deploys).
+    function post(msg) {
+      lastPost = msg;
+      if (loaded && frame.contentWindow) {
+        try { frame.contentWindow.postMessage(msg, targetOrigin()); } catch (e) { /* cross-origin timing */ }
+      }
+    }
 
     function rescale() {
       if (!scaled) return;
@@ -259,7 +280,11 @@ window.Admin = (function () {
     }
 
     reloadBtn.addEventListener('click', reload);
-    frame.addEventListener('load', rescale);
+    frame.addEventListener('load', function () {
+      loaded = true;
+      if (lastPost) post(lastPost);   // re-sync design after any (re)load
+      rescale();
+    });
     if (scaled) {
       if (window.ResizeObserver) {
         new ResizeObserver(rescale).observe(stage);
@@ -271,7 +296,7 @@ window.Admin = (function () {
     if (!opts.defer) setSite(which);
     rescale();
 
-    return { reload: reload, setSite: setSite, frame: frame };
+    return { reload: reload, setSite: setSite, frame: frame, post: post };
   }
 
   /* ---------- config override 병합 ---------- */

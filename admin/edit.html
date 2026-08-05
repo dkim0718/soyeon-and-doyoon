@@ -241,6 +241,23 @@ Admin.gate(async function () {
   const preview = Admin.mountPreview(
     document.getElementById('previewPane'), 'invite', { pin: 480, bg: '#efe9e4' });
 
+  // 라이브 미리보기: 디자인 컨트롤(폰트 프리셋·글자 크기)을 실시간 전송.
+  // 미리보기 전용 — "저장하기" 전까지 아무것도 기록되지 않습니다.
+  function pushThemePreview() {
+    if (!preview || !preview.post) return;
+    const presetEl = document.querySelector('[data-cfg="theme.fontPreset"]');
+    const scaleEl = document.querySelector('[data-cfg="theme.fontScale"]');
+    preview.post({ __sdThemePreview: 1, theme: {
+      fontPreset: presetEl ? presetEl.value : undefined,
+      fontScale: scaleEl ? parseFloat(scaleEl.value) : undefined,
+    } });
+  }
+  ['theme.fontPreset', 'theme.fontScale'].forEach(function (cfg) {
+    const el = document.querySelector('[data-cfg="' + cfg + '"]');
+    if (el) { el.addEventListener('change', pushThemePreview); el.addEventListener('input', pushThemePreview); }
+  });
+  pushThemePreview();   // seed once (held until the frame's first load)
+
   // 저장
   document.getElementById('btnSave').addEventListener('click', async function () {
     const out = JSON.parse(JSON.stringify(cfg));

@@ -340,9 +340,39 @@ Admin.gate(function () {
     $('dBg').value = p.bg; $('dAccent').value = p.accent;
     $('dAlt').value = p.alt; $('dText').value = p.text;
     dPreset = p.id;
+    pushDesignPreviewSoon();
   });
   ['dBg', 'dAccent', 'dAlt', 'dText'].forEach(function (id) {
     $(id).addEventListener('input', function () { dPreset = 'custom'; });
+  });
+
+  /* Live preview: push the design controls to the framed site as they change,
+     so fonts/colors update instantly. Preview-only — nothing is written until
+     "디자인 저장" is clicked. Blank inputs fall back to the site default (the
+     receiver rebuilds from a clean baseline on every message). */
+  var _dpTimer = null;
+  function currentDesignPayload() {
+    return {
+      fonts: designFonts('dHeading', 'dBrand', 'dBody'),
+      fontsKo: designFonts('dHeadingKo', 'dBrandKo', 'dBodyKo'),
+      colors: {
+        preset: dPreset,
+        bg: $('dBg').value, accent: $('dAccent').value,
+        alt: $('dAlt').value, text: $('dText').value,
+      },
+    };
+  }
+  function pushDesignPreview() {
+    if (preview && preview.post) preview.post({ __sdDesignPreview: 1, design: currentDesignPayload() });
+  }
+  function pushDesignPreviewSoon() {
+    clearTimeout(_dpTimer);
+    _dpTimer = setTimeout(pushDesignPreview, 120);
+  }
+  ['dHeading', 'dBrand', 'dBody', 'dHeadingKo', 'dBrandKo', 'dBodyKo',
+   'dBg', 'dAccent', 'dAlt', 'dText'].forEach(function (id) {
+    $(id).addEventListener('input', pushDesignPreviewSoon);
+    $(id).addEventListener('change', pushDesignPreviewSoon);
   });
 
   async function loadDesign() {
@@ -405,7 +435,7 @@ Admin.gate(function () {
   preview = Admin.mountPreview(
     document.getElementById('previewPane'), site, { devWidth: 1280, defer: true });
 
-  loadDesign();
+  loadDesign().then(pushDesignPreview);   // seed the preview to the loaded design
   loadSite('en');
 });
 </script>

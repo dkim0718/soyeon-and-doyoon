@@ -773,6 +773,68 @@ function refreshPanelState() {
 }
 
 /* ----------------------------------------------------------
+   Live design preview (admin → this page, only when embedded)
+   ----------------------------------------------------------
+   admin/edit-site.html frames this page and posts the design
+   controls (fonts + colors) as they change, so the couple sees
+   the result live BEFORE publishing to guests. Preview-only:
+   applied to this in-memory instance via applySettings(), never
+   saved and never shared. Guests view this page top-level, so
+   the `window.parent === window` guard means they never receive
+   or process any of these messages. */
+
+function trustedAdminOrigin(origin) {
+  if (origin === "https://doremi.soyeondoyoon.cloud") return true;
+  // local dev / LAN: admin served from localhost, 127.0.0.1, or a private IP
+  return /^https?:\/\/(localhost|127\.0\.0\.1|(?:192\.168|10\.\d{1,3})\.\d{1,3}\.\d{1,3})(?::\d+)?$/.test(origin);
+}
+function safeFontName(v) {
+  if (typeof v !== "string") return null;
+  const s = v.trim().slice(0, 60);
+  return /^[\w .\-]+$/.test(s) ? s : null;   // letters/digits/space/dot/hyphen
+}
+function safeHexColor(v) {
+  return (typeof v === "string" && /^#[0-9a-fA-F]{3,8}$/.test(v.trim())) ? v.trim() : null;
+}
+// The baseline the preview builds on: built-in defaults + this locale's site
+// fontDefaults. It deliberately EXCLUDES remoteDesign/local picks so the preview
+// mirrors exactly the admin's controls — a field the admin cleared falls back to
+// the site default rather than clinging to a previously-applied value.
+function previewDesignBase() {
+  const siteFonts = normFonts((window.SITE && window.SITE.fontDefaults) || {});
+  return {
+    fonts: { ...DEFAULT_SETTINGS.fonts, ...siteFonts },
+    colors: { ...DEFAULT_SETTINGS.colors },
+    layout: { ...settings.layout },   // design panel here doesn't touch layout
+  };
+}
+function applyDesignPreview(payload) {
+  if (!payload || typeof payload !== "object") return;
+  const base = previewDesignBase();
+  const isKo = window.SITE && window.SITE.locale === "ko";
+  const rf = normFonts((isKo ? payload.fontsKo : payload.fonts) || {});
+  for (const role of ["heading", "brand", "body"]) {
+    if (rf[role] === "None") base.fonts[role] = "None";
+    else { const f = safeFontName(rf[role]); if (f) base.fonts[role] = f; }
+  }
+  const c = payload.colors || {};
+  for (const k of ["bg", "accent", "alt", "text"]) {
+    const hex = safeHexColor(c[k]);
+    if (hex) base.colors[k] = hex;
+  }
+  if (typeof c.preset === "string") base.colors.preset = c.preset;
+  settings = base;
+  applySettings();
+  if (designEnabled()) refreshPanelState();
+}
+window.addEventListener("message", (e) => {
+  if (window.parent === window) return;              // ignore unless embedded
+  if (!trustedAdminOrigin(e.origin)) return;
+  const d = e.data;
+  if (d && d.__sdDesignPreview) applyDesignPreview(d.design);
+});
+
+/* ----------------------------------------------------------
    Admin content override (edited in /admin/edit-site.html)
    ---------------------------------------------------------- */
 
