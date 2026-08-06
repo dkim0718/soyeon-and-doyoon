@@ -15,9 +15,9 @@ window.SITE = {
   // heading = 페이지 제목 전체, brand = 상단 사이트 타이틀(S & D 모노그램 + 이름)
   // brand 는 영어 사이트 헤더와 똑같이 보이도록 같은 세리프를 씁니다.
   fontDefaults: {
-    heading: "Nanum Myeongjo",
-    brand: "EB Garamond",
-    body: "Noto Sans KR",
+    heading: "SD Jeongche",   // 모든 한국어 텍스트에 산돌 SD정체 적용(제목·이름·본문).
+    brand: "SD Jeongche",     // 관리자 디자인 패널에서 다른 글꼴로 언제든 변경 가능.
+    body: "SD Jeongche",
   },
 
   couple: {
@@ -27,7 +27,7 @@ window.SITE = {
     // 헤더·푸터·탭 제목에 실제로 표시되는 이름 — 히어로와 동일한 한국어 성함.
     // 기존 저장된 override 에 없는 새 필드라 가려지지 않습니다(displayName 은 override 됨).
     brandName: "김도윤 & 김소연",
-    monogram: "S & D",      // 로고 마크(성씨가 모두 '김'이라 이니셜은 영문 유지)
+    monogram: "D & S",      // 로고 마크(신랑 먼저 — 히어로/헤더 이름 순서와 동일)
     // 홈 히어로에 크게 표시되는 이름 — 한국어 정식 성함(신랑 먼저).
     // 이 필드가 있으면 영문 partner1/2 대신 사용됩니다(한국어 사이트 전용).
     heroPartner1: "김도윤",

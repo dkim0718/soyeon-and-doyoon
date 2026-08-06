@@ -1140,3 +1140,9 @@ html[data-hero="classic"] .hero-photo-wrap .hero-img {
   background: var(--c-accent);
   margin: 2.6rem auto 0;
 }
+
+/* KR site uses SD정체 for all Korean text (incl. the header/footer names, which
+   ride --f-brand). Keep the Latin "D & S" monogram in a Latin serif so it stays
+   crisp — scoped to lang=ko so the English site's monogram is untouched. */
+html[lang="ko"] .brand-monogram,
+html[lang="ko"] .footer-monogram { font-family: "EB Garamond", Georgia, serif; }
