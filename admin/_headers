@@ -1,0 +1,7 @@
+# Admin is a private, low-traffic dashboard (the couple + one helper).
+# Revalidate every asset before use — cheap 304s when unchanged — so a
+# deploy's fresh HTML never runs against a stale cached admin.js. That
+# version skew is what silently breaks the live preview (and once threw
+# "Admin.mountPreview is not a function") until a manual hard refresh.
+/*
+  Cache-Control: no-cache
