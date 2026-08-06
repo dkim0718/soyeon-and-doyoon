@@ -24,14 +24,20 @@ const FONT_CHOICES = {
 /* Korean-first font sets for the ko site's design panel. Every font here is
    loaded up front by kr/index.html's static <link>, so switching is instant. */
 const FONT_CHOICES_KO = {
-  heading: ["Nanum Myeongjo", "Noto Serif KR", "Gowun Batang", "Song Myung", "Hahmlet", "Black Han Sans", "Do Hyeon", "Jua"],
+  heading: ["SD Jeongche", "Nanum Myeongjo", "Noto Serif KR", "Gowun Batang", "Song Myung", "Hahmlet", "Black Han Sans", "Do Hyeon", "Jua"],
   brand: ["Nanum Pen Script", "Gaegu", "Gamja Flower", "None"],
-  body: ["Noto Sans KR", "Gowun Dodum", "Nanum Gothic", "IBM Plex Sans KR", "Sunflower"],
+  body: ["Noto Sans KR", "SD Jeongche", "Gowun Dodum", "Nanum Gothic", "IBM Plex Sans KR", "Sunflower"],
 };
 
 function fontChoices() {
   return (typeof SITE !== "undefined" && SITE.locale === "ko") ? FONT_CHOICES_KO : FONT_CHOICES;
 }
+
+// Fonts served by an external webfont provider (Sandoll Cloud), NOT Google
+// Fonts — each site loads them via its own <link>, so they must be excluded
+// from the dynamic Google Fonts request (css2 400s the WHOLE request on an
+// unknown family name, which would drop every other font too).
+const EXTERNAL_FONTS = new Set(["SD Jeongche"]);
 
 const PALETTES = [
   { id: "magnolia",  name: "Magnolia",   bg: "#f8f1ef", accent: "#875346", alt: "#5a6857", text: "#333333" },
@@ -157,7 +163,9 @@ function loadGoogleFonts() {
   // single-weight display fonts), which would drop every font. Bold weights for
   // the built-in choices come from each page's static <link>; this dynamic link
   // just guarantees any custom-typed font also loads.
-  const parts = [...fams].map((f) => "family=" + encodeURIComponent(f).replace(/%20/g, "+"));
+  const parts = [...fams]
+    .filter((f) => f && !EXTERNAL_FONTS.has(f))
+    .map((f) => "family=" + encodeURIComponent(f).replace(/%20/g, "+"));
   const link = document.getElementById("gfonts");
   if (link) link.href = "https://fonts.googleapis.com/css2?" + parts.join("&") + "&display=swap";
 }
@@ -584,8 +592,9 @@ function designEnabled() {
 function ensurePreviewFonts() {
   const fams = new Set();
   for (const role of ["heading", "brand", "body"]) {
-    for (const f of fontChoices()[role]) if (f && f !== "None") fams.add(f);
-    if (settings.fonts[role] && settings.fonts[role] !== "None") fams.add(settings.fonts[role]);
+    for (const f of fontChoices()[role]) if (f && f !== "None" && !EXTERNAL_FONTS.has(f)) fams.add(f);
+    const pick = settings.fonts[role];
+    if (pick && pick !== "None" && !EXTERNAL_FONTS.has(pick)) fams.add(pick);
   }
   let link = document.getElementById("gfontsPreview");
   if (!link) {

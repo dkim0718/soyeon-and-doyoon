@@ -480,6 +480,123 @@ window.Admin = (function () {
     wireSiteLinks();
   }
 
+  /* ---------- 글꼴 미리보기 드롭다운 (font picker) ---------- */
+
+  // Fonts served by an external webfont provider (Sandoll), NOT Google Fonts.
+  // They render only on registered domains; the admin (doremi.*) isn't one, so
+  // their swatch falls back here — and they must never go into the Google Fonts
+  // preview request (css2 400s the whole request on an unknown family).
+  var FP_EXTERNAL = { 'SD Jeongche': 1 };
+  var fpDocWired = false;
+
+  function closeAllFontPickers() {
+    var menus = document.querySelectorAll('.fp-menu');
+    Array.prototype.forEach.call(menus, function (m) { m.hidden = true; });
+  }
+
+  // Load every Google font offered across all <datalist>s once, so each picker
+  // option (and trigger) can render in its own typeface. External fonts skipped.
+  function ensureFontPickerFonts() {
+    var link = document.getElementById('fpPreviewFonts');
+    if (!link) {
+      link = document.createElement('link');
+      link.id = 'fpPreviewFonts';
+      link.rel = 'stylesheet';
+      document.head.appendChild(link);
+    }
+    var fams = {};
+    var opts = document.querySelectorAll('datalist option');
+    Array.prototype.forEach.call(opts, function (o) {
+      var v = o.value;
+      if (v && v !== 'None' && !FP_EXTERNAL[v]) fams[v] = 1;
+    });
+    var parts = Object.keys(fams).map(function (f) {
+      return 'family=' + encodeURIComponent(f).replace(/%20/g, '+');
+    });
+    if (parts.length) {
+      link.href = 'https://fonts.googleapis.com/css2?' + parts.join('&') + '&display=swap';
+    }
+  }
+
+  // Enhance a font <input list="…"> with a dropdown whose options render in
+  // their own typeface. The input stays as the value holder (the font-family
+  // string) and gets an 'input' event on pick, so existing listeners (the live
+  // preview) fire. A "직접 입력" option reveals the raw box for a custom name.
+  function fontPicker(input) {
+    if (!input || input.__fp) return;
+    input.__fp = true;
+    if (!fpDocWired) { document.addEventListener('click', closeAllFontPickers); fpDocWired = true; }
+
+    var listId = input.getAttribute('list');
+    var datalist = listId && document.getElementById(listId);
+    var options = [];
+    if (datalist) {
+      Array.prototype.forEach.call(datalist.querySelectorAll('option'), function (o) {
+        options.push({ value: o.value, label: (o.textContent || '').trim() || o.value });
+      });
+    }
+    ensureFontPickerFonts();
+
+    var wrap = document.createElement('div');
+    wrap.className = 'fontpick';
+    var trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'fp-trigger';
+    var menu = document.createElement('div');
+    menu.className = 'fp-menu';
+    menu.hidden = true;
+    wrap.appendChild(trigger);
+    wrap.appendChild(menu);
+
+    input.style.display = 'none';
+    input.parentNode.insertBefore(wrap, input.nextSibling);
+
+    function fam(v) { return (v && v !== 'None') ? '"' + v + '", inherit' : ''; }
+    function setTrigger(v) {
+      trigger.textContent = v ? v : '(기본값)';
+      trigger.style.fontFamily = fam(v);
+    }
+    function pick(v) {
+      input.value = v;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      setTrigger(v);
+      menu.hidden = true;
+    }
+    function opt(label, value, isCustom) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'fp-opt' + (isCustom ? ' fp-custom' : '');
+      b.textContent = label;
+      if (!isCustom) b.style.fontFamily = fam(value);
+      menu.appendChild(b);
+      return b;
+    }
+
+    opt('(기본값)', '').addEventListener('click', function () { pick(''); });
+    options.forEach(function (o) {
+      opt(o.label, o.value).addEventListener('click', function () { pick(o.value); });
+    });
+    opt('직접 입력…', '', true).addEventListener('click', function () {
+      menu.hidden = true;
+      input.style.display = '';
+      input.focus();
+    });
+
+    trigger.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = !menu.hidden;
+      closeAllFontPickers();
+      menu.hidden = open;
+    });
+    // custom box: hide again on blur, keep trigger in sync while typing
+    input.addEventListener('input', function () { setTrigger(input.value); });
+    input.addEventListener('blur', function () {
+      if (input.style.display !== 'none') { input.style.display = 'none'; setTrigger(input.value); }
+    });
+
+    setTrigger(input.value);
+  }
+
   return {
     esc: esc,
     fmtDateTime: fmtDateTime,
@@ -493,6 +610,7 @@ window.Admin = (function () {
     siteUrl: siteUrl,
     wireSiteLinks: wireSiteLinks,
     mountPreview: mountPreview,
+    fontPicker: fontPicker,
     gate: gate,
     logout: logout,
   };

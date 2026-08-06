@@ -63,9 +63,9 @@
     <datalist id="dlHeading"><option>Playfair Display</option><option>Cormorant Garamond</option><option>EB Garamond</option><option>Libre Caslon Text</option><option>DM Serif Display</option><option>Marcellus</option><option>Lora</option></datalist>
     <datalist id="dlBrand"><option>None</option><option>Clicker Script</option><option>Great Vibes</option><option>Parisienne</option><option>Dancing Script</option><option>Allura</option><option>Charmonman</option></datalist>
     <datalist id="dlBody"><option>Montserrat</option><option>Inter</option><option>Lato</option><option>Karla</option><option>Bitter</option><option>Jost</option><option>Nunito Sans</option></datalist>
-    <datalist id="dlHeadingKo"><option>Nanum Myeongjo</option><option>Noto Serif KR</option><option>Gowun Batang</option><option>Song Myung</option><option>Hahmlet</option></datalist>
+    <datalist id="dlHeadingKo"><option value="SD Jeongche">SD 정체</option><option>Nanum Myeongjo</option><option>Noto Serif KR</option><option>Gowun Batang</option><option>Song Myung</option><option>Hahmlet</option></datalist>
     <datalist id="dlBrandKo"><option>None</option><option>Nanum Pen Script</option><option>Gaegu</option><option>Gamja Flower</option></datalist>
-    <datalist id="dlBodyKo"><option>Noto Sans KR</option><option>Gowun Dodum</option><option>Nanum Gothic</option><option>IBM Plex Sans KR</option><option>Sunflower</option></datalist>
+    <datalist id="dlBodyKo"><option>Noto Sans KR</option><option value="SD Jeongche">SD 정체</option><option>Gowun Dodum</option><option>Nanum Gothic</option><option>IBM Plex Sans KR</option><option>Sunflower</option></datalist>
     <p class="hint" style="margin:14px 0 6px;">색상 팔레트 (두 사이트 공통)</p>
     <div id="dPalettes" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;"></div>
     <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px;">
@@ -456,7 +456,14 @@ Admin.gate(function () {
   preview = Admin.mountPreview(
     document.getElementById('previewPane'), site, { devWidth: 1280, defer: true });
 
-  loadDesign().then(pushDesignPreview);   // seed the preview to the loaded design
+  loadDesign().then(function () {
+    // Attach the preview-dropdown to each font box AFTER their values are loaded,
+    // so each trigger opens showing the currently-selected typeface.
+    ['dHeading', 'dBrand', 'dBody', 'dHeadingKo', 'dBrandKo', 'dBodyKo'].forEach(function (id) {
+      if (window.Admin && Admin.fontPicker) Admin.fontPicker($(id));
+    });
+    pushDesignPreview();   // seed the preview to the loaded design
+  });
   loadSite('en').then(pushContentPreview);
 });
 </script>
