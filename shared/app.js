@@ -251,8 +251,9 @@ function renderWelcome() {
     ? `<img class="hero-img" src="${SITE.photos.hero}" alt="" fetchpriority="high">` : "";
   const invite = inviteBlock();
   const countdown = `<div class="countdown" id="countdown"></div>`;
-  // With an invitation (KR), the countdown moves below it so the invitation
-  // sits right under the hero. Without one (EN), it stays in the hero — unchanged.
+  // KR (has an invitation): hero → invitation → countdown, with extra bottom
+  // space before the footer — no warm coda. EN (no invitation): hero+countdown
+  // → the "We're getting married" welcome block, unchanged.
   return `
     <section class="hero">
       <div class="hero-photo-wrap">
@@ -263,11 +264,12 @@ function renderWelcome() {
       ${invite ? "" : countdown}
     </section>
     ${invite}
-    <section class="page-body" style="max-width:var(--w-content);margin:0 auto;padding:${invite ? "2.8rem" : "3rem"} 1.5rem 0">
+    ${invite
+      ? `<section class="page-body" style="max-width:var(--w-content);margin:0 auto;padding:2.4rem 1.5rem 5.5rem">${countdown}</section>`
+      : `<section class="page-body" style="max-width:var(--w-content);margin:0 auto;padding:3rem 1.5rem 0">
       <div class="page-title">${titleFor("welcome").script ? `<span class="script">${titleFor("welcome").script}</span>` : ""}<h2>${SITE.welcome.heading}</h2></div>
       <p class="center">${SITE.welcome.message}</p>
-    </section>
-    ${invite ? `<section class="page-body" style="max-width:var(--w-content);margin:0 auto;padding:2.4rem 1.5rem 0">${countdown}</section>` : ""}`;
+    </section>`}`;
 }
 
 function renderStory() {
