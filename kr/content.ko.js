@@ -23,8 +23,35 @@ window.SITE = {
   couple: {
     partner1: "Soyeon",
     partner2: "Doyoon",
-    displayName: "Soyeon & Doyoon",
-    monogram: "S & D",      // 영어 사이트와 동일한 헤더 구성 (모노그램 + SOYEON & DOYOON)
+    displayName: "Soyeon & Doyoon",   // 영문 정식 표기(폴백용)
+    // 헤더·푸터·탭 제목에 실제로 표시되는 이름 — 히어로와 동일한 한국어 성함.
+    // 기존 저장된 override 에 없는 새 필드라 가려지지 않습니다(displayName 은 override 됨).
+    brandName: "김도윤 & 김소연",
+    monogram: "S & D",      // 로고 마크(성씨가 모두 '김'이라 이니셜은 영문 유지)
+    // 홈 히어로에 크게 표시되는 이름 — 한국어 정식 성함(신랑 먼저).
+    // 이 필드가 있으면 영문 partner1/2 대신 사용됩니다(한국어 사이트 전용).
+    heroPartner1: "김도윤",
+    heroPartner2: "김소연",
+  },
+
+  // 모시는 글 — 홈 화면의 정식 초대 인사(모청과 동일한 문구). 한국어 사이트 전용:
+  // 영문 content.en.js 에는 이 블록이 없으므로 렌더링되지 않습니다.
+  greeting: {
+    eyebrow: "INVITATION",
+    heading: "소중한 분들을 초대합니다",
+    body:
+      "서로가 마주보며 다져온 사랑을\n" +
+      "이제 함께 한 곳을 바라보며\n" +
+      "걸어갈 수 있는 큰 사랑으로 키우고자 합니다.\n\n" +
+      "저희 두 사람이 사랑의 이름으로\n" +
+      "지켜나갈 수 있게 앞날을\n" +
+      "축복해 주시면 감사하겠습니다.",
+  },
+
+  // 혼주(부모님) — 전통 형식 "아버지 · 어머니 의 아들/딸 이름". 한국어 사이트 전용.
+  family: {
+    groomFather: "김효종", groomMother: "주영실", groomRole: "아들", groomName: "도윤",
+    brideFather: "김성용", brideMother: "박영식", brideRole: "딸",  brideName: "소연",
   },
 
   wedding: {

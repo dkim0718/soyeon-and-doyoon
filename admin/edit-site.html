@@ -146,6 +146,12 @@ Admin.gate(function () {
   var SECTIONS = [
     { key:'welcome',  navId:'welcome',  label:'환영 인사 (Welcome)',   type:'fields',
       fields:[['heading','제목 (heading)','text',1],['message','메시지 (message)','textarea',1]] },
+    // 모시는 글 · 혼주 (한국어 홈 전용 — 영문 사이트에는 값이 없어 표시되지 않음).
+    // 구조화된 텍스트 필드(슬라이더 없음): 부모님 성함/호칭은 고정 형식으로 렌더됩니다.
+    { key:'greeting', navId:'welcome',  label:'모시는 글 (Invitation)', type:'fields',
+      fields:[['eyebrow','윗 문구 (예: INVITATION)','text'],['heading','제목','text'],['body','인사말','textarea']] },
+    { key:'family',   navId:'welcome',  label:'혼주 (Parents)',        type:'fields',
+      fields:[['groomFather','신랑 아버지','text'],['groomMother','신랑 어머니','text'],['groomRole','신랑 호칭 (아들/장남 등)','text'],['groomName','신랑 이름','text'],['brideFather','신부 아버지','text'],['brideMother','신부 어머니','text'],['brideRole','신부 호칭 (딸/장녀 등)','text'],['brideName','신부 이름','text']] },
     { key:'story',    navId:'story',    label:'우리 이야기 (Story)',   type:'fields',
       fields:[['intro','소제목 (intro)','text',1],['text','본문 (text)','textarea',1]] },
     { key:'schedule', navId:'schedule', label:'일정 (Schedule)',       type:'list',

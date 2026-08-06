@@ -208,16 +208,51 @@ function pageTitle(id) {
   return `<div class="page-title">${eyebrow}<h2>${s.title || ""}</h2></div>`;
 }
 
+// One 혼주(parent) line: "아버지 · 어머니  의 아들/딸  이름".
+function familyLine(father, mother, role, name) {
+  const parents = [father, mother].filter(Boolean).join(" · ");
+  if (!parents && !name) return "";
+  return `<p class="invite-family"><span class="parents">${parents}</span>` +
+    (role ? `<span class="rel">의 ${role}</span>` : "") +
+    (name ? `<b>${name}</b>` : "") + "</p>";
+}
+
+// The formal invitation block (모시는 글 + 혼주). Renders only when the content
+// file provides SITE.greeting / SITE.family — so the KR site shows it and the EN
+// site (which has neither) is left exactly as before.
+function inviteBlock() {
+  const g = SITE.greeting, f = SITE.family;
+  if (!g && !f) return "";
+  let inner = "";
+  if (g) {
+    if (g.eyebrow) inner += `<p class="invite-eyebrow">${g.eyebrow}</p>`;
+    if (g.heading) inner += `<h2 class="invite-heading">${g.heading}</h2>`;
+    if (g.body) inner += `<p class="invite-body">${String(g.body).replace(/\n/g, "<br>")}</p>`;
+  }
+  if (f) {
+    const lines = familyLine(f.groomFather, f.groomMother, f.groomRole, f.groomName) +
+      familyLine(f.brideFather, f.brideMother, f.brideRole, f.brideName);
+    if (lines) inner += `<div class="invite-families">${lines}</div>`;
+  }
+  return inner ? `<section class="invitation">${inner}</section>` : "";
+}
+
 function renderWelcome() {
   const w = SITE.wedding;
-  const names = `${SITE.couple.partner1} <span class="hero-amp">&amp;</span> ${SITE.couple.partner2}`;
+  const c = SITE.couple;
+  const p1 = c.heroPartner1 || c.partner1;   // KR: full Korean names; EN: romanized
+  const p2 = c.heroPartner2 || c.partner2;
+  const names = `${p1} <span class="hero-amp">&amp;</span> ${p2}`;
   const heroText = `
     <div class="hero-names">${names}</div>
     <div class="hero-date">${w.dateDisplay}</div>
     <div class="hero-venue">${w.venue}</div>`;
   const heroPhoto = (SITE.photos && SITE.photos.hero)
     ? `<img class="hero-img" src="${SITE.photos.hero}" alt="" fetchpriority="high">` : "";
-
+  const invite = inviteBlock();
+  const countdown = `<div class="countdown" id="countdown"></div>`;
+  // With an invitation (KR), the countdown moves below it so the invitation
+  // sits right under the hero. Without one (EN), it stays in the hero — unchanged.
   return `
     <section class="hero">
       <div class="hero-photo-wrap">
@@ -225,12 +260,14 @@ function renderWelcome() {
         <div class="hero-overlay" id="heroOverlay">${heroText}</div>
       </div>
       <div class="hero-inner" id="heroInner">${heroText}</div>
-      <div class="countdown" id="countdown"></div>
+      ${invite ? "" : countdown}
     </section>
-    <section class="page-body" style="max-width:var(--w-content);margin:0 auto;padding:3rem 1.5rem 0">
+    ${invite}
+    <section class="page-body" style="max-width:var(--w-content);margin:0 auto;padding:${invite ? "2.8rem" : "3rem"} 1.5rem 0">
       <div class="page-title">${titleFor("welcome").script ? `<span class="script">${titleFor("welcome").script}</span>` : ""}<h2>${SITE.welcome.heading}</h2></div>
       <p class="center">${SITE.welcome.message}</p>
-    </section>`;
+    </section>
+    ${invite ? `<section class="page-body" style="max-width:var(--w-content);margin:0 auto;padding:2.4rem 1.5rem 0">${countdown}</section>` : ""}`;
 }
 
 function renderStory() {
@@ -840,7 +877,11 @@ function applyDesignPreview(payload) {
 // Content-derived page chrome (title, brand monogram/names, footer). Shared by
 // boot() and the live content preview so both stay in sync with window.SITE.
 function applyContentChrome() {
-  document.title = `${SITE.couple.displayName} — ${SITE.wedding.dateDisplay}`;
+  // brandName (KR: Korean names) overrides displayName for the visible header /
+  // footer / tab title. It's a separate field so a saved couple.displayName
+  // override can't mask it; EN has no brandName, so it falls back unchanged.
+  const brand = SITE.couple.brandName || SITE.couple.displayName;
+  document.title = `${brand} — ${SITE.wedding.dateDisplay}`;
   // An empty monogram means "no abbreviation" → show the full names as the
   // brand instead of an initials-style monogram (see .brand.no-monogram CSS).
   const monoEl = document.getElementById("brandMonogram");
@@ -856,7 +897,7 @@ function applyContentChrome() {
     }
   }
   const namesEl = document.getElementById("brandNames");
-  if (namesEl) namesEl.textContent = SITE.couple.displayName;
+  if (namesEl) namesEl.textContent = brand;
   const footMono = document.getElementById("footerMonogram");
   if (footMono) {
     footMono.textContent = SITE.couple.monogram || "";
@@ -864,7 +905,7 @@ function applyContentChrome() {
   }
   const footLine = document.getElementById("footerLine");
   if (footLine) footLine.textContent =
-    `${SITE.couple.displayName} · ${SITE.wedding.dateDisplay} · ${SITE.wedding.city}`;
+    `${brand} · ${SITE.wedding.dateDisplay} · ${SITE.wedding.city}`;
 }
 
 // Live content preview: the admin posts the in-progress section edits (the same
