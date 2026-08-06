@@ -111,11 +111,25 @@
       if (n >= 0.5 && n <= 2) root.style.setProperty('--font-scale', n);
     }
   }
+  // 라이브 콘텐츠 미리보기: 관리자가 편집 중인 설정을 실시간으로 보내면
+  // 텍스트 계열(바인딩·혼주·연락처)만 다시 그립니다. 계좌·RSVP·공유·지도 등
+  // 이벤트를 바인딩하는 섹션은 재바인딩 위험이 있어 저장 후 새로고침 시 반영됩니다.
+  function applyContentPreview(override) {
+    if (!override || typeof override !== 'object') return;
+    const cfg = deepMerge(window.MOCHUNG_DEFAULTS, override);
+    window.MOCHUNG_CONFIG = cfg;
+    renderBindings(cfg);
+    renderFamily(cfg);
+    renderContacts(cfg);
+  }
+
   window.addEventListener('message', function (e) {
     if (window.parent === window) return;            // 임베드 상태에서만 반영
     if (!trustedAdminOrigin(e.origin)) return;
     const d = e.data;
-    if (d && d.__sdThemePreview) applyThemePreview(d.theme);
+    if (!d) return;
+    if (d.__sdThemePreview) applyThemePreview(d.theme);
+    else if (d.__sdContentPreview) applyContentPreview(d.content);
   });
 
   function personLine(parent) {
@@ -620,6 +634,12 @@
 
     if (cfg.theme.effects.stars) {
       MochungEffects.StarField($('#starCanvas'), $('#hero'));
+    }
+
+    // 임베드된 관리자 미리보기에 렌더 완료를 알립니다 → 관리자가 보유 중인
+    // 라이브 디자인/콘텐츠를 init 이후에 (재)적용하여 경쟁 상태를 피합니다.
+    if (window.parent !== window) {
+      try { window.parent.postMessage({ __sdPreviewReady: 1 }, '*'); } catch (e) { /* sandboxed */ }
     }
   }
 

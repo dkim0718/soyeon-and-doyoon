@@ -244,8 +244,9 @@ window.Admin = (function () {
 
     var currentSite = which;
 
-    var loaded = false;     // the frame's current document has fired 'load'
-    var lastPost = null;    // most recent preview message (re-sent after reload)
+    var ready = false;      // the framed site finished boot and can accept preview msgs
+    var lastPosts = {};     // most recent message PER channel (all re-applied once ready)
+    var readyTimer = null;
 
     function srcFor(site) {
       var base = siteUrl(site);
@@ -258,19 +259,41 @@ window.Admin = (function () {
       try { return new URL(siteUrl(currentSite), location.href).origin; }
       catch (e) { return '*'; }
     }
-    function setSite(site) { currentSite = site; loaded = false; frame.src = srcFor(site); }
+    function setSite(site) { currentSite = site; ready = false; frame.src = srcFor(site); }
     function reload() { setSite(currentSite); }
 
     // Push a live message to the framed site. The site applies it in memory and
-    // never persists it (preview only). Held until the frame's 'load', then
-    // re-sent after every navigation so the preview re-syncs on reload / tab
-    // switch. No-op if the site engine has no receiver (older deploys).
+    // never persists it (preview only). The latest message of each channel
+    // (design / content / theme) is remembered and ALL are re-sent after every
+    // navigation so the preview re-syncs on reload / tab switch. No-op if the
+    // site engine has no receiver (older deploys).
+    function channelOf(msg) {
+      if (msg && msg.__sdDesignPreview) return 'design';
+      if (msg && msg.__sdContentPreview) return 'content';
+      if (msg && msg.__sdThemePreview) return 'theme';
+      return 'misc';
+    }
+    function flushPosts() {
+      if (!frame.contentWindow) return;
+      Object.keys(lastPosts).forEach(function (k) {
+        try { frame.contentWindow.postMessage(lastPosts[k], targetOrigin()); } catch (e) { /* timing */ }
+      });
+    }
     function post(msg) {
-      lastPost = msg;
-      if (loaded && frame.contentWindow) {
+      lastPosts[channelOf(msg)] = msg;      // held; (re)applied when the frame is ready
+      if (ready && frame.contentWindow) {
         try { frame.contentWindow.postMessage(msg, targetOrigin()); } catch (e) { /* cross-origin timing */ }
       }
     }
+    // The framed site posts __sdPreviewReady when its boot has fully rendered;
+    // only then do we (re)apply held design/content, so boot can't clobber it.
+    window.addEventListener('message', function (e) {
+      if (e.source !== frame.contentWindow) return;
+      if (!e.data || !e.data.__sdPreviewReady) return;
+      ready = true;
+      clearTimeout(readyTimer);
+      flushPosts();
+    });
 
     function rescale() {
       if (!scaled) return;
@@ -281,9 +304,11 @@ window.Admin = (function () {
 
     reloadBtn.addEventListener('click', reload);
     frame.addEventListener('load', function () {
-      loaded = true;
-      if (lastPost) post(lastPost);   // re-sync design after any (re)load
       rescale();
+      // Fallback: if the site never signals readiness (older deploy without the
+      // preview receiver), flush anyway after a beat. A no-op on such sites.
+      clearTimeout(readyTimer);
+      readyTimer = setTimeout(function () { if (!ready) flushPosts(); }, 1500);
     });
     if (scaled) {
       if (window.ResizeObserver) {

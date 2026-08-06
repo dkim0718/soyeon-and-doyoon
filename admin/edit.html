@@ -252,14 +252,15 @@ Admin.gate(async function () {
       fontScale: scaleEl ? parseFloat(scaleEl.value) : undefined,
     } });
   }
-  ['theme.fontPreset', 'theme.fontScale'].forEach(function (cfg) {
-    const el = document.querySelector('[data-cfg="' + cfg + '"]');
+  ['theme.fontPreset', 'theme.fontScale'].forEach(function (key) {
+    const el = document.querySelector('[data-cfg="' + key + '"]');
     if (el) { el.addEventListener('change', pushThemePreview); el.addEventListener('input', pushThemePreview); }
   });
   pushThemePreview();   // seed once (held until the frame's first load)
 
-  // 저장
-  document.getElementById('btnSave').addEventListener('click', async function () {
+  // 라이브 콘텐츠 미리보기: 편집 중인 설정을 실시간으로 전송 (저장 전 미리보기 전용).
+  // 텍스트 계열(이름·혼주·인사말·날짜·연락처 등)이 즉시 반영됩니다.
+  function buildOut() {
     const out = JSON.parse(JSON.stringify(cfg));
     fields.forEach(function (el) {
       let v;
@@ -271,6 +272,27 @@ Admin.gate(async function () {
     const d = document.getElementById('weddingDate').value;
     const t = document.getElementById('weddingTime').value;
     if (d && t) out.wedding.dateISO = d + 'T' + t + ':00+09:00';
+    return out;
+  }
+  let _cpTimer = null;
+  function pushContentPreview() {
+    if (preview && preview.post) preview.post({ __sdContentPreview: 1, content: buildOut() });
+  }
+  function pushContentPreviewSoon() {
+    clearTimeout(_cpTimer);
+    _cpTimer = setTimeout(pushContentPreview, 200);
+  }
+  fields.forEach(function (el) {
+    el.addEventListener('input', pushContentPreviewSoon);
+    el.addEventListener('change', pushContentPreviewSoon);
+  });
+  document.getElementById('weddingDate').addEventListener('change', pushContentPreviewSoon);
+  document.getElementById('weddingTime').addEventListener('change', pushContentPreviewSoon);
+  pushContentPreview();   // seed once (held until the frame's first load)
+
+  // 저장
+  document.getElementById('btnSave').addEventListener('click', async function () {
+    const out = buildOut();
     await store.saveConfigOverride('invite', out);
     preview.reload();
     alert('저장되었습니다. 미리보기에서 확인하세요.');

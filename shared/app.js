@@ -67,6 +67,7 @@ const SETTINGS_KEY = "sd-design";
 
 let remoteDesign = null;      // admin-published design (config_overrides scope 'design')
 let hasLocalSettings = false; // this browser has its own panel experiments
+let SAVED_SITE = null;        // guest baseline (content file + saved override); live-preview merge base
 let settings = loadSettings();
 let fontPickers = {};
 
@@ -827,11 +828,57 @@ function applyDesignPreview(payload) {
   applySettings();
   if (designEnabled()) refreshPanelState();
 }
+// Content-derived page chrome (title, brand monogram/names, footer). Shared by
+// boot() and the live content preview so both stay in sync with window.SITE.
+function applyContentChrome() {
+  document.title = `${SITE.couple.displayName} — ${SITE.wedding.dateDisplay}`;
+  // An empty monogram means "no abbreviation" → show the full names as the
+  // brand instead of an initials-style monogram (see .brand.no-monogram CSS).
+  const monoEl = document.getElementById("brandMonogram");
+  const brandEl = document.querySelector(".brand");
+  if (monoEl) {
+    if (SITE.couple.monogram) {
+      monoEl.textContent = SITE.couple.monogram;
+      monoEl.hidden = false;
+      if (brandEl) brandEl.classList.remove("no-monogram");
+    } else {
+      monoEl.hidden = true;
+      if (brandEl) brandEl.classList.add("no-monogram");
+    }
+  }
+  const namesEl = document.getElementById("brandNames");
+  if (namesEl) namesEl.textContent = SITE.couple.displayName;
+  const footMono = document.getElementById("footerMonogram");
+  if (footMono) {
+    footMono.textContent = SITE.couple.monogram || "";
+    footMono.hidden = !SITE.couple.monogram;
+  }
+  const footLine = document.getElementById("footerLine");
+  if (footLine) footLine.textContent =
+    `${SITE.couple.displayName} · ${SITE.wedding.dateDisplay} · ${SITE.wedding.city}`;
+}
+
+// Live content preview: the admin posts the in-progress section edits (the same
+// object Save would write) and this re-renders them over the saved guest
+// baseline — in memory, never persisted. Rebuilding from SAVED_SITE each time
+// means an edited field updates, an un-edited section keeps its saved value, and
+// clearing an override doesn't compound across messages.
+function applyContentPreview(override) {
+  if (!SAVED_SITE || !override || typeof override !== "object") return;
+  window.SITE = deepMerge(JSON.parse(JSON.stringify(SAVED_SITE)), override);
+  applyContentChrome();
+  buildNav();
+  renderAllPages();
+  route();
+}
+
 window.addEventListener("message", (e) => {
   if (window.parent === window) return;              // ignore unless embedded
   if (!trustedAdminOrigin(e.origin)) return;
   const d = e.data;
-  if (d && d.__sdDesignPreview) applyDesignPreview(d.design);
+  if (!d) return;
+  if (d.__sdDesignPreview) applyDesignPreview(d.design);
+  else if (d.__sdContentPreview) applyContentPreview(d.content);
 });
 
 /* ----------------------------------------------------------
@@ -928,26 +975,9 @@ function maybeShowRsvpNudge() {
 
 async function boot() {
   await Promise.all([applySiteOverride(), applyDesignOverride()]);
+  SAVED_SITE = JSON.parse(JSON.stringify(window.SITE));  // file + saved override = the guest baseline
   document.documentElement.lang = SITE.locale || "en";
-  document.title = `${SITE.couple.displayName} — ${SITE.wedding.dateDisplay}`;
-  // An empty monogram means "no abbreviation" → show the full names as the
-  // brand instead of an initials-style monogram (see .brand.no-monogram CSS).
-  const monoEl = document.getElementById("brandMonogram");
-  const brandEl = document.querySelector(".brand");
-  if (SITE.couple.monogram) {
-    monoEl.textContent = SITE.couple.monogram;
-    monoEl.hidden = false;
-    if (brandEl) brandEl.classList.remove("no-monogram");
-  } else {
-    monoEl.hidden = true;
-    if (brandEl) brandEl.classList.add("no-monogram");
-  }
-  document.getElementById("brandNames").textContent = SITE.couple.displayName;
-  const footMono = document.getElementById("footerMonogram");
-  footMono.textContent = SITE.couple.monogram || "";
-  footMono.hidden = !SITE.couple.monogram;
-  document.getElementById("footerLine").textContent =
-    `${SITE.couple.displayName} · ${SITE.wedding.dateDisplay} · ${SITE.wedding.city}`;
+  applyContentChrome();
 
   applySettings();
   buildNav();
@@ -969,6 +999,12 @@ async function boot() {
 
   const lightbox = document.getElementById("lightbox");
   if (lightbox) lightbox.addEventListener("click", (e) => { e.currentTarget.hidden = true; });
+
+  // Tell an embedding admin preview we're fully rendered, so it (re)applies any
+  // held live design/content AFTER our own boot — never racing against it.
+  if (window.parent !== window) {
+    try { window.parent.postMessage({ __sdPreviewReady: 1 }, "*"); } catch (e) { /* sandboxed */ }
+  }
 }
 
 document.addEventListener("DOMContentLoaded", boot);

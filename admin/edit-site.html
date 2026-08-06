@@ -375,6 +375,27 @@ Admin.gate(function () {
     $(id).addEventListener('change', pushDesignPreviewSoon);
   });
 
+  /* Live content preview: push the in-progress section edits to the framed
+     site as they change. The rich-text editor mirrors an 'input' event on its
+     hidden field, so input-delegation on #sections catches both plain-text and
+     rich-text edits; a MutationObserver catches list item add/remove. Preview-
+     only — nothing is written until 저장 is clicked. */
+  var _cpTimer = null;
+  function currentContentOverride() {
+    var out = {};
+    collectors.forEach(function (c) { var kv = c(); out[kv[0]] = kv[1]; });
+    return out;
+  }
+  function pushContentPreview() {
+    if (preview && preview.post) preview.post({ __sdContentPreview: 1, content: currentContentOverride() });
+  }
+  function pushContentPreviewSoon() {
+    clearTimeout(_cpTimer);
+    _cpTimer = setTimeout(pushContentPreview, 220);
+  }
+  $('sections').addEventListener('input', pushContentPreviewSoon);
+  new MutationObserver(pushContentPreviewSoon).observe($('sections'), { childList: true, subtree: true });
+
   async function loadDesign() {
     var d = (await window.Store.getConfigOverride('design')) || {};
     var f = d.fonts || {}, fk = d.fontsKo || {}, c = d.colors || {};
@@ -436,7 +457,7 @@ Admin.gate(function () {
     document.getElementById('previewPane'), site, { devWidth: 1280, defer: true });
 
   loadDesign().then(pushDesignPreview);   // seed the preview to the loaded design
-  loadSite('en');
+  loadSite('en').then(pushContentPreview);
 });
 </script>
 </body>
