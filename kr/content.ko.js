@@ -61,7 +61,7 @@ window.SITE = {
     timeDisplay: "오후 6시 30분",
     venue: "신라호텔 영빈관",
     venueAddress: "서울 중구 동호로 249",
-    city: "서울",
+    city: "신라호텔 영빈관",   // 푸터 마지막 항목(이름 · 날짜 · 장소)에 표시
     // 오시는 길 페이지에 표시되는 지도 링크
     maps: [
       { label: "네이버 지도", url: "https://map.naver.com/p/search/" + encodeURIComponent("신라호텔 영빈관") },
@@ -369,7 +369,6 @@ window.SITE = {
   //  대신 '마음 전하실 곳' 계좌 안내 페이지를 씁니다.)
   navigation: [
     { id: "welcome",  label: "홈" },
-    { id: "story",    label: "Our Story" },
     { id: "schedule", label: "Schedule" },
     { id: "qanda",    label: "Q & A" },
     { id: "moments",  label: "갤러리" },
