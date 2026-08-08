@@ -375,6 +375,17 @@ window.StoreLocal = (function () {
     localStorage.removeItem(KEYS.config + (scope || 'invite'));
   }
 
+  // No Storage on the localStorage backend — embed the image as a data URL so
+  // the local-dev/preview flow still works (the real backend uploads to Storage).
+  async function uploadPhoto(blob) {
+    return await new Promise(function (resolve, reject) {
+      var fr = new FileReader();
+      fr.onload = function () { resolve(fr.result); };
+      fr.onerror = function () { reject(new Error('파일을 읽지 못했습니다.')); };
+      fr.readAsDataURL(blob);
+    });
+  }
+
   /* =======================================================
    * Admin auth (demo passcode). Real auth = Supabase adapter.
    * ===================================================== */
@@ -438,7 +449,7 @@ window.StoreLocal = (function () {
     // guestbook
     listGuestbook, addGuestbook, deleteGuestbook,
     // config
-    getConfigOverride, saveConfigOverride, clearConfigOverride,
+    getConfigOverride, saveConfigOverride, clearConfigOverride, uploadPhoto,
     // admin
     adminSignIn, adminSignOut, isAdmin,
     // backup

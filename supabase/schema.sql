@@ -467,3 +467,30 @@ begin
 end;
 $$;
 grant execute on function public.delete_guestbook(uuid, text) to anon, authenticated;
+
+-- =========================================================
+-- Photo uploads (admin 사진 widget) → Storage bucket 'photos'
+-- Public read (guests view images); only admins (is_admin()) may write.
+-- Uploaded URLs are saved in config_overrides scope 'media' ({hero, gallery}).
+-- Run this block once in the Supabase SQL editor.
+-- =========================================================
+
+insert into storage.buckets (id, name, public)
+values ('photos', 'photos', true)
+on conflict (id) do nothing;
+
+drop policy if exists "photos_public_read" on storage.objects;
+create policy "photos_public_read" on storage.objects
+  for select using (bucket_id = 'photos');
+
+drop policy if exists "photos_admin_insert" on storage.objects;
+create policy "photos_admin_insert" on storage.objects
+  for insert to authenticated with check (bucket_id = 'photos' and public.is_admin());
+
+drop policy if exists "photos_admin_update" on storage.objects;
+create policy "photos_admin_update" on storage.objects
+  for update to authenticated using (bucket_id = 'photos' and public.is_admin());
+
+drop policy if exists "photos_admin_delete" on storage.objects;
+create policy "photos_admin_delete" on storage.objects
+  for delete to authenticated using (bucket_id = 'photos' and public.is_admin());

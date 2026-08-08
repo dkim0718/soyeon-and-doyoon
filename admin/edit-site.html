@@ -86,6 +86,28 @@
     <p class="hint" id="designMsg" style="margin-top:10px;"></p>
   </div>
 
+  <div class="card" id="photosCard">
+    <h2>📷 사진 (두 사이트 공통)</h2>
+    <p class="hint" style="margin-bottom:12px;">
+      메인(히어로) 사진을 업로드하면 두 사이트에 함께 적용됩니다. 업로드가 끝나면 <b>사진 저장</b>을 눌러 반영하세요.
+      (업로드에는 Supabase Storage 'photos' 버킷이 필요합니다 — <code>supabase/schema.sql</code> 참고.)
+    </p>
+    <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+      <img id="heroPreview" alt="메인 사진 미리보기"
+        style="width:240px; height:150px; object-fit:cover; border-radius:10px; border:1px solid var(--line); background:var(--bg);">
+      <div>
+        <label class="btn btn-ghost btn-sm" style="cursor:pointer;">
+          메인 사진 선택… <input type="file" id="heroFile" accept="image/*" hidden>
+        </label>
+        <p class="hint" id="heroUploadMsg" style="margin-top:8px; min-height:1em;"></p>
+      </div>
+    </div>
+    <div class="btn-row" style="margin-top:14px;">
+      <button class="btn btn-primary btn-sm" id="btnSavePhotos">사진 저장 (모든 방문자)</button>
+    </div>
+    <p class="hint" id="photosMsg" style="margin-top:10px; min-height:1em;"></p>
+  </div>
+
   <div class="card">
     <p class="hint" style="margin:0 0 12px;">
       영어(EN) / 한국어(KR) 웨딩 홈페이지의 이야기·일정·Q&amp;A 등을 코드 수정 없이 편집합니다.
@@ -415,6 +437,42 @@ Admin.gate(function () {
   $('sections').addEventListener('input', pushContentPreviewSoon);
   new MutationObserver(pushContentPreviewSoon).observe($('sections'), { childList: true, subtree: true });
 
+  /* ---------- 사진 (media scope — 두 사이트 공통) ---------- */
+  var mediaState = { hero: '', gallery: [] };
+  async function loadPhotos() {
+    var m = (await window.Store.getConfigOverride('media')) || {};
+    mediaState.hero = m.hero || '';
+    mediaState.gallery = Array.isArray(m.gallery) ? m.gallery : [];
+    var fallback = (defaults[site] && defaults[site].photos && defaults[site].photos.hero) || '';
+    var url = mediaState.hero || fallback;
+    if (url) $('heroPreview').src = url;
+  }
+  $('heroFile').addEventListener('change', async function (e) {
+    var file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    var msg = $('heroUploadMsg');
+    msg.style.color = ''; msg.textContent = '업로드 중…';
+    try {
+      var url = await Admin.uploadPhoto(file, { maxDim: 2400, quality: 0.85 });
+      mediaState.hero = url;
+      $('heroPreview').src = url;
+      msg.style.color = '#3a7d5a'; msg.textContent = '업로드 완료 — "사진 저장"을 눌러 반영하세요.';
+    } catch (err) {
+      msg.style.color = '#b55'; msg.textContent = '업로드 실패: ' + (err && err.message ? err.message : err);
+    }
+  });
+  $('btnSavePhotos').addEventListener('click', async function () {
+    var msg = $('photosMsg'); msg.style.color = '';
+    try {
+      await window.Store.saveConfigOverride('media', { hero: mediaState.hero, gallery: mediaState.gallery });
+      msg.style.color = '#3a7d5a'; msg.textContent = '사진이 저장되었습니다 — 모든 방문자에게 적용됩니다.';
+      if (preview) preview.reload();
+    } catch (err) {
+      msg.style.color = '#b55'; msg.textContent = '저장 실패: ' + (err && err.message ? err.message : err);
+    }
+  });
+
   async function loadDesign() {
     var d = (await window.Store.getConfigOverride('design')) || {};
     var f = d.fonts || {}, fk = d.fontsKo || {}, c = d.colors || {};
@@ -486,6 +544,7 @@ Admin.gate(function () {
     pushDesignPreview();   // seed the preview to the loaded design
   });
   loadSite('en').then(pushContentPreview);
+  loadPhotos();
 });
 </script>
 </body>

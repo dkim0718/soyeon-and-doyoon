@@ -379,6 +379,23 @@
   }
 
   /* =======================================================
+   * Photo upload → Supabase Storage 'photos' bucket (public).
+   * Returns the public URL. Requires the bucket + policies from
+   * supabase/schema.sql. A unique filename avoids browser caching.
+   * ===================================================== */
+
+  async function uploadPhoto(blob, filename) {
+    var ext = String((filename || '').split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+    var path = Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + ext;
+    var up = await client.storage.from('photos').upload(path, blob, {
+      contentType: (blob && blob.type) || 'image/jpeg', cacheControl: '31536000', upsert: false,
+    });
+    if (up && up.error) throw up.error;
+    var pub = client.storage.from('photos').getPublicUrl(path);
+    return pub && pub.data ? pub.data.publicUrl : null;
+  }
+
+  /* =======================================================
    * Admin auth (Supabase Auth magic link)
    * ===================================================== */
 
@@ -515,6 +532,7 @@
     getConfigOverride: getConfigOverride,
     saveConfigOverride: saveConfigOverride,
     clearConfigOverride: clearConfigOverride,
+    uploadPhoto: uploadPhoto,
     // admin
     adminSignIn: adminSignIn,
     adminVerifyOtp: adminVerifyOtp,

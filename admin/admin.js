@@ -597,6 +597,37 @@ window.Admin = (function () {
     setTrigger(input.value);
   }
 
+  /* ---------- 사진 업로드 (downscale → Store.uploadPhoto) ---------- */
+
+  // Read a File, downscale to maxDim on the long edge (JPEG), and upload via the
+  // store. Resolves to the hosted URL (Supabase Storage) or a data URL (local).
+  function uploadPhoto(file, opts) {
+    opts = opts || {};
+    var maxDim = opts.maxDim || 2400;
+    var quality = opts.quality || 0.85;
+    return new Promise(function (resolve, reject) {
+      if (!file || !/^image\//.test(file.type || '')) { reject(new Error('이미지 파일을 선택해 주세요.')); return; }
+      if (!(window.Store && window.Store.uploadPhoto)) { reject(new Error('현재 백엔드는 업로드를 지원하지 않습니다.')); return; }
+      var img = new Image();
+      var objUrl = URL.createObjectURL(file);
+      img.onload = function () {
+        URL.revokeObjectURL(objUrl);
+        var w = img.naturalWidth, h = img.naturalHeight;
+        var scale = Math.min(1, maxDim / Math.max(w, h));
+        var cw = Math.max(1, Math.round(w * scale)), ch = Math.max(1, Math.round(h * scale));
+        var canvas = document.createElement('canvas');
+        canvas.width = cw; canvas.height = ch;
+        canvas.getContext('2d').drawImage(img, 0, 0, cw, ch);
+        canvas.toBlob(function (blob) {
+          if (!blob) { reject(new Error('이미지 처리에 실패했습니다.')); return; }
+          window.Store.uploadPhoto(blob, file.name).then(resolve, reject);
+        }, 'image/jpeg', quality);
+      };
+      img.onerror = function () { URL.revokeObjectURL(objUrl); reject(new Error('이미지를 불러오지 못했습니다.')); };
+      img.src = objUrl;
+    });
+  }
+
   return {
     esc: esc,
     fmtDateTime: fmtDateTime,
@@ -611,6 +642,7 @@ window.Admin = (function () {
     wireSiteLinks: wireSiteLinks,
     mountPreview: mountPreview,
     fontPicker: fontPicker,
+    uploadPhoto: uploadPhoto,
     gate: gate,
     logout: logout,
   };

@@ -1031,6 +1031,22 @@ async function applyDesignOverride() {
   } catch (e) { /* keep the built-in defaults */ }
 }
 
+// Admin-uploaded photos, saved under the shared scope 'media' ({ hero, gallery })
+// and applied to BOTH sites over the per-site content. Edited in the admin's
+// photo card (uploads go to Supabase Storage).
+async function applyMediaOverride() {
+  try {
+    if (!window.Store || !window.Store.getConfigOverride) return;
+    const m = await window.Store.getConfigOverride("media");
+    if (!m || typeof m !== "object") return;
+    if (m.hero) {
+      window.SITE.photos = window.SITE.photos || {};
+      window.SITE.photos.hero = m.hero;
+    }
+    if (Array.isArray(m.gallery) && m.gallery.length) window.SITE.galleryDefaults = m.gallery;
+  } catch (e) { /* keep the built-in photos */ }
+}
+
 /* ----------------------------------------------------------
    RSVP nudge — entry popup asking guests to respond by the
    deadline (the Joy-engine cousin of the 모청's entry popup).
@@ -1088,6 +1104,7 @@ function maybeShowRsvpNudge() {
 
 async function boot() {
   await Promise.all([applySiteOverride(), applyDesignOverride()]);
+  await applyMediaOverride();   // admin-uploaded photos (shared), over the per-site content
   SAVED_SITE = JSON.parse(JSON.stringify(window.SITE));  // file + saved override = the guest baseline
   document.documentElement.lang = SITE.locale || "en";
   // Scroll-reveal effect — default on; the admin design panel can turn it off.
