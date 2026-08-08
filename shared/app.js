@@ -542,26 +542,34 @@ function route() {
    Opt-in via html[data-reveal="on"] (set from the admin toggle).
    ---------------------------------------------------------- */
 
-let revealObserver = null;
+let revealScrollWired = false;
+let revealTick = false;
+
+// Reveal any .reveal block whose top has scrolled into (or above) the viewport.
+// Geometry-based (not IntersectionObserver) so it can never leave content stuck
+// invisible, and it's straightforward to verify.
+function revealInView() {
+  if (document.documentElement.dataset.reveal !== "on") return;
+  const vh = window.innerHeight || document.documentElement.clientHeight;
+  document.querySelectorAll(".reveal:not(.is-visible)").forEach((el) => {
+    const r = el.getBoundingClientRect();
+    if (r.top < vh * 0.92 && r.bottom > 0) el.classList.add("is-visible");
+  });
+}
 
 function observeReveals() {
   if (document.documentElement.dataset.reveal !== "on") return;
-  const els = document.querySelectorAll(".reveal:not(.is-visible)");
-  if (!("IntersectionObserver" in window)) {
-    els.forEach((el) => el.classList.add("is-visible"));
-    return;
+  revealInView();                       // in-view / just-navigated blocks reveal now
+  if (!revealScrollWired) {
+    revealScrollWired = true;
+    const onScroll = function () {
+      if (revealTick) return;
+      revealTick = true;
+      setTimeout(function () { revealTick = false; revealInView(); }, 80);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
   }
-  if (!revealObserver) {
-    revealObserver = new IntersectionObserver((entries) => {
-      entries.forEach((en) => {
-        if (en.isIntersecting) {
-          en.target.classList.add("is-visible");
-          revealObserver.unobserve(en.target);
-        }
-      });
-    }, { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
-  }
-  els.forEach((el) => revealObserver.observe(el));
 }
 
 function applyReveal(on) {
