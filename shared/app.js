@@ -234,7 +234,7 @@ function inviteBlock() {
       familyLine(f.brideFather, f.brideMother, f.brideRole, f.brideName);
     if (lines) inner += `<div class="invite-families">${lines}</div>`;
   }
-  return inner ? `<section class="invitation">${inner}</section>` : "";
+  return inner ? `<section class="invitation reveal">${inner}</section>` : "";
 }
 
 function renderWelcome() {
@@ -265,8 +265,8 @@ function renderWelcome() {
     </section>
     ${invite}
     ${invite
-      ? `<section class="page-body" style="max-width:var(--w-content);margin:0 auto;padding:2.4rem 1.5rem 5.5rem">${countdown}</section>`
-      : `<section class="page-body" style="max-width:var(--w-content);margin:0 auto;padding:3rem 1.5rem 0">
+      ? `<section class="page-body reveal" style="max-width:var(--w-content);margin:0 auto;padding:2.4rem 1.5rem 5.5rem">${countdown}</section>`
+      : `<section class="page-body reveal" style="max-width:var(--w-content);margin:0 auto;padding:3rem 1.5rem 0">
       <div class="page-title">${titleFor("welcome").script ? `<span class="script">${titleFor("welcome").script}</span>` : ""}<h2>${SITE.welcome.heading}</h2></div>
       <p class="center">${SITE.welcome.message}</p>
     </section>`}`;
@@ -496,7 +496,9 @@ function renderAllPages() {
   main.innerHTML = SITE.navigation
     .map((p) => {
       const body = PAGE_RENDERERS[p.id] ? PAGE_RENDERERS[p.id]() : "";
-      const cls = p.id === "welcome" ? "" : "page";
+      // welcome tags its own blocks (invitation/countdown); other pages fade in
+      // as a block when navigated to.
+      const cls = p.id === "welcome" ? "" : "page reveal";
       return `<section class="${cls}" id="page-${p.id}" data-page="${p.id}">${body}</section>`;
     })
     .join("");
@@ -532,6 +534,39 @@ function route() {
     const el = document.getElementById("page-" + id);
     if (el) el.scrollIntoView({ behavior: "smooth" });
   }
+  observeReveals();   // the page that just became visible may hold .reveal blocks
+}
+
+/* ----------------------------------------------------------
+   Scroll reveal — fades .reveal blocks in as they enter view.
+   Opt-in via html[data-reveal="on"] (set from the admin toggle).
+   ---------------------------------------------------------- */
+
+let revealObserver = null;
+
+function observeReveals() {
+  if (document.documentElement.dataset.reveal !== "on") return;
+  const els = document.querySelectorAll(".reveal:not(.is-visible)");
+  if (!("IntersectionObserver" in window)) {
+    els.forEach((el) => el.classList.add("is-visible"));
+    return;
+  }
+  if (!revealObserver) {
+    revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting) {
+          en.target.classList.add("is-visible");
+          revealObserver.unobserve(en.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
+  }
+  els.forEach((el) => revealObserver.observe(el));
+}
+
+function applyReveal(on) {
+  document.documentElement.dataset.reveal = on ? "on" : "off";
+  if (on) observeReveals();
 }
 
 /* ----------------------------------------------------------
@@ -880,6 +915,9 @@ function applyDesignPreview(payload) {
   settings = base;
   applySettings();
   if (designEnabled()) refreshPanelState();
+  if (payload.effects && typeof payload.effects.reveal === "boolean") {
+    applyReveal(payload.effects.reveal);
+  }
 }
 // Content-derived page chrome (title, brand monogram/names, footer). Shared by
 // boot() and the live content preview so both stay in sync with window.SITE.
@@ -1044,6 +1082,9 @@ async function boot() {
   await Promise.all([applySiteOverride(), applyDesignOverride()]);
   SAVED_SITE = JSON.parse(JSON.stringify(window.SITE));  // file + saved override = the guest baseline
   document.documentElement.lang = SITE.locale || "en";
+  // Scroll-reveal effect — default on; the admin design panel can turn it off.
+  // Set before render so .reveal blocks start hidden (no flash).
+  applyReveal(!(remoteDesign && remoteDesign.effects && remoteDesign.effects.reveal === false));
   applyContentChrome();
 
   applySettings();

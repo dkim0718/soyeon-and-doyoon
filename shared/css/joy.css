@@ -1166,3 +1166,20 @@ html[lang="ko"] .qa-item summary,
 html[lang="ko"] .acct-num b {
   font-weight: 400;
 }
+
+/* Scroll-reveal — content fades/rises in as it enters the viewport. Opt-in via
+   html[data-reveal="on"] (admin toggle), so flipping it off instantly disables
+   the effect with no layout impact. Honors prefers-reduced-motion. */
+html[data-reveal="on"] .reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+  will-change: opacity, transform;
+}
+html[data-reveal="on"] .reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-reveal="on"] .reveal { opacity: 1; transform: none; transition: none; }
+}
