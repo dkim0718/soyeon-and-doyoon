@@ -15,6 +15,11 @@ window.SITE = {
     partner2: "Doyoon",
     displayName: "Soyeon & Doyoon",
     monogram: "S & D",
+    // Mirror the English names so the admin's 이름·헤더 fields pre-fill on the EN
+    // tab (same values as partner1/2 + displayName → no visual change to EN).
+    heroPartner1: "Soyeon",
+    heroPartner2: "Doyoon",
+    brandName: "Soyeon & Doyoon",
   },
 
   wedding: {

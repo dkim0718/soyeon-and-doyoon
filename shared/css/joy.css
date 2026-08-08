@@ -1141,8 +1141,28 @@ html[data-hero="classic"] .hero-photo-wrap .hero-img {
   margin: 2.6rem auto 0;
 }
 
-/* KR site uses SD정체 for all Korean text (incl. the header/footer names, which
-   ride --f-brand). Keep the Latin "D & S" monogram in a Latin serif so it stays
-   crisp — scoped to lang=ko so the English site's monogram is untouched. */
+/* KR site: SD정체 for all Korean text (headers/footer names ride --f-brand).
+   The English/Latin accents use SD 정체 630i (SD Jeongche weight 700 — the italic
+   cut): the monogram, the INVITATION eyebrow, the & ampersands, the footer note,
+   and the Latin menu labels. Scoped to lang=ko so the English site is untouched. */
+html[lang="ko"] .invite-eyebrow,
+html[lang="ko"] .hero-amp,
+html[lang="ko"] .footer-note,
 html[lang="ko"] .brand-monogram,
-html[lang="ko"] .footer-monogram { font-family: "EB Garamond", Georgia, serif; }
+html[lang="ko"] .footer-monogram,
+html[lang="ko"] .site-nav a.en-label {
+  font-family: "SD Jeongche", Georgia, serif;
+  font-weight: 700;
+}
+
+/* SD Jeongche's only bold cut IS 630i (italic), so keep Korean "bold" text
+   upright by pinning it back to the 030 (weight 400) cut — otherwise the
+   parents' names, schedule/Q&A headings and account numbers would go italic. */
+html[lang="ko"] .invite-family b,
+html[lang="ko"] .timeline-item h3,
+html[lang="ko"] .travel-block h3,
+html[lang="ko"] .qa-group,
+html[lang="ko"] .qa-item summary,
+html[lang="ko"] .acct-num b {
+  font-weight: 400;
+}

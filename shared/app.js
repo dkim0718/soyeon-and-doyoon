@@ -482,7 +482,12 @@ const PAGE_RENDERERS = {
 function buildNav() {
   const nav = document.getElementById("siteNav");
   nav.innerHTML = SITE.navigation
-    .map((p) => `<a href="#/${p.id}" data-page="${p.id}">${p.label}</a>`)
+    .map((p) => {
+      // Latin-only labels (Schedule, Q & A, RSVP…) get .en-label, so the KR site
+      // can render them in the 630i accent while Korean labels stay in 030.
+      const latin = /^[\x20-\x7E]+$/.test(plainText(p.label));
+      return `<a href="#/${p.id}" data-page="${p.id}"${latin ? ' class="en-label"' : ""}>${p.label}</a>`;
+    })
     .join("");
 }
 
@@ -878,19 +883,29 @@ function applyDesignPreview(payload) {
 }
 // Content-derived page chrome (title, brand monogram/names, footer). Shared by
 // boot() and the live content preview so both stay in sync with window.SITE.
+// Strip inline markup so a rich-text value is safe for plain-text contexts
+// (the browser tab title and the one-line footer).
+function plainText(html) {
+  return String(html == null ? "" : html).replace(/<[^>]*>/g, "");
+}
+
 function applyContentChrome() {
   // brandName (KR: Korean names) overrides displayName for the visible header /
   // footer / tab title. It's a separate field so a saved couple.displayName
   // override can't mask it; EN has no brandName, so it falls back unchanged.
   const brand = SITE.couple.brandName || SITE.couple.displayName;
-  document.title = `${brand} — ${SITE.wedding.dateDisplay}`;
+  // Names / monogram / date may carry inline size/style markup (admin rich-text
+  // editor), so render those as HTML; plain-text contexts strip the tags.
+  const brandPlain = plainText(brand);
+  const datePlain = plainText(SITE.wedding.dateDisplay);
+  document.title = `${brandPlain} — ${datePlain}`;
   // An empty monogram means "no abbreviation" → show the full names as the
   // brand instead of an initials-style monogram (see .brand.no-monogram CSS).
   const monoEl = document.getElementById("brandMonogram");
   const brandEl = document.querySelector(".brand");
   if (monoEl) {
     if (SITE.couple.monogram) {
-      monoEl.textContent = SITE.couple.monogram;
+      monoEl.innerHTML = SITE.couple.monogram;
       monoEl.hidden = false;
       if (brandEl) brandEl.classList.remove("no-monogram");
     } else {
@@ -899,15 +914,15 @@ function applyContentChrome() {
     }
   }
   const namesEl = document.getElementById("brandNames");
-  if (namesEl) namesEl.textContent = brand;
+  if (namesEl) namesEl.innerHTML = brand;
   const footMono = document.getElementById("footerMonogram");
   if (footMono) {
-    footMono.textContent = SITE.couple.monogram || "";
+    footMono.innerHTML = SITE.couple.monogram || "";
     footMono.hidden = !SITE.couple.monogram;
   }
   const footLine = document.getElementById("footerLine");
   if (footLine) footLine.textContent =
-    `${brand} · ${SITE.wedding.dateDisplay} · ${SITE.wedding.city}`;
+    `${brandPlain} · ${datePlain} · ${SITE.wedding.city}`;
 }
 
 // Live content preview: the admin posts the in-progress section edits (the same

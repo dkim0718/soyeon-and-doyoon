@@ -144,6 +144,12 @@ Admin.gate(function () {
   //   hotels[].stars (numeric), travel[].body (bullet/URL parser),
   //   qanda[].q ('## ' group-heading sniff in shared/app.js).
   var SECTIONS = [
+    // 헤더·메인(히어로): 이름/모노그램/날짜/장소. 4번째 플래그(1) = 글자별 크기·스타일
+    // 편집기(리치 텍스트). couple/wedding 은 두 사이트 모두에 존재해 EN·KR 탭 둘 다 표시.
+    { key:'couple',   navId:'welcome',  label:'이름 · 헤더 (Names & Header)', type:'fields',
+      fields:[['heroPartner1','메인 이름 1 (신랑)','text',1],['heroPartner2','메인 이름 2 (신부)','text',1],['brandName','헤더 이름 (상단)','text',1],['monogram','모노그램 (예: D & S)','text',1]] },
+    { key:'wedding',  navId:'welcome',  label:'예식 정보 (Date & Venue)',    type:'fields',
+      fields:[['dateDisplay','날짜 표기','text',1],['venue','예식장','text',1]] },
     { key:'welcome',  navId:'welcome',  label:'환영 인사 (Welcome)',   type:'fields',
       fields:[['heading','제목 (heading)','text',1],['message','메시지 (message)','textarea',1]] },
     // 모시는 글 · 혼주 (한국어 홈 전용 — 영문 사이트에는 값이 없어 표시되지 않음).
