@@ -167,7 +167,9 @@ function loadGoogleFonts() {
     .filter((f) => f && !EXTERNAL_FONTS.has(f))
     .map((f) => "family=" + encodeURIComponent(f).replace(/%20/g, "+"));
   const link = document.getElementById("gfonts");
-  if (link) link.href = "https://fonts.googleapis.com/css2?" + parts.join("&") + "&display=swap";
+  // Only fetch when a Google family is actually needed — with SD정체 (external)
+  // selected, parts is empty, so we skip the request entirely.
+  if (link && parts.length) link.href = "https://fonts.googleapis.com/css2?" + parts.join("&") + "&display=swap";
 }
 
 /* tiny color helpers (hex in, hex out) */
@@ -1031,20 +1033,22 @@ async function applyDesignOverride() {
   } catch (e) { /* keep the built-in defaults */ }
 }
 
-// Admin-uploaded photos, saved under the shared scope 'media' ({ hero, gallery })
-// and applied to BOTH sites over the per-site content. Edited in the admin's
-// photo card (uploads go to Supabase Storage).
-async function applyMediaOverride() {
-  try {
-    if (!window.Store || !window.Store.getConfigOverride) return;
-    const m = await window.Store.getConfigOverride("media");
-    if (!m || typeof m !== "object") return;
-    if (m.hero) {
-      window.SITE.photos = window.SITE.photos || {};
-      window.SITE.photos.hero = m.hero;
-    }
+// Fetch every admin override in ONE parallel round-trip and apply them in order
+// (site content + design, then uploaded media last so it lands on the final
+// SITE). Called AFTER the first paint (see boot), so the network never blocks
+// the initial render. Returns true if anything actually changed.
+async function fetchOverrides() {
+  const S = window.Store;
+  if (!S || !S.getConfigOverride) return false;
+  // launch media in parallel with the site/design pair (no extra round-trip)
+  const mediaP = S.getConfigOverride("media").catch(() => null);
+  await Promise.all([applySiteOverride(), applyDesignOverride()]);
+  const m = await mediaP;
+  if (m && typeof m === "object") {
+    if (m.hero) { window.SITE.photos = window.SITE.photos || {}; window.SITE.photos.hero = m.hero; }
     if (Array.isArray(m.gallery) && m.gallery.length) window.SITE.galleryDefaults = m.gallery;
-  } catch (e) { /* keep the built-in photos */ }
+  }
+  return true;
 }
 
 /* ----------------------------------------------------------
@@ -1102,39 +1106,43 @@ function maybeShowRsvpNudge() {
    Boot
    ---------------------------------------------------------- */
 
-async function boot() {
-  await Promise.all([applySiteOverride(), applyDesignOverride()]);
-  await applyMediaOverride();   // admin-uploaded photos (shared), over the per-site content
-  SAVED_SITE = JSON.parse(JSON.stringify(window.SITE));  // file + saved override = the guest baseline
-  document.documentElement.lang = SITE.locale || "en";
-  // Scroll-reveal effect — default on; the admin design panel can turn it off.
-  // Set before render so .reveal blocks start hidden (no flash).
+// All the content-driven rendering, so boot can run it twice: once immediately
+// from the content file, and again after the admin overrides arrive.
+function renderPage() {
+  // Scroll-reveal — default on; the admin design panel can turn it off. Set
+  // before render so .reveal blocks start hidden (no flash).
   applyReveal(!(remoteDesign && remoteDesign.effects && remoteDesign.effects.reveal === false));
   applyContentChrome();
-
   applySettings();
   buildNav();
   renderAllPages();
-
-  const toggle = document.getElementById("designToggle");
-  if (designEnabled()) {
-    if (toggle) toggle.hidden = false;
-    buildDesignPanel();
-  } else if (toggle) {
-    toggle.hidden = true;
-  }
-
   route();
   syncHeroText();
-  maybeShowRsvpNudge();
+}
 
+async function boot() {
+  document.documentElement.lang = SITE.locale || "en";
+  SAVED_SITE = JSON.parse(JSON.stringify(window.SITE));   // baseline = content file
+
+  // 1) Paint immediately from the content file — the network never blocks this.
+  renderPage();
+
+  // One-time page wiring (content is on screen now).
   window.addEventListener("hashchange", route);
-
   const lightbox = document.getElementById("lightbox");
   if (lightbox) lightbox.addEventListener("click", (e) => { e.currentTarget.hidden = true; });
 
-  // Tell an embedding admin preview we're fully rendered, so it (re)applies any
-  // held live design/content AFTER our own boot — never racing against it.
+  // 2) Pull the admin overrides (one parallel round-trip) and re-render.
+  await fetchOverrides();
+  SAVED_SITE = JSON.parse(JSON.stringify(window.SITE));   // now file + saved overrides
+  renderPage();
+
+  // Design panel reads the final settings; nudge + preview handshake come last
+  // so the admin's live preview applies AFTER the saved overrides (no clobber).
+  const toggle = document.getElementById("designToggle");
+  if (designEnabled()) { if (toggle) toggle.hidden = false; buildDesignPanel(); }
+  else if (toggle) toggle.hidden = true;
+  maybeShowRsvpNudge();
   if (window.parent !== window) {
     try { window.parent.postMessage({ __sdPreviewReady: 1 }, "*"); } catch (e) { /* sandboxed */ }
   }
