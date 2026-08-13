@@ -59,19 +59,21 @@ without re-investigating.
 
 ## 4. KR site: nav labels 홈 → "Home", 자주 묻는 질문 → "FAQ"
 
-- [ ] In the KR nav (`navigation` in `kr/content.ko.js`), change the label
-      홈 to **Home** and 자주 묻는 질문 to **FAQ**.
-- Per repo precedent (commits c6d9ab2, 46fe885: page title matches its nav
-  tab), also change `titles.qanda` from 자주 묻는 질문 to "FAQ". The welcome
-  page title is empty, so 홈 → Home touches only the nav label.
+- [x] Done 2026-08-13. In `kr/content.ko.js`: nav 홈 → **Home**. The qanda nav
+      was already "Q & A" (not 자주 묻는 질문), so set BOTH the qanda nav label
+      and `titles.qanda` to **FAQ** to keep tab == title (repo precedent,
+      commits c6d9ab2, 46fe885). welcome page title stays empty → 홈 → Home is
+      nav-only. Both new labels are ASCII, so they render in the 630i accent
+      like Schedule/RSVP. The welcome-message prose "…자주 묻는 질문에 대한…" is
+      intentionally left as-is (a sentence, not a label).
 
 ## 5. EN site: drop the "S & D" monogram at the top
 
-- [ ] Remove the "S & D" shown above the site name in the EN header — set
-      `couple.monogram` to `""` in `en/content.en.js`. The engine then hides
-      the monogram element and shows the full "Soyeon & Doyoon" as the brand
-      instead (`.brand.no-monogram` path in `shared/app.js` boot), same as
-      the KR site. The footer monogram disappears automatically too.
+- [x] Won't do — decided 2026-08-13 to KEEP the "S & D" monogram on the EN
+      header. Closed by decision, not implemented. (If ever reversed: set
+      `couple.monogram` to `""` in `en/content.en.js` — the engine then hides
+      the monogram and shows the full "Soyeon & Doyoon" via the
+      `.brand.no-monogram` path; the footer monogram disappears too.)
 
 ## 6. KR site: 소연 & 도윤 → "Soyeon & Doyoon" in titles
 
@@ -86,7 +88,11 @@ without re-investigating.
 
 ## 7. 모청 (+ KR/EN 웹사이트): admin 인라인 리치텍스트 편집기
 
-- [ ] In the admin, let part of a sentence be selected and resized with a
+- [x] **DONE (on `main`, 2026-08-13):** shipped as `shared/richtext.js` +
+      `shared/richtext-editor.js`, wired into `admin/edit-site.html`; used for
+      the hero/header + section per-word size/style editing on both sites.
+      Original spec kept below for reference.
+- In the admin, let part of a sentence be selected and resized with a
       slider (plus bold / 자간 / uppercase / capitalize). Motivating case:
       "김효종 · 주영실의 아들 도윤" — 의 smaller than 아들, names largest.
 - Scope decided: that sentence lives only in the 모청 (`renderFamily()`,
@@ -139,7 +145,11 @@ without re-investigating.
 
 ## 8. Admin: side-by-side live preview (edit form + real page)
 
-- [ ] Show the real page next to the edit form in `admin/edit-site.html`
+- [x] **DONE — Tier A (on `main`, 2026-08-13):** `Admin.mountPreview` renders
+      the real page in a side-by-side iframe in `admin/edit-site.html`. Tier B
+      (debounced unsaved-state postMessage preview) remains optional / not done.
+      Original spec kept below for reference.
+- Show the real page next to the edit form in `admin/edit-site.html`
       (EN/KR 사이트) and `admin/edit.html` (모청), instead of the current
       new-tab 미리보기 ↗ round trip.
 - Prereq (LANDED 2026-08-04, verify committed): the 미리보기 링크 fix in
