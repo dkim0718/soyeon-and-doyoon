@@ -180,3 +180,29 @@ without re-investigating.
   `main.js:312-315` — the `$('#rsvp').hidden` branch has no `else`, so the RSVP
   on/off checkbox is one-way; `app.js:492-493` — `clearInterval` sits below the
   `if (!el) return` guard, leaking the countdown interval.
+
+## 9. KR site: hero photo "feels instant" (blur-up placeholder + AVIF)
+
+- [ ] Make the home hero photo *appear* faster without lowering desktop quality.
+      Parked 2026-08-13 — the site "feels okay for now" per the user; this is the
+      polish pass, not urgent.
+- Context: the load-time **resize jump** is already fixed (commit c6e6d2b —
+  `aspect-ratio: 3/2` on `.hero-img` reserves the box height, so the frame no
+  longer grows 186px when the photo loads). What's left is that the big
+  `shared/photos/hero.jpg` (3200×2133, ~1.1MB) still takes a beat to arrive, so
+  the reserved frame sits empty until it does.
+- Two-part plan (deferred earlier as "Fix 3 / #2"):
+  1. **Blur-up placeholder** — inline a tiny (~30px-wide) heavily-blurred version
+     as a base64 data-URI in the CSS/markup (a couple KB, ships with the page =
+     0 extra requests), shown scaled-up + CSS-blurred inside the now-fixed 3:2
+     frame; cross-fade the full image in on `img.onload`. Fills the empty frame
+     instantly, then sharpens. The admin already canvas-downscales uploads
+     (`Admin.uploadPhoto`), so it could emit the LQIP at upload time and store it
+     alongside the hero URL in the `media` scope.
+  2. **AVIF via `<picture>`** — serve AVIF (or WebP) with a JPEG fallback; AVIF at
+     high quality is ~½ the bytes of a visually-identical JPEG, so the
+     full-quality photo downloads ~2× faster with no visible desktop change.
+     Pair with `<link rel="preload" as="image" fetchpriority="high">` (the
+     `<img>` already has `fetchpriority="high"`, added in renderWelcome).
+- Explicitly NOT doing: re-encoding hero.jpg at lower quality — the user rejected
+  that (visible on desktop). These techniques keep full quality.
