@@ -77,7 +77,7 @@ window.SITE = {
     schedule: { script: "", title: "예식 안내" },
     stay:     { script: "", title: "숙소 안내" },
     travel:   { script: "", title: "오시는 길" },
-    qanda:    { script: "", title: "자주 묻는 질문" },
+    qanda:    { script: "", title: "FAQ" },
     moments:  { script: "", title: "갤러리" },
     accounts: { script: "", title: "마음 전하실 곳" },
     rsvp:     { script: "", title: "RSVP" },
@@ -379,9 +379,9 @@ window.SITE = {
   // (미국식 선물 등록[registry] 은 한국 하객 정서에 맞지 않아 생략했습니다 —
   //  대신 '마음 전하실 곳' 계좌 안내 페이지를 씁니다.)
   navigation: [
-    { id: "welcome",  label: "홈" },
+    { id: "welcome",  label: "Home" },
     { id: "schedule", label: "Schedule" },
-    { id: "qanda",    label: "Q & A" },
+    { id: "qanda",    label: "FAQ" },
     { id: "moments",  label: "갤러리" },
     { id: "accounts", label: "마음 전하실 곳" },
     { id: "rsvp",     label: "RSVP" },
