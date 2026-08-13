@@ -1005,6 +1005,14 @@ html[data-mode="single"] .page + .page::before {
 
 html[data-hero="banner"] .hero-photo-wrap .hero-img {
   border-radius: 0;
+  /* Reserve the final height BEFORE the photo bytes arrive. Without this the
+     box sits at min-height (62vh) while empty, then snaps to max-height (84vh)
+     the instant the image loads — a ~186px "resize + pop" on wide screens.
+     aspect-ratio lets the browser compute the height from width up front (then
+     the same min/max clamp applies), so pre-load height == post-load height and
+     there is no jump. 3/2 matches the hero photo (3200×2133); object-fit: cover
+     still crops cleanly for any other ratio. */
+  aspect-ratio: 3 / 2;
   min-height: 62vh;
   max-height: 84vh;
 }
