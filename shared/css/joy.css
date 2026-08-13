@@ -1149,6 +1149,35 @@ html[data-hero="classic"] .hero-photo-wrap .hero-img {
   margin: 2.6rem auto 0;
 }
 
+/* RSVP call-to-action (home page) — reuses the invitation eyebrow/heading/body
+   styles above, then a big pill button that links to the RSVP form page.
+   Mirrors the 모청's 참석의사 전달 block. */
+.rsvp-cta {
+  max-width: var(--w-content, 720px);
+  margin: 0 auto;
+  padding: 0 1.5rem 5.5rem;
+  text-align: center;
+}
+.rsvp-cta .invite-body { margin-bottom: 2.2rem; }
+.rsvp-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 30rem;
+  padding: 1.15rem 2rem;
+  border-radius: 999px;
+  background: var(--c-accent);
+  color: #fff;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  box-shadow: 0 8px 22px -8px rgba(0, 0, 0, 0.28);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+.rsvp-cta-btn:hover { filter: brightness(1.07); box-shadow: 0 10px 26px -8px rgba(0, 0, 0, 0.32); }
+.rsvp-cta-btn:active { transform: scale(0.98); }
+
 /* KR site: SD정체 for all Korean text (headers/footer names ride --f-brand).
    The English/Latin accents use SD 정체 630i (SD Jeongche weight 700 — the italic
    cut): the monogram, the INVITATION eyebrow, the & ampersands, the footer note,
