@@ -1192,10 +1192,17 @@ html[lang="ko"] .invite-eyebrow,
 html[lang="ko"] .hero-amp,
 html[lang="ko"] .footer-note,
 html[lang="ko"] .brand-monogram,
-html[lang="ko"] .footer-monogram,
-html[lang="ko"] .site-nav a.en-label {
+html[lang="ko"] .footer-monogram {
   font-family: "SD Jeongche", Georgia, serif;
   font-weight: 700;
+}
+
+/* English nav labels (HOME/SCHEDULE/FAQ/RSVP) stay in SD정체 but UPRIGHT (030,
+   weight 400) — the 630i cut above is italic, which reads wrong on the menu.
+   They now match the Korean menu labels (갤러리 …). */
+html[lang="ko"] .site-nav a.en-label {
+  font-family: "SD Jeongche", "Helvetica Neue", sans-serif;
+  font-weight: 400;
 }
 
 /* SD Jeongche's only bold cut IS 630i (italic), so keep Korean "bold" text
