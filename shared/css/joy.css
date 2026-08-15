@@ -611,15 +611,22 @@ html[data-hero="minimal"] .hero-names { font-size: clamp(3rem, 9vw, 5.4rem); }
 /* ---------------- moments gallery ---------------- */
 
 .gallery {
-  columns: 3 12rem;
-  column-gap: 0.9rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
   margin-top: 2rem;
+}
+.gallery-col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
 }
 
 .gallery-item {
   position: relative;
-  break-inside: avoid;
-  margin-bottom: 0.9rem;
+  margin: 0;
   border-radius: 4px;
   overflow: hidden;
   cursor: zoom-in;
@@ -988,7 +995,6 @@ html[data-mode="single"] .page + .page::before {
 @media (max-width: 560px) {
   .site-nav { gap: 0.1rem 0.95rem; }
   .hero-names { letter-spacing: 0.02em; }
-  .gallery { columns: 2 8rem; }
   .dp-colors { grid-template-columns: 1fr; }
 }
 

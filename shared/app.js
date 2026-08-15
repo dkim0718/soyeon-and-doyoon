@@ -640,12 +640,26 @@ function syncHeroText() {
    Gallery (display-only) + lightbox
    ---------------------------------------------------------- */
 
+let galleryMqWired = false;
 function renderGallery() {
   const gallery = document.getElementById("gallery");
   if (!gallery) return;
   const urls = SITE.galleryDefaults || [];
   gallery.innerHTML = "";
-  urls.forEach((url) => {
+  // Row-major masonry: fan the photos across N columns round-robin (photo i →
+  // column i % N) so reading left-to-right, top-to-bottom follows the saved
+  // order (1·2·3 across the top, then 4·5·6…), while every column keeps its
+  // photos at full aspect ratio (no cropping). N follows the 560px breakpoint,
+  // and the gallery re-lays out when that breakpoint flips.
+  const n = window.matchMedia("(max-width: 560px)").matches ? 2 : 3;
+  const cols = [];
+  for (let i = 0; i < n; i++) {
+    const col = document.createElement("div");
+    col.className = "gallery-col";
+    cols.push(col);
+    gallery.append(col);
+  }
+  urls.forEach((url, i) => {
     const fig = document.createElement("figure");
     fig.className = "gallery-item";
     const img = document.createElement("img");
@@ -654,8 +668,12 @@ function renderGallery() {
     img.loading = "lazy";
     fig.append(img);
     fig.addEventListener("click", () => openLightbox(url));
-    gallery.append(fig);
+    cols[i % n].append(fig);
   });
+  if (!galleryMqWired) {
+    galleryMqWired = true;
+    window.matchMedia("(max-width: 560px)").addEventListener("change", renderGallery);
+  }
 }
 
 function openLightbox(src) {
