@@ -102,6 +102,18 @@
         <p class="hint" id="heroUploadMsg" style="margin-top:8px; min-height:1em;"></p>
       </div>
     </div>
+    <div class="gm-section">
+      <h3 class="gm-title">갤러리 사진</h3>
+      <p class="hint" style="margin-bottom:10px;">
+        사진을 끌어서(또는 ◀ ▶ 버튼으로) 순서를 바꾸고, ✕ 로 삭제하세요. 보이는 순서 그대로
+        갤러리에 노출됩니다. 변경 후 아래 <b>사진 저장</b>을 눌러야 모든 방문자에게 반영됩니다.
+      </p>
+      <div id="galleryGrid" class="gallery-admin-grid"></div>
+      <label class="btn btn-ghost btn-sm" style="cursor:pointer; margin-top:12px;">
+        사진 추가… <input type="file" id="galleryFile" accept="image/*" multiple hidden>
+      </label>
+      <p class="hint" id="galleryUploadMsg" style="margin-top:8px; min-height:1em;"></p>
+    </div>
     <div class="btn-row" style="margin-top:14px;">
       <button class="btn btn-primary btn-sm" id="btnSavePhotos">사진 저장 (모든 방문자)</button>
     </div>
@@ -149,6 +161,7 @@
 <!-- inline rich-text editor (sanitizer + widget) -->
 <script src="../shared/richtext.js"></script>
 <script src="../shared/richtext-editor.js"></script>
+<script src="gallery-manager.js"></script>
 <!-- load BOTH content files and snapshot their defaults -->
 <script src="../en/content.en.js"></script>
 <script>window.__DEF_EN = window.SITE;</script>
@@ -439,13 +452,31 @@ Admin.gate(function () {
 
   /* ---------- 사진 (media scope — 두 사이트 공통) ---------- */
   var mediaState = { hero: '', gallery: [] };
+  function gallerySeed() {
+    var g = (defaults.kr && defaults.kr.galleryDefaults) || (defaults.en && defaults.en.galleryDefaults) || [];
+    return Array.isArray(g) ? g.slice() : [];
+  }
+  var galleryMgr = null;
   async function loadPhotos() {
     var m = (await window.Store.getConfigOverride('media')) || {};
     mediaState.hero = m.hero || '';
-    mediaState.gallery = Array.isArray(m.gallery) ? m.gallery : [];
+    // Seed the grid from the saved override if it has photos, else from the
+    // content file's galleryDefaults — so the admin always mirrors what guests
+    // currently see (the site uses the same "override-if-any, else defaults").
+    mediaState.gallery = (Array.isArray(m.gallery) && m.gallery.length) ? m.gallery.slice() : gallerySeed();
     var fallback = (defaults[site] && defaults[site].photos && defaults[site].photos.hero) || '';
     var url = mediaState.hero || fallback;
     if (url) $('heroPreview').src = url;
+    if (!galleryMgr) {
+      galleryMgr = GalleryManager.mount({
+        grid: $('galleryGrid'),
+        addInput: $('galleryFile'),
+        msg: $('galleryUploadMsg'),
+        upload: function (file) { return Admin.uploadPhoto(file, { maxDim: 2000, quality: 0.82 }); },
+        onChange: function (list) { mediaState.gallery = list; }
+      });
+    }
+    galleryMgr.setItems(mediaState.gallery);
   }
   $('heroFile').addEventListener('change', async function (e) {
     var file = e.target.files && e.target.files[0];
