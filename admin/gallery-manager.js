@@ -132,7 +132,7 @@
         var files = Array.prototype.slice.call(e.target.files || []);
         e.target.value = '';
         if (!files.length) return;
-        var done = 0, failed = 0;
+        var done = 0, failed = 0, lastErr = '';
         function setMsg(color, text) { if (msg) { msg.style.color = color; msg.textContent = text; } }
         setMsg('', '업로드 중… (0/' + files.length + ')');
         // Upload sequentially so the added order is stable and storage isn't hammered.
@@ -142,10 +142,16 @@
               items.push(url); done++;
               setMsg('', '업로드 중… (' + done + '/' + files.length + ')');
               render(); emit();
-            }, function () { failed++; });
+            }, function (err) {
+              // Surface the real reason (e.g. "Bucket not found", RLS denial) —
+              // silently counting failures hides the actual cause.
+              failed++;
+              lastErr = (err && err.message) ? err.message : String(err);
+              if (window.console && console.error) console.error('[gallery] 업로드 실패:', file.name, err);
+            });
           });
         }, Promise.resolve()).then(function () {
-          if (failed) setMsg('#b55', done + '장 추가됨, ' + failed + '장 실패. "사진 저장"을 눌러 반영하세요.');
+          if (failed) setMsg('#b55', done + '장 추가, ' + failed + '장 실패' + (lastErr ? ' — ' + lastErr : '') + '.');
           else setMsg('#3a7d5a', done + '장 추가됨 — "사진 저장"을 눌러 반영하세요.');
         });
       });
