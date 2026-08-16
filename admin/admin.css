@@ -140,6 +140,11 @@ table.data .num { text-align: center; }
   background: #fff; border: 1px solid var(--line); color: var(--ink-soft); cursor: pointer;
 }
 .rt-btn:hover { border-color: var(--accent); color: var(--accent-deep); }
+.rt-font {
+  font-size: 12px; padding: 4px 8px; border-radius: 7px; max-width: 120px;
+  background: #fff; border: 1px solid var(--line); color: var(--ink-soft); cursor: pointer;
+}
+.rt-font:hover { border-color: var(--accent); }
 
 /* 글꼴 미리보기 드롭다운 (Admin.fontPicker) — each option renders in its own face */
 .fontpick { position: relative; }

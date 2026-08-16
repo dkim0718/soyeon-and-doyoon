@@ -26,6 +26,42 @@
 
   function el(tag, cls) { var e = document.createElement(tag); if (cls) e.className = cls; return e; }
 
+  // Per-selection font choices. value = CSS font-family (quoted), '' = inherit.
+  // Every value must also be on RichText's ALLOWED_FONTS or sanitize() drops it.
+  var FONT_OPTS = [
+    ['', '글꼴 (기본)'],
+    ["'SD Jeongche'", 'SD정체'],
+    ["'Nanum Myeongjo'", '나눔명조'],
+    ["'Noto Serif KR'", '노토명조'],
+    ["'Gowun Batang'", '고운바탕'],
+    ["'Song Myung'", '송명'],
+    ["'Noto Sans KR'", '노토고딕'],
+    ["'Nanum Gothic'", '나눔고딕'],
+    ["'Black Han Sans'", '검은고딕'],
+    ["'Do Hyeon'", '도현'],
+    ["'EB Garamond'", 'EB Garamond'],
+    ["'Playfair Display'", 'Playfair'],
+    ["'Cormorant Garamond'", 'Cormorant'],
+    ["'Marcellus'", 'Marcellus'],
+    ["'Nanum Pen Script'", '나눔손글씨'],
+    ["'Clicker Script'", 'Clicker Script'],
+  ];
+  function normFont(v) { return (v || '').replace(/["']/g, '').trim().toLowerCase(); }
+  // Load a Google font into the ADMIN doc so the editor previews the choice.
+  // SD정체 is domain-locked (won't load off soyeondoyoon.fun) and generics need
+  // nothing; the live site loads its content fonts itself (app.js loadGoogleFonts).
+  var loadedFonts = {};
+  function loadEditorFont(cssVal) {
+    var name = normFont(cssVal);
+    if (!name || name === 'sd jeongche' || /^(serif|sans-serif|cursive)$/.test(name) || loadedFonts[name]) return;
+    loadedFonts[name] = 1;
+    var l = document.createElement('link');
+    l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=' +
+      encodeURIComponent(cssVal.replace(/["']/g, '').trim()).replace(/%20/g, '+') + '&display=swap';
+    document.head.appendChild(l);
+  }
+
   function attach(input, opts) {
     opts = opts || {};
     if (!window.RichText) { throw new Error('RichTextEditor requires RichText (shared/richtext.js)'); }
@@ -44,6 +80,15 @@
     if (input.tagName === 'TEXTAREA') editor.className = 'rt-editor rt-multiline';
 
     /* ---- toolbar controls ---- */
+    var font = document.createElement('select');
+    font.className = 'rt-font';
+    font.title = '글꼴';
+    for (var fi = 0; fi < FONT_OPTS.length; fi++) {
+      var fo = document.createElement('option');
+      fo.value = FONT_OPTS[fi][0];
+      fo.textContent = FONT_OPTS[fi][1];
+      font.appendChild(fo);
+    }
     var size = rangeInput('0.6', '2', '0.05', '1');
     var sizeCtl = ctl('크기', size);
     var ls = rangeInput('-0.05', '0.4', '0.01', '0');
@@ -53,6 +98,7 @@
     var bCap = btn('Aa', '첫 글자 대문자');
     var bClear = btn('서식 지우기');
 
+    bar.appendChild(font);
     bar.appendChild(sizeCtl);
     bar.appendChild(lsCtl);
     bar.appendChild(bBold);
@@ -189,6 +235,15 @@
     size.addEventListener('input', function () { setProp('font-size', parseFloat(size.value) + 'em'); });
     ls.addEventListener('input', function () { setProp('letter-spacing', parseFloat(ls.value) + 'em'); });
 
+    // Font dropdown: apply the chosen family (or clear for '(기본)'), and load it
+    // into the admin doc so the editor previews it. Uses the saved selection.
+    preserveSel(font);
+    font.addEventListener('change', function () {
+      var v = font.value;
+      loadEditorFont(v);
+      setProp('font-family', v || null);
+    });
+
     editor.addEventListener('input', sync);
     editor.addEventListener('keyup', saveSel);
     editor.addEventListener('mouseup', saveSel);
@@ -201,6 +256,12 @@
       saveSel();
       var range = currentRange();
       var span = range ? enclosingSpan(range) : null;
+      // reflect the selection's current font in the dropdown (blank = inherit)
+      var nf = normFont(span ? span.style.getPropertyValue('font-family') : '');
+      font.value = '';
+      for (var oi = 0; oi < font.options.length; oi++) {
+        if (normFont(font.options[oi].value) === nf) { font.value = font.options[oi].value; break; }
+      }
       if (span) {
         var fs = span.style.getPropertyValue('font-size');
         if (/em$/.test(fs)) size.value = parseFloat(fs);

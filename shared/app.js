@@ -38,6 +38,8 @@ function fontChoices() {
 // from the dynamic Google Fonts request (css2 400s the WHOLE request on an
 // unknown family name, which would drop every other font too).
 const EXTERNAL_FONTS = new Set(["SD Jeongche"]);
+// Generic / system families that never need a Google Fonts request.
+const GENERICS = new Set(["serif", "sans-serif", "cursive", "monospace", "system-ui", "ui-serif", "ui-sans-serif"]);
 
 const PALETTES = [
   { id: "magnolia",  name: "Magnolia",   bg: "#f8f1ef", accent: "#875346", alt: "#5a6857", text: "#333333" },
@@ -158,17 +160,26 @@ function applySettings() {
 function loadGoogleFonts() {
   const fams = new Set([settings.fonts.heading, settings.fonts.body]);
   if (settings.fonts.brand !== "None") fams.add(settings.fonts.brand);
+  // Per-item fonts chosen in the admin inline editor arrive as inline
+  // font-family on spans in the header/main/footer — collect those too so the
+  // chosen font actually loads (otherwise it silently falls back to the default).
+  document.querySelectorAll('.site-header [style*="font-family"], #main [style*="font-family"], .site-footer [style*="font-family"]')
+    .forEach((el) => {
+      const ff = el.style && el.style.fontFamily;
+      if (!ff) return;
+      ff.split(",").forEach((f) => fams.add(f.trim().replace(/^['"]|['"]$/g, "")));
+    });
   // Request families WITHOUT a weight/italic axis: css2 rejects the whole
   // request if any one family lacks the requested axis (common with Korean and
   // single-weight display fonts), which would drop every font. Bold weights for
   // the built-in choices come from each page's static <link>; this dynamic link
-  // just guarantees any custom-typed font also loads.
+  // just guarantees any custom-typed / per-item font also loads.
   const parts = [...fams]
-    .filter((f) => f && !EXTERNAL_FONTS.has(f))
+    .filter((f) => f && !EXTERNAL_FONTS.has(f) && !GENERICS.has(f.toLowerCase()))
     .map((f) => "family=" + encodeURIComponent(f).replace(/%20/g, "+"));
   const link = document.getElementById("gfonts");
   // Only fetch when a Google family is actually needed — with SD정체 (external)
-  // selected, parts is empty, so we skip the request entirely.
+  // selected and no per-item Google fonts, parts is empty, so we skip the request.
   if (link && parts.length) link.href = "https://fonts.googleapis.com/css2?" + parts.join("&") + "&display=swap";
 }
 
@@ -1160,6 +1171,7 @@ function renderPage() {
   renderAllPages();
   route();
   syncHeroText();
+  loadGoogleFonts();   // re-scan now that content (with any per-item fonts) is in the DOM
 }
 
 async function boot() {
