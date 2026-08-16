@@ -380,6 +380,7 @@ window.SITE = {
   //  대신 '마음 전하실 곳' 계좌 안내 페이지를 씁니다.)
   navigation: [
     { id: "welcome",  label: "Home" },
+    { id: "story",    label: "Story" },
     { id: "schedule", label: "Schedule" },
     { id: "qanda",    label: "FAQ" },
     { id: "moments",  label: "갤러리" },
