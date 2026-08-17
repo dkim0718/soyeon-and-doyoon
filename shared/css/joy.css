@@ -1155,17 +1155,19 @@ html[data-hero="classic"] .hero-photo-wrap .hero-img {
   margin: 2.6rem auto 0;
 }
 
-/* RSVP call-to-action (home page) — reuses the invitation eyebrow/heading/body
-   styles above, then a big pill button that links to the RSVP form page.
-   Mirrors the 모청's 참석의사 전달 block. */
-.rsvp-cta {
+/* Home-page call-to-action blocks (RSVP + 마음 전하실 곳) — reuse the invitation
+   eyebrow/heading/body styles, then a big pill button linking to that page.
+   Mirrors the 모청's 참석의사 전달 / 마음 전하실 곳 sections. They stack with even
+   spacing (collapsing top margins); .home-cta-end holds the gap before the footer. */
+.home-cta {
   max-width: var(--w-content, 720px);
-  margin: 0 auto;
-  padding: 0 1.5rem 5.5rem;
+  margin: 3.4rem auto 0;
+  padding: 0 1.5rem;
   text-align: center;
 }
-.rsvp-cta .invite-body { margin-bottom: 2.2rem; }
-.rsvp-cta-btn {
+.home-cta-end { height: 4.5rem; }
+.home-cta .invite-body { margin-bottom: 2.2rem; }
+.home-cta-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1181,8 +1183,8 @@ html[data-hero="classic"] .hero-photo-wrap .hero-img {
   box-shadow: 0 8px 22px -8px rgba(0, 0, 0, 0.28);
   transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
 }
-.rsvp-cta-btn:hover { filter: brightness(1.07); box-shadow: 0 10px 26px -8px rgba(0, 0, 0, 0.32); }
-.rsvp-cta-btn:active { transform: scale(0.98); }
+.home-cta-btn:hover { filter: brightness(1.07); box-shadow: 0 10px 26px -8px rgba(0, 0, 0, 0.32); }
+.home-cta-btn:active { transform: scale(0.98); }
 
 /* KR site: SD정체 for all Korean text (headers/footer names ride --f-brand).
    The English/Latin accents use SD 정체 630i (SD Jeongche weight 700 — the italic

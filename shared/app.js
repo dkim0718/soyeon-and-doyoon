@@ -250,19 +250,20 @@ function inviteBlock() {
   return inner ? `<section class="invitation reveal">${inner}</section>` : "";
 }
 
-// 모청-style RSVP call-to-action for the bottom of the home page: eyebrow →
-// heading → notice → big pill button that routes to the full RSVP form (#/rsvp).
-// Opt-in per site via SITE.rsvp.homeCta (KR only today), so EN is unaffected.
-function rsvpCtaBlock() {
-  const cta = SITE.rsvp && SITE.rsvp.homeCta;
+// 모청-style call-to-action blocks for the bottom of the home page: eyebrow →
+// heading → notice → big pill button that routes to a full page. Opt-in per site
+// via SITE.<scope>.homeCta (KR only today), so EN is unaffected.
+function homeCtaBlock(cta, href, defaultLabel) {
   if (!cta) return "";
   let inner = "";
   if (cta.eyebrow) inner += `<p class="invite-eyebrow">${cta.eyebrow}</p>`;
   if (cta.heading) inner += `<h2 class="invite-heading">${cta.heading}</h2>`;
   if (cta.body) inner += `<p class="invite-body">${String(cta.body).replace(/\n/g, "<br>")}</p>`;
-  inner += `<a class="rsvp-cta-btn" href="#/rsvp">${cta.button || "RSVP"}</a>`;
-  return `<section class="rsvp-cta reveal">${inner}</section>`;
+  inner += `<a class="home-cta-btn" href="${href}">${cta.button || defaultLabel}</a>`;
+  return `<section class="home-cta reveal">${inner}</section>`;
 }
+function rsvpCtaBlock() { return homeCtaBlock(SITE.rsvp && SITE.rsvp.homeCta, "#/rsvp", "RSVP"); }
+function accountsCtaBlock() { return homeCtaBlock(SITE.accounts && SITE.accounts.homeCta, "#/accounts", "마음 전하실 곳"); }
 
 function renderWelcome() {
   const w = SITE.wedding;
@@ -277,7 +278,7 @@ function renderWelcome() {
   const heroPhoto = (SITE.photos && SITE.photos.hero)
     ? `<img class="hero-img" src="${SITE.photos.hero}" alt="" fetchpriority="high">` : "";
   const invite = inviteBlock();
-  const cta = rsvpCtaBlock();
+  const cta = rsvpCtaBlock() + accountsCtaBlock();   // 0, 1, or 2 stacked CTAs
   const countdown = `<div class="countdown" id="countdown"></div>`;
   // KR (has an invitation): hero → invitation → countdown, with extra bottom
   // space before the footer — no warm coda. EN (no invitation): hero+countdown
@@ -293,7 +294,7 @@ function renderWelcome() {
     </section>
     ${invite}
     ${invite
-      ? `<section class="page-body reveal" style="max-width:var(--w-content);margin:0 auto;padding:2.4rem 1.5rem ${cta ? "2.8rem" : "5.5rem"}">${countdown}</section>${cta}`
+      ? `<section class="page-body reveal" style="max-width:var(--w-content);margin:0 auto;padding:2.4rem 1.5rem ${cta ? "1.5rem" : "5.5rem"}">${countdown}</section>${cta}${cta ? '<div class="home-cta-end" aria-hidden="true"></div>' : ""}`
       : `<section class="page-body reveal" style="max-width:var(--w-content);margin:0 auto;padding:3rem 1.5rem 0">
       <div class="page-title">${titleFor("welcome").script ? `<span class="script">${titleFor("welcome").script}</span>` : ""}<h2>${SITE.welcome.heading}</h2></div>
       <p class="center">${SITE.welcome.message}</p>

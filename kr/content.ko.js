@@ -314,6 +314,7 @@ window.SITE = {
 
   // 참석 회신 (자유 self-report). 위젯은 shared/rsvp-widget.js 가 담당합니다.
   rsvp: {
+    popup: true,   // 홈 진입 시 참석 회신 팝업(모청 입장 팝업의 조이엔진 버전). 문구는 i18n nudge.* (ko).
     deadline: "2026년 9월 15일",
     message:
       "참석 여부를 알려주시면 정확한 인원 준비에 큰 도움이 됩니다. 꼭 뵙기를 바랍니다!",
@@ -351,6 +352,16 @@ window.SITE = {
   // (모청과 같은 방식 — 실제 값 보관: invite/config.private.js).
   accounts: {
     notice: "참석이 어려워 직접 축하를 전하지 못하는 분들을 위해 기재했습니다. 너그러운 마음으로 양해 부탁드립니다.",
+    // 홈(첫 페이지) 하단의 '마음 전하실 곳' 안내 + 버튼 → 계좌 안내 페이지(#/accounts).
+    // RSVP CTA 바로 아래에 같은 구성으로 놓입니다. 빼려면 homeCta 를 지우세요.
+    homeCta: {
+      eyebrow: "GIFT",
+      heading: "마음 전하실 곳",
+      body:
+        "참석이 어려워 직접 축하를 전하지 못하는 분들을 위해\n" +
+        "마음 전하실 곳을 마련했습니다.",
+      button: "마음 전하실 곳 보기",
+    },
     groom: [
       {
         label: "신랑",
