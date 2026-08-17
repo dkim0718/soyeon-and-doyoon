@@ -1130,8 +1130,8 @@ function maybeShowRsvpNudge() {
     <div class="nudge" role="dialog" aria-modal="true" aria-label="${t("nudge.title")}">
       <button class="nudge-x" aria-label="${t("nudge.close")}">✕</button>
       <h3 class="nudge-title">${t("nudge.title")}</h3>
-      ${cfg.message ? `<p class="nudge-body">${cfg.message}</p>` : ""}
-      ${cfg.deadline ? `<p class="nudge-deadline">${t("respondBy", { date: cfg.deadline })}</p>` : ""}
+      ${(cfg.popupMessage || cfg.message) ? `<p class="nudge-body">${cfg.popupMessage || cfg.message}</p>` : ""}
+      ${cfg.deadline && !cfg.popupHideDeadline ? `<p class="nudge-deadline">${t("respondBy", { date: cfg.deadline })}</p>` : ""}
       <button class="btn nudge-go">${t("nudge.cta")}</button>
       <button class="nudge-today">${t("nudge.today")}</button>
     </div>`;
