@@ -957,9 +957,12 @@ html[data-hero="minimal"] .hero-names { font-size: clamp(3rem, 9vw, 5.4rem); }
   line-height: 1.6;
   margin-bottom: 0.5rem;
 }
-/* KR 팝업 본문 + 마감일 줄은 2포인트 정도 크게 (가독성) */
+/* KR 팝업 본문 + 마감일 줄은 2포인트 정도 크게 (가독성). word-break: keep-all 로
+   한국어가 글자 사이가 아니라 띄어쓰기(단어) 단위로만 줄바꿈되게 함. 팝업 폭도 조금
+   넓혀 긴 문구가 한 줄에 들어갈 여유를 줌(좁은 화면에서는 화면 폭에 맞춰 줄바꿈). */
+html[lang="ko"] .nudge { max-width: 28rem; }
 html[lang="ko"] .nudge-body,
-html[lang="ko"] .nudge-deadline { font-size: 1.05rem; }
+html[lang="ko"] .nudge-deadline { font-size: 1.05rem; word-break: keep-all; }
 
 .nudge-deadline { font-size: 0.92rem; margin-bottom: 1.4rem; }
 
