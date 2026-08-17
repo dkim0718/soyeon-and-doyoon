@@ -211,7 +211,7 @@ Admin.gate(function () {
     { key:'moments',  navId:'moments',  label:'갤러리 소개 (Gallery)', type:'fields',
       fields:[['intro','소개 문구','textarea',1]] },
     { key:'rsvp',     navId:'rsvp',     label:'참석 회신 (RSVP)',      type:'fields',
-      fields:[['message','안내 문구 (RSVP 폼 페이지)','textarea',1],['popupMessage','팝업 문구 (진입 팝업)','textarea',1],['deadline','회신 마감일','text',1]] },
+      fields:[['message','안내 문구 (팝업 + RSVP 페이지 공용)','textarea',1],['deadline','회신 마감일','text',1]] },
   ];
 
   var $ = function (id) { return document.getElementById(id); };

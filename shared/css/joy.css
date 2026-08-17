@@ -957,8 +957,9 @@ html[data-hero="minimal"] .hero-names { font-size: clamp(3rem, 9vw, 5.4rem); }
   line-height: 1.6;
   margin-bottom: 0.5rem;
 }
-/* KR 팝업 본문은 2포인트 정도 크게 (가독성) */
-html[lang="ko"] .nudge-body { font-size: 1.05rem; margin-bottom: 1.4rem; }
+/* KR 팝업 본문 + 마감일 줄은 2포인트 정도 크게 (가독성) */
+html[lang="ko"] .nudge-body,
+html[lang="ko"] .nudge-deadline { font-size: 1.05rem; }
 
 .nudge-deadline { font-size: 0.92rem; margin-bottom: 1.4rem; }
 
