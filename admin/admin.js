@@ -353,14 +353,17 @@ window.Admin = (function () {
     if (isSupabase) {
       gateEl.innerHTML =
         '<h1>관리자 로그인</h1>' +
-        '<p>등록된 관리자 이메일로 로그인 링크를 보내드립니다.</p>' +
+        '<p>등록된 관리자 이메일과 비밀번호로 로그인하세요.</p>' +
         '<input type="email" id="gateEmail" placeholder="admin@example.com" ' +
         'autocomplete="email" style="letter-spacing:normal;text-align:left;">' +
-        '<button class="btn btn-primary btn-block" id="gateGo">로그인 링크 보내기</button>' +
+        '<input type="password" id="gatePw" placeholder="비밀번호" ' +
+        'autocomplete="current-password" style="letter-spacing:normal;text-align:left;margin-top:8px;">' +
+        '<button class="btn btn-primary btn-block" id="gatePwGo" style="margin-top:4px;">로그인</button>' +
         '<div style="margin-top:14px;padding-top:12px;border-top:1px solid #e5ddd6;">' +
-        '<p style="font-size:12px;color:#8b7f7a;margin:0 0 6px;">메일에 6자리 코드가 함께 온 경우, 링크 대신 코드를 입력해도 됩니다.</p>' +
+        '<p style="font-size:12px;color:#8b7f7a;margin:0 0 6px;">비밀번호가 없거나 잊으셨나요? 이메일로 로그인 링크(또는 6자리 코드)를 받을 수 있습니다.</p>' +
+        '<button class="btn btn-ghost btn-block" id="gateGo">로그인 링크 보내기</button>' +
         '<input id="gateOtp" inputmode="numeric" autocomplete="one-time-code" ' +
-        'placeholder="6자리 코드" maxlength="8" style="text-align:center;letter-spacing:0.25em;">' +
+        'placeholder="6자리 코드" maxlength="8" style="text-align:center;letter-spacing:0.25em;margin-top:8px;">' +
         '<button class="btn btn-ghost btn-block" id="gateOtpGo" style="margin-top:6px;">코드로 로그인</button>' +
         '</div>' +
         '<p id="gateMsg" style="font-size:12px;color:#b55;margin:12px 0 0;min-height:1em;"></p>';
@@ -441,8 +444,36 @@ window.Admin = (function () {
       }
     }
 
+    // Primary path: email + password. Sends no email, so it is immune to the
+    // magic-link rate limit and to scanned/expired links.
+    async function submitPassword() {
+      msg.style.color = '#b55';
+      msg.textContent = '';
+      const emailEl = gateEl.querySelector('#gateEmail');
+      const pwEl = gateEl.querySelector('#gatePw');
+      const addr = emailEl ? emailEl.value.trim() : '';
+      const pass = pwEl ? pwEl.value : '';
+      if (!addr) { msg.textContent = '이메일을 입력해 주세요.'; return; }
+      if (!pass) { msg.textContent = '비밀번호를 입력해 주세요.'; return; }
+      try {
+        await store.adminSignInPassword(addr, pass);
+        location.reload();
+      } catch (e) {
+        msg.textContent = '로그인 실패: ' + (e && e.message ? e.message : e);
+      }
+    }
+
+    const pwGo = gateEl.querySelector('#gatePwGo');
+    if (pwGo) {
+      pwGo.addEventListener('click', submitPassword);
+      const pwEl = gateEl.querySelector('#gatePw');
+      if (pwEl) pwEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitPassword(); });
+    }
+
     gateEl.querySelector('#gateGo').addEventListener('click', submit);
-    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+    // Supabase mode: Enter on the email field logs in with the password.
+    // localStorage mode: the first input is the password, so just submit.
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') (isSupabase ? submitPassword : submit)(); });
 
     const otpInput = gateEl.querySelector('#gateOtp');
     const otpGo = gateEl.querySelector('#gateOtpGo');

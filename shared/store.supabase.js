@@ -416,6 +416,19 @@
     return true;
   }
 
+  // Old-fashioned email + password sign-in. Sends NO email, so it is immune
+  // to the magic-link rate limit and to scanned/expired links. Requires the
+  // user to have a password set in Supabase Auth (dashboard → Authentication
+  // → Users → Add user with a password, or reset an existing user's).
+  async function adminSignInPassword(email, password) {
+    var res = await client.auth.signInWithPassword({
+      email: str(email),
+      password: str(password),
+    });
+    if (res && res.error) throw res.error;
+    return true;
+  }
+
   // Sign in by typing the 6-digit code from the same email — works even
   // when the link itself fails (scanned/expired link, in-app browser).
   async function adminVerifyOtp(email, code) {
@@ -535,6 +548,7 @@
     uploadPhoto: uploadPhoto,
     // admin
     adminSignIn: adminSignIn,
+    adminSignInPassword: adminSignInPassword,
     adminVerifyOtp: adminVerifyOtp,
     adminSignOut: adminSignOut,
     isAdmin: isAdmin,
