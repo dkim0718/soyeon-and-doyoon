@@ -192,15 +192,15 @@ html[data-mode="single"] .page { padding-bottom: 2rem; }
 
 .hero-date {
   margin-top: 1.2rem;
-  font-size: 0.85rem;
-  letter-spacing: 0.3em;
+  font-size: clamp(0.98rem, 2.7vw, 1.15rem);
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
 .hero-venue {
-  margin-top: 0.4rem;
-  font-size: 0.8rem;
-  letter-spacing: 0.18em;
+  margin-top: 0.5rem;
+  font-size: clamp(0.92rem, 2.4vw, 1.05rem);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--c-muted);
 }
@@ -504,6 +504,7 @@ html[data-hero="minimal"] .hero-names { font-size: clamp(3rem, 9vw, 5.4rem); }
   font-family: var(--f-heading);
   font-size: 1.06rem;
   font-weight: 600;
+  color: var(--c-accent);
   position: relative;
 }
 
@@ -524,7 +525,13 @@ html[data-hero="minimal"] .hero-names { font-size: clamp(3rem, 9vw, 5.4rem); }
 
 .qa-item[open] summary::after { transform: translateY(-50%) rotate(45deg); }
 
-.qa-answer { padding: 0 0 1.2rem; font-size: 0.95rem; white-space: pre-line; }
+.qa-answer {
+  padding: 0.1rem 0 1.3rem 0.9rem;
+  border-left: 2px solid var(--c-line);
+  font-size: 0.97rem;
+  color: var(--c-text);
+  white-space: pre-line;
+}
 
 /* ---------------- registry ---------------- */
 
@@ -901,6 +908,38 @@ html[data-hero="minimal"] .hero-names { font-size: clamp(3rem, 9vw, 5.4rem); }
 
 .lightbox img { max-width: 100%; max-height: 100%; border-radius: 3px; }
 
+/* slideshow controls (built by wireLightbox in app.js) */
+.lb-nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 3rem; height: 3rem; border-radius: 999px;
+  border: 0; background: rgba(255, 255, 255, 0.14); color: #fff;
+  font-size: 2rem; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.lb-nav:hover { background: rgba(255, 255, 255, 0.28); }
+.lb-prev { left: 0.8rem; }
+.lb-next { right: 0.8rem; }
+.lb-close {
+  position: absolute; top: 1rem; right: 1rem;
+  width: 2.4rem; height: 2.4rem; border-radius: 999px;
+  border: 0; background: rgba(255, 255, 255, 0.14); color: #fff;
+  font-size: 1.1rem; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.lb-close:hover { background: rgba(255, 255, 255, 0.28); }
+.lb-count {
+  position: absolute; bottom: 1.1rem; left: 50%; transform: translateX(-50%);
+  color: #fff; font-size: 0.85rem; letter-spacing: 0.08em; opacity: 0.85;
+  pointer-events: none;
+}
+@media (max-width: 560px) {
+  .lb-nav { width: 2.6rem; height: 2.6rem; font-size: 1.7rem; }
+  .lb-prev { left: 0.3rem; }
+  .lb-next { right: 0.3rem; }
+}
+
 /* ---------------- RSVP nudge popup ---------------- */
 
 .nudge-overlay {
@@ -1173,6 +1212,8 @@ html[data-hero="classic"] .hero-photo-wrap .hero-img {
 }
 .home-cta-end { height: 4.5rem; }
 .home-cta .invite-body { margin-bottom: 2.2rem; }
+.home-location .invite-body { margin-bottom: 1.1rem; }
+.home-location .travel-maps { margin: 0.2rem 0 0; }
 .home-cta-btn {
   display: inline-flex;
   align-items: center;

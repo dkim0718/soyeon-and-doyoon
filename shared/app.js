@@ -265,6 +265,22 @@ function homeCtaBlock(cta, href, defaultLabel) {
 function rsvpCtaBlock() { return homeCtaBlock(SITE.rsvp && SITE.rsvp.homeCta, "#/rsvp", "RSVP"); }
 function accountsCtaBlock() { return homeCtaBlock(SITE.accounts && SITE.accounts.homeCta, "#/accounts", "마음 전하실 곳"); }
 
+// Home 'directions' summary — venue + address + map pills. KR-only: opt-in via
+// SITE.wedding.homeLocation so EN (which also has wedding.maps) is unaffected.
+// The full 오시는 길 page lives at #/travel; this is the at-a-glance version.
+function locationHomeBlock() {
+  const w = SITE.wedding;
+  if (!w || !w.homeLocation) return "";
+  const maps = (w.maps || []).map((m) =>
+    `<a class="map-pill" href="${m.url}" target="_blank" rel="noopener">${m.label}</a>`).join("");
+  return `<section class="home-cta home-location reveal">
+    <p class="invite-eyebrow">LOCATION</p>
+    <h2 class="invite-heading">${w.venue}</h2>
+    ${w.venueAddress ? `<p class="invite-body">${w.venueAddress}</p>` : ""}
+    ${maps ? `<div class="travel-maps">${maps}</div>` : ""}
+  </section>`;
+}
+
 function renderWelcome() {
   const w = SITE.wedding;
   const c = SITE.couple;
@@ -278,7 +294,7 @@ function renderWelcome() {
   const heroPhoto = (SITE.photos && SITE.photos.hero)
     ? `<img class="hero-img" src="${SITE.photos.hero}" alt="" fetchpriority="high">` : "";
   const invite = inviteBlock();
-  const cta = rsvpCtaBlock() + accountsCtaBlock();   // 0, 1, or 2 stacked CTAs
+  const cta = locationHomeBlock() + rsvpCtaBlock() + accountsCtaBlock();   // stacked home sections
   const countdown = `<div class="countdown" id="countdown"></div>`;
   // KR (has an invitation): hero → invitation → countdown, with extra bottom
   // space before the footer — no warm coda. EN (no invitation): hero+countdown
@@ -653,10 +669,13 @@ function syncHeroText() {
    ---------------------------------------------------------- */
 
 let galleryMqWired = false;
+let galleryUrls = [];
+let lightboxIndex = 0;
 function renderGallery() {
   const gallery = document.getElementById("gallery");
   if (!gallery) return;
   const urls = SITE.galleryDefaults || [];
+  galleryUrls = urls;
   gallery.innerHTML = "";
   // Row-major masonry: fan the photos across N columns round-robin (photo i →
   // column i % N) so reading left-to-right, top-to-bottom follows the saved
@@ -679,7 +698,7 @@ function renderGallery() {
     img.alt = "Gallery photo";
     img.loading = "lazy";
     fig.append(img);
-    fig.addEventListener("click", () => openLightbox(url));
+    fig.addEventListener("click", () => openLightbox(i));
     cols[i % n].append(fig);
   });
   if (!galleryMqWired) {
@@ -688,11 +707,70 @@ function renderGallery() {
   }
 }
 
-function openLightbox(src) {
+function openLightbox(index) {
   const lb = document.getElementById("lightbox");
-  if (!lb) return;
-  document.getElementById("lightboxImg").src = src;
+  if (!lb || !galleryUrls.length) return;
+  lightboxIndex = (index + galleryUrls.length) % galleryUrls.length;
+  const img = document.getElementById("lightboxImg");
+  if (img) img.src = galleryUrls[lightboxIndex];
+  const counter = document.getElementById("lightboxCount");
+  if (counter) counter.textContent = (lightboxIndex + 1) + " / " + galleryUrls.length;
   lb.hidden = false;
+}
+
+function lightboxStep(delta) { openLightbox(lightboxIndex + delta); }
+
+function closeLightbox() {
+  const lb = document.getElementById("lightbox");
+  if (lb) lb.hidden = true;
+}
+
+// Build prev/next/close controls once and wire keyboard + swipe. Controls are
+// created in JS so any page with a bare <div id="lightbox"> gains slideshow
+// navigation without touching its markup.
+function wireLightbox() {
+  const lb = document.getElementById("lightbox");
+  if (!lb || lb.dataset.wired) return;
+  lb.dataset.wired = "1";
+  if (!document.getElementById("lightboxPrev")) {
+    const mk = (id, cls, txt, label) => {
+      const b = document.createElement("button");
+      b.id = id; b.className = cls; b.type = "button"; b.textContent = txt;
+      b.setAttribute("aria-label", label);
+      return b;
+    };
+    lb.append(
+      mk("lightboxPrev", "lb-nav lb-prev", "‹", "이전 사진"),
+      mk("lightboxNext", "lb-nav lb-next", "›", "다음 사진"),
+      mk("lightboxClose", "lb-close", "✕", "닫기")
+    );
+    const count = document.createElement("div");
+    count.id = "lightboxCount"; count.className = "lb-count";
+    lb.append(count);
+  }
+  // Close only when the dark backdrop itself is clicked — not the image or arrows.
+  lb.addEventListener("click", (e) => { if (e.target === lb) closeLightbox(); });
+  const on = (id, fn) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("click", (e) => { e.stopPropagation(); fn(); });
+  };
+  on("lightboxPrev", () => lightboxStep(-1));
+  on("lightboxNext", () => lightboxStep(1));
+  on("lightboxClose", closeLightbox);
+  document.addEventListener("keydown", (e) => {
+    if (lb.hidden) return;
+    if (e.key === "ArrowLeft") lightboxStep(-1);
+    else if (e.key === "ArrowRight") lightboxStep(1);
+    else if (e.key === "Escape") closeLightbox();
+  });
+  let sx = null;
+  lb.addEventListener("touchstart", (e) => { sx = e.changedTouches[0].clientX; }, { passive: true });
+  lb.addEventListener("touchend", (e) => {
+    if (sx === null) return;
+    const dx = e.changedTouches[0].clientX - sx;
+    sx = null;
+    if (Math.abs(dx) > 40) lightboxStep(dx < 0 ? 1 : -1);
+  }, { passive: true });
 }
 
 /* ----------------------------------------------------------
@@ -1184,8 +1262,7 @@ async function boot() {
 
   // One-time page wiring (content is on screen now).
   window.addEventListener("hashchange", route);
-  const lightbox = document.getElementById("lightbox");
-  if (lightbox) lightbox.addEventListener("click", (e) => { e.currentTarget.hidden = true; });
+  wireLightbox();
 
   // 2) Pull the admin overrides (one parallel round-trip) and re-render.
   await fetchOverrides();

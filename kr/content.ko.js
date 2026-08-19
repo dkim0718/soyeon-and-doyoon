@@ -59,25 +59,26 @@ window.SITE = {
     dateISO: "2026-10-30T18:30:00+09:00",
     dateDisplay: "2026년 10월 30일 금요일",
     timeDisplay: "오후 6시 30분",
-    venue: "신라호텔 영빈관",
+    venue: "서울 신라호텔 영빈관",
     venueAddress: "서울 중구 동호로 249",
-    city: "신라호텔 영빈관",   // 푸터 마지막 항목(이름 · 날짜 · 장소)에 표시
-    // 오시는 길 페이지에 표시되는 지도 링크
+    city: "서울 신라호텔 영빈관",   // 푸터 마지막 항목(이름 · 날짜 · 장소)에 표시
+    homeLocation: true,   // 홈(첫 화면)에 '오시는 길' 요약(장소·주소·지도 버튼) 표시 — 한국어 전용
+    // 오시는 길 페이지 + 홈 요약에 쓰이는 지도 링크 (네이버·카카오 우선)
     maps: [
       { label: "네이버 지도", url: "https://map.naver.com/p/search/" + encodeURIComponent("신라호텔 영빈관") },
-      { label: "구글 지도", url: "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("신라호텔 영빈관") },
       { label: "카카오맵", url: "https://map.kakao.com/link/search/" + encodeURIComponent("신라호텔 영빈관") },
+      { label: "구글 지도", url: "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("신라호텔 영빈관") },
     ],
   },
 
   // 페이지별 제목 (script = 필기체 소제목, title = 큰 제목)
   titles: {
     welcome:  { script: "", title: "" },
-    story:    { script: "", title: "우리 이야기" },
+    story:    { script: "", title: "Our Story" },
     schedule: { script: "", title: "예식 안내" },
     stay:     { script: "", title: "숙소 안내" },
     travel:   { script: "", title: "오시는 길" },
-    qanda:    { script: "", title: "FAQ" },
+    qanda:    { script: "", title: "Q&A" },
     moments:  { script: "", title: "갤러리" },
     accounts: { script: "", title: "마음 전하실 곳" },
     rsvp:     { script: "", title: "RSVP" },
@@ -397,8 +398,9 @@ window.SITE = {
     { id: "welcome",  label: "Home" },
     { id: "story",    label: "Story" },
     { id: "schedule", label: "Schedule" },
-    { id: "qanda",    label: "FAQ" },
+    { id: "qanda",    label: "Q&A" },
     { id: "moments",  label: "갤러리" },
+    { id: "travel",   label: "오시는길" },
     { id: "accounts", label: "마음 전하실 곳" },
     { id: "rsvp",     label: "RSVP" },
   ],
