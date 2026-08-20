@@ -1001,7 +1001,12 @@ html[data-hero="minimal"] .hero-names { font-size: clamp(3rem, 9vw, 5.4rem); }
    넓혀 긴 문구가 한 줄에 들어갈 여유를 줌(좁은 화면에서는 화면 폭에 맞춰 줄바꿈). */
 html[lang="ko"] .nudge { max-width: 28rem; }
 html[lang="ko"] .nudge-body,
-html[lang="ko"] .nudge-deadline { font-size: 1.05rem; word-break: keep-all; }
+html[lang="ko"] .nudge-deadline { font-size: 1rem; word-break: keep-all; }
+/* Phones: shrink a touch more so each phrase fits without messy wrapping. */
+@media (max-width: 560px) {
+  html[lang="ko"] .nudge-body,
+  html[lang="ko"] .nudge-deadline { font-size: 0.85rem; }
+}
 
 .nudge-deadline { font-size: 0.92rem; margin-bottom: 1.4rem; }
 

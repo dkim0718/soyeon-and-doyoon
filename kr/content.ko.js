@@ -400,7 +400,6 @@ window.SITE = {
     { id: "schedule", label: "Schedule" },
     { id: "qanda",    label: "Q&A" },
     { id: "moments",  label: "갤러리" },
-    { id: "travel",   label: "오시는길" },
     { id: "accounts", label: "마음 전하실 곳" },
     { id: "rsvp",     label: "RSVP" },
   ],

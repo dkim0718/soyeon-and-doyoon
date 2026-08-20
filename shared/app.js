@@ -273,7 +273,10 @@ function locationHomeBlock() {
   if (!w || !w.homeLocation) return "";
   const maps = (w.maps || []).map((m) =>
     `<a class="map-pill" href="${m.url}" target="_blank" rel="noopener">${m.label}</a>`).join("");
-  return `<section class="home-cta home-location reveal">
+  // No 'reveal' class here on purpose: the venue + map are key info that must
+  // always render. The scroll-fade can leave a below-the-fold block stuck at
+  // opacity 0 if its reveal never fires, which read as "the map doesn't show".
+  return `<section class="home-cta home-location">
     <p class="invite-eyebrow">LOCATION</p>
     <h2 class="invite-heading">${w.venue}</h2>
     ${w.venueAddress ? `<p class="invite-body">${w.venueAddress}</p>` : ""}
@@ -294,7 +297,7 @@ function renderWelcome() {
   const heroPhoto = (SITE.photos && SITE.photos.hero)
     ? `<img class="hero-img" src="${SITE.photos.hero}" alt="" fetchpriority="high">` : "";
   const invite = inviteBlock();
-  const cta = locationHomeBlock() + rsvpCtaBlock() + accountsCtaBlock();   // stacked home sections
+  const cta = rsvpCtaBlock() + locationHomeBlock() + accountsCtaBlock();   // RSVP → location/map → gift
   const countdown = `<div class="countdown" id="countdown"></div>`;
   // KR (has an invitation): hero → invitation → countdown, with extra bottom
   // space before the footer — no warm coda. EN (no invitation): hero+countdown
