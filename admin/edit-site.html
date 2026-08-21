@@ -17,6 +17,8 @@
   .list-item { border:1px solid var(--line,#e6d9d4); border-radius:10px; padding:12px; margin:12px 0; position:relative; background:rgba(0,0,0,.015); }
   .list-item .rm { position:absolute; top:8px; right:8px; }
   .item-head { font-size:12px; color:#b0a49e; margin-bottom:6px; }
+  .sub-head { font-size:13px; font-weight:600; color:var(--accent-deep,#6d4034); margin:20px 0 2px; }
+  .acct-hint { font-size:12px; color:#8b7f7a; line-height:1.6; margin:2px 0 8px; }
   .save-bar { position:sticky; bottom:0; background:var(--card,#fffdfc); border-top:1px solid var(--line,#e6d9d4);
     padding:14px 0; margin-top:20px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
   #status { font-size:13px; min-height:1em; }
@@ -212,6 +214,11 @@ Admin.gate(function () {
       fields:[['intro','소개 문구','textarea',1]] },
     { key:'rsvp',     navId:'rsvp',     label:'참석 회신 (RSVP)',      type:'fields',
       fields:[['message','안내 문구 (팝업 + RSVP 페이지 공용)','textarea',1],['deadline','회신 마감일','text',1]] },
+    // 마음 전하실 곳 (축의금 계좌). 신랑/신부 측 계좌를 각각 자유롭게 추가·삭제.
+    // 계좌번호는 하객 모두에게 공개됩니다. 저장 시 홈 화면의 GIFT 버튼(homeCta)은
+    // 코드 기본값 그대로 유지됩니다(override 는 notice/groom/bride 만 씀).
+    { key:'accounts', navId:'accounts', label:'마음 전하실 곳 (계좌 안내)', type:'accounts',
+      acctFields:[['label','호칭 (예: 신랑, 신부 아버지)','text'],['holder','예금주','text'],['bank','은행','text'],['number','계좌번호','text'],['kakaopayUrl','카카오페이 링크 (선택)','text'],['cardPayUrl','카드결제 링크 (선택)','text']] },
   ];
 
   var $ = function (id) { return document.getElementById(id); };
@@ -250,6 +257,68 @@ Admin.gate(function () {
         var out = {};
         sec.fields.forEach(function (f) { out[f[0]] = rows[f[0]].value; });
         return [sec.key, out];
+      };
+    }
+
+    // accounts type — notice + two free-form account lists (신랑/신부 측).
+    // Collector returns { notice, groom, bride }; homeCta is intentionally
+    // omitted so deepMerge keeps the home GIFT button from the content file.
+    if (sec.type === 'accounts') {
+      var acc = data || {};
+      var noticeRow = fieldRow('안내 문구 (notice)', 'textarea', acc.notice);
+      card.appendChild(noticeRow.wrap);
+      card.appendChild(elm('p', 'acct-hint', '계좌번호는 웹사이트를 여는 하객 모두에게 공개됩니다. 항목을 비우거나 삭제하면 그 계좌는 표시되지 않습니다.'));
+
+      function renderAcctList(titleText, arr) {
+        card.appendChild(elm('h3', 'sub-head', titleText));
+        var wrap = elm('div');
+        var refs = [];
+        function renumber() {
+          [].forEach.call(wrap.querySelectorAll('.item-head'), function (h, i) { h.textContent = '#' + (i + 1); });
+        }
+        function addAcct(itemData, idx) {
+          var box = elm('div', 'list-item');
+          box.appendChild(elm('div', 'item-head', '#' + (idx + 1)));
+          var rm = elm('button', 'btn btn-sm btn-danger rm', '삭제');
+          rm.type = 'button';
+          box.appendChild(rm);
+          var map = {};
+          sec.acctFields.forEach(function (f) {
+            var r = fieldRow(f[1], f[2] || 'text', (itemData || {})[f[0]]);
+            map[f[0]] = r.inp;
+            box.appendChild(r.wrap);
+          });
+          var ref = { map: map, box: box };
+          refs.push(ref);
+          rm.addEventListener('click', function () {
+            box.remove();
+            var i = refs.indexOf(ref); if (i >= 0) refs.splice(i, 1);
+            renumber();
+          });
+          wrap.appendChild(box);
+        }
+        (Array.isArray(arr) ? arr : []).forEach(function (it, i) { addAcct(it, i); });
+        card.appendChild(wrap);
+        var addBtn = elm('button', 'btn btn-ghost btn-sm', '+ 계좌 추가');
+        addBtn.type = 'button';
+        addBtn.addEventListener('click', function () { addAcct({}, refs.length); });
+        card.appendChild(addBtn);
+        return refs;
+      }
+
+      var groomRefs = renderAcctList('신랑 측 계좌', acc.groom);
+      var brideRefs = renderAcctList('신부 측 계좌', acc.bride);
+      $('sections').appendChild(card);
+
+      return function () {
+        function collect(refs) {
+          return refs.map(function (ref) {
+            var o = {};
+            sec.acctFields.forEach(function (f) { o[f[0]] = ref.map[f[0]].value; });
+            return o;
+          }).filter(function (o) { return o.number || o.holder || o.bank; });
+        }
+        return [sec.key, { notice: noticeRow.inp.value, groom: collect(groomRefs), bride: collect(brideRefs) }];
       };
     }
 
