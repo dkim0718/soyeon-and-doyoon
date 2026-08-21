@@ -356,7 +356,7 @@ window.SITE = {
   // ⚠️ 계좌번호는 자리표시자입니다. 실제 값은 공개 직전에 붙여넣으세요
   // (모청과 같은 방식 — 실제 값 보관: invite/config.private.js).
   accounts: {
-    notice: "참석이 어려워 직접 축하를 전하지 못하는 분들을 위해 기재했습니다. 너그러운 마음으로 양해 부탁드립니다.",
+    notice: "참석이 어려워 직접 축하를 전하지 못하는 분들을 위해 기재했습니다.\n너그러운 마음으로 양해 부탁드립니다.",
     // 홈(첫 페이지) 하단의 '마음 전하실 곳' 안내 + 버튼 → 계좌 안내 페이지(#/accounts).
     // RSVP CTA 바로 아래에 같은 구성으로 놓입니다. 빼려면 homeCta 를 지우세요.
     homeCta: {
@@ -379,10 +379,26 @@ window.SITE = {
     ],
     bride: [
       {
+        label: "신부 아버지",
+        holder: "김성용",
+        bank: "국민은행",
+        number: "358-21-0086-694",
+        kakaopayUrl: "",
+        cardPayUrl: "",
+      },
+      {
+        label: "신부 어머니",
+        holder: "박영식",
+        bank: "신한은행",
+        number: "110-015-643159",
+        kakaopayUrl: "",
+        cardPayUrl: "",
+      },
+      {
         label: "신부",
         holder: "김소연",
-        bank: "",
-        number: "",
+        bank: "우리은행",
+        number: "1002-947-404595",
         kakaopayUrl: "",
         cardPayUrl: "",
       },

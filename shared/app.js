@@ -450,7 +450,7 @@ function renderAccounts() {
   };
   return `
     ${pageTitle("accounts")}
-    ${a.notice ? `<p class="center">${a.notice}</p>` : ""}
+    ${a.notice ? `<p class="center">${String(a.notice).replace(/\n/g, "<br>")}</p>` : ""}
     <div class="accounts">
       ${group(t("accounts.groomSide"), a.groom)}
       ${group(t("accounts.brideSide"), a.bride)}
