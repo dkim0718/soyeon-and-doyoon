@@ -279,7 +279,7 @@ function locationHomeBlock() {
   return `<section class="home-cta home-location">
     <p class="invite-eyebrow">LOCATION</p>
     <h2 class="invite-heading">${w.venue}</h2>
-    ${w.venueAddress ? `<p class="invite-body">${w.venueAddress}</p>` : ""}
+    ${(w.venueAddress || w.venuePhone) ? `<p class="invite-body">${w.venueAddress || ""}${(w.venueAddress && w.venuePhone) ? "<br>" : ""}${w.venuePhone ? `<a class="venue-tel" href="tel:${String(w.venuePhone).replace(/[^0-9+]/g, "")}">${w.venuePhone}</a>` : ""}</p>` : ""}
     ${maps ? `<div class="travel-maps">${maps}</div>` : ""}
   </section>`;
 }
