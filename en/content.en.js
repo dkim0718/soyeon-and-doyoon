@@ -363,7 +363,6 @@ window.SITE = {
   // Remove a line to hide that page.
   navigation: [
     { id: "welcome",  label: "Welcome" },
-    { id: "story",    label: "Our Story" },
     { id: "schedule", label: "Schedule" },
     { id: "stay",     label: "Where to Stay" },
     { id: "travel",   label: "Travel" },
