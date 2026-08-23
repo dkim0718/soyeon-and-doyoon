@@ -141,11 +141,15 @@
         message: message.value,
         locale: locale,
       })).then(function () {
+        // Same flag the afterparty flow sets — stops the entry popup
+        // from re-nudging (and re-collecting) a guest who already sent.
+        try { localStorage.setItem('sd-afterparty-responded', '1'); } catch (x) { /* ignore */ }
         root.innerHTML = '';
         root.append(el('p', { class: 'rsvp-sent on', text: t('rsvp.thanksWedding') }));
       }).catch(function (err) {
         submit.disabled = false;
-        status.textContent = (err && err.message) || 'Error';
+        status.textContent = t('rsvp.sendFail');
+        try { console.error('[rsvp] submit failed:', err); } catch (x) { /* ignore */ }
       });
     });
 

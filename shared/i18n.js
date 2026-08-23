@@ -19,6 +19,7 @@ window.STRINGS = {
       name: 'Your name', email: 'Email', phone: 'Phone',
       messageLabel: 'A note for us (optional)',
       required: 'Please enter your name.',
+      sendFail: "We couldn't send your RSVP — please check your connection and try again.",
       done: 'Response saved.',
       // wedding (open self-report)
       side: 'Which side?', sideGroom: "Groom's side", sideBride: "Bride's side",
@@ -66,6 +67,7 @@ window.STRINGS = {
       name: '성함', email: '이메일', phone: '연락처',
       messageLabel: '전하고 싶은 말 (선택)',
       required: '성함을 입력해 주세요.',
+      sendFail: '전송에 실패했습니다. 인터넷 연결을 확인하시고 잠시 후 다시 시도해 주세요.',
       done: '응답이 저장되었습니다.',
       side: '어느 쪽이신가요?', sideGroom: '신랑 측', sideBride: '신부 측',
       partySize: '참석 인원 (본인 포함)',

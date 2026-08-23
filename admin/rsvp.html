@@ -25,6 +25,7 @@
 
   <div class="card">
     <h2>집계 <span class="hint" id="filterNote"></span></h2>
+    <p class="hint" id="dupNote" hidden></p>
     <div class="stat-row">
       <div class="stat"><b id="stRes">-</b><span>응답 수</span></div>
       <div class="stat"><b id="stHead">-</b><span>참석 인원</span></div>
@@ -69,11 +70,8 @@
 <script src="../invite/config.js"></script>
 <script src="../shared/site-config.js"></script>
 <script src="../shared/supabase-config.js"></script>
-<script>
-  if (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url && window.SUPABASE_CONFIG.anonKey) {
-    document.write('<scr' + 'ipt src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/scr' + 'ipt>');
-  }
-</script>
+<!-- supabase-js v2, self-hosted: the guest RSVP path must not depend on a third-party CDN -->
+<script src="../shared/vendor/supabase-js-v2.js"></script>
 <script src="../shared/store.localStorage.js"></script>
 <script src="../shared/store.supabase.js"></script>
 <script src="../shared/store.js"></script>
@@ -101,8 +99,22 @@ Admin.gate(async function () {
     });
   }
 
+  const dupKey = function (r) {
+    return (r.name || '').trim().toLowerCase().replace(/\s+/g, ' ') + '|' +
+           (r.phone || '').replace(/\D/g, '');
+  };
+
   async function refresh() {
     all = await store.listWeddingRsvps();
+    // 중복 의심: 같은 성함+연락처 조합이 2건 이상 (필터와 무관하게 전체 기준).
+    // 집계에서 임의로 빼지 않고 표시만 한다 — 판단·삭제는 사람이.
+    const dupCount = {};
+    all.forEach(function (r) { const k = dupKey(r); dupCount[k] = (dupCount[k] || 0) + 1; });
+    const dups = all.filter(function (r) { return dupCount[dupKey(r)] > 1; }).length;
+    const dupNote = document.getElementById('dupNote');
+    dupNote.hidden = dups === 0;
+    if (dups) dupNote.textContent = '⚠️ 같은 성함·연락처로 접수된 응답이 ' + dups +
+      '건 있습니다 (아래 목록에 주황색 표시). 집계에는 모두 포함되어 있으니, 같은 분의 이전 응답이면 확인 후 삭제하세요.';
     const list = filtered();
 
     document.getElementById('stRes').textContent = list.length + '건';
@@ -113,10 +125,12 @@ Admin.gate(async function () {
       list.filter(function (r) { return !r.attending; }).length + '건';
 
     document.getElementById('rows').innerHTML = list.map(function (r) {
-      return '<tr>' +
+      const isDup = dupCount[dupKey(r)] > 1;
+      return '<tr' + (isDup ? ' class="dup-row"' : '') + '>' +
         '<td style="white-space:nowrap;">' + Admin.fmtDateTime(r.created_at) + '</td>' +
         '<td><span class="tag ' + (r.side || '') + '">' + sideKo(r.side) + '</span></td>' +
-        '<td>' + esc(r.name) + '</td>' +
+        '<td>' + esc(r.name) +
+          (isDup ? ' <span class="dup-badge" title="같은 성함·연락처의 응답이 여러 건입니다">중복?</span>' : '') + '</td>' +
         '<td>' + attKo(r.attending) + '</td>' +
         '<td class="num">' + (r.attending ? (r.party_count || 0) : 0) + '</td>' +
         '<td style="white-space:nowrap;">' + esc(r.phone) + '</td>' +
@@ -138,8 +152,16 @@ Admin.gate(async function () {
   document.getElementById('rows').addEventListener('click', async function (e) {
     const btn = e.target.closest('[data-del]');
     if (!btn) return;
-    if (!confirm('이 응답을 삭제할까요?')) return;
-    await store.deleteWeddingRsvp(btn.dataset.del);
+    const row = all.find(function (r) { return r.id === btn.dataset.del; });
+    const who = row
+      ? '"' + row.name + '" (' + Admin.fmtDateTime(row.created_at) + ' 접수) 님의 응답'
+      : '이 응답';
+    if (!confirm(who + '을 삭제할까요?\n\n삭제한 응답은 되돌릴 수 없습니다.')) return;
+    try {
+      await store.deleteWeddingRsvp(btn.dataset.del);
+    } catch (err) {
+      alert('삭제에 실패했습니다: ' + ((err && err.message) || err));
+    }
     refresh();
   });
 

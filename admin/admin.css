@@ -207,3 +207,11 @@ table.data .num { text-align: center; }
 .gthumb-btn:hover:not(:disabled) { background: #fff; }
 .gthumb-btn:disabled { opacity: 0.35; cursor: default; }
 .gthumb-btn.gm-del:hover { background: #e5484d; color: #fff; }
+
+/* ---- 웨딩 참석 확인: 중복 의심 표시 ---- */
+.data tr.dup-row td { background: #fff4e0; }
+.dup-badge {
+  display: inline-block; margin-left: 6px; padding: 1px 7px;
+  font-size: 11px; font-weight: 600; color: #9a5b00;
+  background: #ffe3b3; border-radius: 999px; white-space: nowrap;
+}

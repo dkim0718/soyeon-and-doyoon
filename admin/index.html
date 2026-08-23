@@ -81,11 +81,8 @@
 <!-- 공유 데이터 백엔드 (로드 순서 중요) -->
 <script src="../shared/site-config.js"></script>
 <script src="../shared/supabase-config.js"></script>
-<script>
-  if (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url && window.SUPABASE_CONFIG.anonKey) {
-    document.write('<scr' + 'ipt src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/scr' + 'ipt>');
-  }
-</script>
+<!-- supabase-js v2, self-hosted: the guest RSVP path must not depend on a third-party CDN -->
+<script src="../shared/vendor/supabase-js-v2.js"></script>
 <script src="../shared/store.localStorage.js"></script>
 <script src="../shared/store.supabase.js"></script>
 <script src="../shared/store.js"></script>
