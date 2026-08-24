@@ -40,7 +40,9 @@ without re-investigating.
 
 ## 3. Visitor analytics (Cloudflare Web Analytics)
 
-- [ ] Enable **Cloudflare Web Analytics** for the public site — visits, page
+- [x] Enable **Cloudflare Web Analytics** for the public site (done 2026-08-24;
+      note: the Metrics-tab toggle only takes effect on the NEXT deployment —
+      an empty-commit rebuild activated the beacon injection) — visits, page
       views, referrers, and visitor countries; free, cookie-less (no consent
       banner needed).
 - How: Cloudflare dash → Pages project `soyeondoyoon-invite` → enable Web
