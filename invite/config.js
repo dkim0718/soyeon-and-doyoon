@@ -1,133 +1,183 @@
 /* =========================================================
- * 모바일 청첩장 설정 (Invitation configuration)
+ * 청모파티 초대 페이지 설정 (soyeondoyoon.com)
  * ---------------------------------------------------------
  * 이 파일의 값이 "기본값"입니다.
- * 관리자 페이지(admin/edit.html)에서 수정하면 브라우저
- * localStorage 에 덮어쓰기(override)로 저장되며, 이 파일은
- * 바뀌지 않습니다. 영구 반영하려면 이 파일을 직접 수정하거나
- * edit 페이지의 "JSON 내보내기"로 받은 내용을 반영하세요.
+ * 관리자 페이지(admin/edit.html)에서 수정하면 백엔드
+ * (config_overrides, scope='invite')에 덮어쓰기로 저장되며,
+ * 이 파일은 바뀌지 않습니다. 영구 반영하려면 이 파일을 직접
+ * 수정하거나 edit 페이지의 "JSON 내보내기" 결과를 반영하세요.
+ *
+ * ⚠️ 아직 확정되지 않은 값은 TBD 주석으로 표시해 두었습니다.
  * ========================================================= */
-window.MOCHUNG_DEFAULTS = {
+window.PARTY_DEFAULTS = {
   meta: {
-    title: '소연 ♥ 도윤 결혼식에 초대합니다',
-    description: '2026년 10월 30일 금요일 오후 6시 30분 · 신라호텔 영빈관',
+    title: '소연 ♥ 도윤 청모파티에 초대합니다',
+    description: '2026년 9월 18일 금요일 5:30 PM · 네이버즈 (서울 용산구 신흥로 99)',
   },
 
   theme: {
-    // classic | romantic | modern | bold | handwriting  (css/style.css 참고)
-    fontPreset: 'classic',
-    // 글자 크기 배율 (0.9 ~ 1.15 권장)
     fontScale: 1,
-    effects: {
-      stars: true,    // 메인 화면 별 반짝임 효과
-      reveal: true,   // 스크롤 시 섹션 서서히 나타나기
-    },
+    effects: { reveal: true },   // 스크롤 시 섹션 서서히 나타나기
   },
 
-  couple: {
-    groom: {
-      fullName: '김도윤',
-      firstName: '도윤',
-      enName: 'DOYOON',
-      phone: '010-0000-0000',           // PLACEHOLDER — real value in config.private.js
-      role: '아들',
-      father: { name: '김효종', phone: '010-0000-0000' },
-      mother: { name: '주영실', phone: '010-0000-0000' },
-    },
-    bride: {
-      fullName: '김소연',
-      firstName: '소연',
-      enName: 'SOYEON',
-      phone: '010-0000-0000',           // PLACEHOLDER — real value in config.private.js
-      role: '딸',
-      father: { name: '김성용', phone: '' },
-      mother: { name: '박영식', phone: '' },
-    },
+  party: {
+    // ISO 형식 — 이 값 하나로 날짜 표기와 캘린더 저장이 만들어집니다.
+    dateISO: '2026-09-18T17:30:00+09:00',
+    title: '소연도윤 청모파티',
+    dateLine: '2026 . 09 . 18 . FRI',
+    timeLine: '5:30 PM',          // TBD — 시작 시각 확정 후 수정
+    venueLine: '@ 네이버즈',
+    venueName: '네이버즈',
+    addressLine: '(서울 용산구 신흥로 99)',
+    address: '서울 용산구 신흥로 99',
+    // 지도 링크용 좌표 (네이버즈 · 용산구 신흥로 99 부근) — 확정 시 보정
+    lat: 37.54639,
+    lng: 126.98750,
   },
 
-  wedding: {
-    // ISO 형식 (초대장 전체에서 이 값 기준으로 D-day, 달력, ics 생성)
-    dateISO: '2026-10-30T18:30:00+09:00',
-    dateText: '2026. 10. 30. 금요일 오후 6시 30분',
-    heroDateLine: '2026 . 10 . 30 . FRI',
-    heroTimeLine: 'PM 6:30',
-    venueName: '신라호텔 영빈관',
-    venueHall: '영빈관',
-    address: '서울 중구 동호로 249',
-    venueTel: '02-2233-3131',
-    // 지도 링크용 좌표 (신라호텔 영빈관)
-    lat: 37.55583,
-    lng: 127.00556,
+  // 상단 포스터 — 문구는 이미지 안에 포함되어 있습니다 (오버레이 없음).
+  // TBD: 실제 포스터 이미지로 교체 (관리자에서 업로드 가능, 가로 1000~1200px 권장)
+  posters: [
+    { src: '../shared/photos/cover.jpg', alt: '청모파티 포스터' },
+    { src: '../shared/photos/story.jpg', alt: '청첩장 받으러 오세요' },
+  ],
+
+  nav: [
+    { id: 'must',     label: '!필독!', ko: true },
+    { id: 'story',    label: 'Story' },
+    { id: 'schedule', label: 'Schedule' },
+    { id: 'qa',       label: 'Q&A' },
+    { id: 'rsvp',     label: 'RSVP' },
+  ],
+
+  notes: {
+    eyebrow: 'Please Read',
+    title: '안내사항',
+    lead: '오시기 전에 딱 여섯 가지만\n확인해 주시면 감사하겠습니다.',
+    items: [
+      {
+        text: '아래 링크로 <b>참석 여부와 메뉴</b>를 미리 알려주세요!',
+        sub: '동반자가 있으신 분도 미리 소연·도윤에게 알려주시면 좋아요.',
+        buttonLabel: '참석 여부 & 메뉴 알리기',
+        buttonHref: '#rsvp',
+      },
+      { text: '청모파티에 오시기 전에 위의 <b>웨딩 RSVP</b>를 통해 <b>결혼식</b> 참석 여부를 꼭 알려주세요.', sub: '' },
+      { text: '파티 중에는 <b>스냅 촬영</b>이 있을 예정입니다.', sub: '사진 촬영이 부담되시는 분은 미리 말씀해 주세요.' },
+      { text: '특별한 드레스코드는 없지만, <b>빨간색 아이템</b>을 작게라도 하나 지참해 주세요!', sub: '' },
+      { text: '다른 일행이 없으셔도 괜찮아요—! 저희가 <b>내향형</b>이신 분들 위주로 파티를 구성했습니다 :)', sub: '' },
+      { text: '다른 궁금한 점은 아래 <b>Q&A</b>를 확인해주세요!', sub: '' },
+    ],
   },
 
-  greeting: {
-    heading: '소중한 분들을 초대합니다',
-    body: '서로가 마주보며 다져온 사랑을\n이제 함께 한 곳을 바라보며\n걸어갈 수 있는 큰 사랑으로 키우고자 합니다.\n\n저희 두 사람이 사랑의 이름으로\n지켜나갈 수 있게 앞날을\n축복해 주시면 감사하겠습니다.',
+  story: {
+    eyebrow: 'Our Story',
+    title: '우리가 만난 이야기',
+    photo: '../shared/photos/gallery-05.jpg',
+    paragraphs: [
+      '추운 겨울 보스턴, 한 이탈리안 레스토랑에서 저희는 처음 만났습니다.',
+      '소연이는 도윤이를 조금 귀여운 너드 같다고 생각했고, 도윤이는 소연이를 낯을 가리면서도 자기 생각이 뚜렷한 사람이라고 생각했습니다. 곧 보스턴을 떠날 예정이던 소연이와 앞으로 어디서 살게 될지 전혀 알 수 없던 도윤은, 그렇게 조금씩 가까워졌습니다.',
+      '저희의 만남은 대부분 짐을 싸고, 공항에서 배웅하고, 다시 공항으로 마중 나가는 날들의 연속이었습니다. 소연이는 정말 끝도 없이 돌아다녔고, 도윤이도 만만치 않았거든요!',
+      '곁에 있어주지 못할 때면, 소연이는 혼자 있기를 좋아하면서도 막상 혼자가 되면 외로워하는 도윤이를 위해 자신의 절친 도래미를 대신 친구로 파견하고, 래미의 입을 빌려 도윤이에게 말을 걸어주기도 했습니다. 도윤이는 어디를 가든 늘 마음이 조금은 급한 소연이를 편히 쉬게 해주는 걸 좋아해서, 함께 있을 때마다 자기가 운전하겠다고 욕심을 부리곤 했습니다. 사실은 본인이 운전대를 잡았을 때 소연이가 스르르 잠들면 엄청 뿌듯했거든요. 여러 번의 이사를 함께하는 동안 도윤이는 낡은 스타워즈 레고를 차마 버리지 못해 슬퍼하던 자신을 있는 그대로 이해해주고 레고를 다시 조립해서 원래 있던 자리에 놓아 준 소연이를 기억합니다.',
+      '이렇게 저희가 함께한 시간은 세 개의 대륙과 쉰두 번의 비행에 걸쳐 있었습니다. 서로의 여정이 늘 엇갈리는 것만 같았는데도, 이상하게 우리는 서로의 손을 놓지 않았습니다. 다른 건 다 미뤄도 서로를 만나기 위한 비행기만큼은 열심히 탔고, 만남이 끝날 때쯤이면 늘 다음, 다다음 만남을 계획했습니다. 그렇게 계속 혼자 떠돌 것 같았던 저희 둘은, 혼자 있을 때보다 함께할 때 더욱 자유로워진다는 사실을 알았고, 그 길을 함께 더 걸어가 보기 위해 이제 같은 곳으로 향하기로 했습니다!',
+    ],
+  },
+
+  schedule: {
+    eyebrow: 'Schedule',
+    title: '파티 순서',
+    items: [
+      { time: '17:30', title: '칵테일 리셉션', place: 'ROOFTOP', desc: '날씨가 좋으면 노을까지 함께 볼 수 있어요.' },
+      // TBD: 디너 장소 라벨 확정
+      { time: '19:00', title: '디너', place: '', desc: '미리 알려주신 메뉴로 준비해 둘게요.' },
+    ],
+  },
+
+  location: {
+    eyebrow: 'Location',
+    title: '오시는 길',
+    showMap: true,
+  },
+
+  qanda: {
+    eyebrow: 'Q & A',
+    title: '자주 묻는 질문',
+    groups: [
+      {
+        label: '청모파티',
+        labelEn: 'The Party',
+        items: [
+          { q: '드레스코드가 있나요?', a: '자율입니다! 다만 빨간색 아이템을 작게라도 하나 지참해 주시면 사진이 훨씬 예쁘게 나와요.' },
+          { q: '주차할 수 있나요?', a: '장소가 협소한 관계로 주차가 불가능해요 ㅠㅠ 대중교통을 이용해주세요.' },
+          { q: '자리는 어떻게 정해지나요?', a: '내향인들도 부담스럽지 않게 즐길 수 있도록 준비했어요! 편하신 자리에 앉으시면 됩니다~' },
+          { q: '중간에 나와도 되나요?', a: '중간에 일찍 나오셔도 됩니다! 편하게 즐기다 가세요~' },
+          { q: '논알콜 메뉴도 있나요?', a: '네 물론이죠! 맛있는 논알콜 칵테일을 준비했습니다.' },
+          // TBD: 답변 확정 필요
+          { q: '몇 시까지 가면 되나요?', a: '' },
+        ],
+      },
+      {
+        label: '소연 · 도윤',
+        labelEn: 'The Couple',
+        items: [
+          { q: '두 분은 어떻게 만나셨나요?', a: '위의 Our Story를 읽어보세요!' },
+          { q: '누가 먼저 다가갔나요?', a: '신랑: 제가 먼저 문자를 보내며 다가갔습니다. / 신부: 그 버전은 실제와 조금 달라요 ㅎㅎ' },
+        ],
+      },
+    ],
   },
 
   rsvp: {
-    enabled: true,
-    popupOnLoad: true,   // 접속 시 참석의사 안내 팝업 (오늘 그만보기 지원)
-    askMeal: true,       // 식사여부 (예정/안함/미정)
-    askCompanion: true,  // 동행인 성함
-    askBus: false,       // 대절버스 탑승 여부
-    notice: '축하의 마음으로 참석해 주실\n모든 분을 정중히 모시고자 하오니,\n참석 여부를 알려주시면 감사하겠습니다.',
+    eyebrow: 'R S V P',
+    title: '참석 여부 알려주기',
+    lead: '두 가지 모두 답해주시면\n준비에 큰 도움이 됩니다.',
+
+    // ① 청모파티 — 이 페이지에서 바로 접수 (party_rsvps 테이블)
+    party: {
+      enabled: true,
+      kind: '01 · The Party',
+      title: '청모파티 참석 & 메뉴',
+      buttonLabel: '참석 여부 & 메뉴 알리기',
+      note: '이 페이지에서 바로 접수됩니다',
+      askPhone: true,
+      askCompanion: true,
+      // TBD: 실제 메뉴 확정 후 교체 (관리자에서 추가/삭제 가능)
+      menuOptions: ['메뉴 A', '메뉴 B', '채식'],
+      // 나중에 질문을 더 받고 싶으면 여기(또는 관리자)에서 추가하세요.
+      // type: 'text' | 'choice' | 'yesno'
+      extraQuestions: [],
+      consentText:
+        '제공 받는 자 : 청모파티 주최자(소연·도윤)\n' +
+        '이용 목적 : 참석 인원·메뉴 확인 및 관련 안내\n' +
+        '제공 항목 : 성함, 연락처 등 입력한 항목\n' +
+        '보유 기간 : 파티일로부터 90일\n' +
+        '동의를 거부할 권리가 있으며, 거부 시 접수가 제한됩니다.',
+      warnText: '전달한 내용은 수정이 불가합니다.\n내용 변동이 있을 경우 재전달해 주세요.',
+      doneText: '참석 여부가 전달되었습니다. 감사합니다!',
+    },
+
+    // ② 결혼식 — 웨딩 홈페이지로 이동
+    wedding: {
+      enabled: true,
+      kind: '02 · The Wedding',
+      title: '결혼식 참석의사 전달',
+      dateISO: '2026-10-30T18:30:00+09:00',
+      dateLine: '2026 . 10 . 30 . FRI',
+      timeLine: '6:30 PM',
+      venueLine: '신라호텔 영빈관 · 서울 중구 동호로 249',
+      buttonLabel: '웨딩 홈페이지에서 전달하기 ↗',
+    },
   },
 
-  gallery: {
-    title: '우리의 순간들',
-    photos: Array.from({ length: 15 }, (_, i) =>
-      '../shared/photos/gallery-' + String(i + 1).padStart(2, '0') + '.jpg'),
+  links: {
+    // 웨딩 홈페이지 (푸터 + 결혼식 RSVP 버튼)
+    weddingSite: 'https://soyeondoyoon.fun',
+    weddingSiteLabel: '웨딩 홈페이지 보기 · soyeondoyoon.fun ↗',
   },
 
-  accounts: {
-    notice: '참석이 어려워 직접 축하를 전하지 못하는\n분들을 위해 기재했습니다.\n너그러운 마음으로 양해 부탁드립니다.',
-    groom: [
-      {
-        label: '신랑',
-        holder: '김도윤',
-        bank: '신한은행',
-        number: '0000000000000',   // PLACEHOLDER — real account # in config.private.js
-        kakaopayUrl: '',   // 카카오페이 송금 링크 (https://qr.kakaopay.com/...)
-        cardPayUrl: '',    // PLACEHOLDER (account-linked) — real URL in config.private.js
-      },
-    ],
-    bride: [
-      {
-        label: '신부',
-        holder: '김소연',
-        bank: '',
-        number: '',
-        kakaopayUrl: '',
-        cardPayUrl: '',
-      },
-    ],
-  },
-
-  flower: {
-    enabled: false,
-    title: '축하 화환 보내기',
-    body: '두 사람 앞날에 화환으로 축복을 더해주세요.',
-    url: '',
-  },
-
-  share: {
-    // developers.kakao.com 에서 발급한 JavaScript 키.
-    // 사이트 도메인 등록 후 입력하면 카카오톡 공유가 활성화됩니다.
-    kakaoJsKey: '',
-    // 공유에 사용할 대표 URL (배포 도메인)
-    url: 'https://soyeondoyoon.com',
-    title: '소연 ♥ 도윤 결혼식에 초대합니다',
-    description: '2026년 10월 30일 금요일 오후 6시 30분\n신라호텔 영빈관',
-    // 카카오톡 미리보기 이미지 (절대주소)
-    imageUrl: 'https://soyeondoyoon.com/shared/photos/og.jpg',
-  },
+  footer: { names: 'SOYEON  ♥  DOYOON' },
 
   admin: {
-    // 관리자 페이지 접근 암호 (PLACEHOLDER for the public preview; real value in
-    // config.private.js). NOTE: on the static/localStorage preview this passcode
-    // is visible in page source and is only a demo gate — real protection comes
-    // from Supabase Auth + RLS once the backend is enabled.
+    // localStorage 데모 전용 게이트. 운영은 Supabase Auth + RLS 로 보호됩니다.
     passcode: '000000',
   },
 };

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>청모파티 참석 · 관리자</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🥂</text></svg>">
+<link rel="stylesheet" href="../shared/mochung/style.css">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-wrap" id="adminApp" hidden>
+  <div class="admin-head">
+    <h1>🥂 청모파티 참석</h1>
+    <div class="admin-nav">
+      <a href="index.html">홈</a>
+      <a href="party-rsvp.html" class="on">청모파티 참석</a>
+      <a href="rsvp.html">웨딩 참석</a>
+      <a href="afterparty.html">애프터파티</a>
+      <a href="guestbook.html">방명록</a>
+      <a href="edit.html">청모파티 수정</a>
+      <a href="edit-site.html">웹사이트 수정</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>집계</h2>
+    <p class="hint" id="dupNote" hidden></p>
+    <div class="stat-row">
+      <div class="stat"><b id="stRes">-</b><span>응답 수</span></div>
+      <div class="stat"><b id="stHead">-</b><span>참석 인원</span></div>
+      <div class="stat"><b id="stYes">-</b><span>참석</span></div>
+      <div class="stat"><b id="stNo">-</b><span>불참</span></div>
+    </div>
+    <div id="menuTally" style="margin-top:16px;"></div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+      <h2 style="margin:0;">응답 목록</h2>
+      <div class="btn-row" style="margin:0;">
+        <select id="attendFilter" style="width:auto; padding:8px 12px; font-size:13px;">
+          <option value="">참석: 전체</option>
+          <option value="yes">참석</option>
+          <option value="no">불참</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" id="btnCsv">CSV 다운로드</button>
+      </div>
+    </div>
+    <div class="table-scroll" style="margin-top:14px;">
+      <table class="data">
+        <thead>
+          <tr>
+            <th>접수 시각</th><th>성함</th><th>참석</th><th class="num">동반</th>
+            <th>동반자 성함</th><th>메뉴</th><th>연락처</th><th>남긴 말</th><th>추가 답변</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p class="hint" id="emptyMsg" hidden>아직 접수된 응답이 없습니다.</p>
+  </div>
+</div>
+
+<!-- 공유 데이터 백엔드 (로드 순서 중요) -->
+<script src="../invite/config.js"></script>
+<script src="../shared/site-config.js"></script>
+<script src="../shared/supabase-config.js"></script>
+<script src="../shared/vendor/supabase-js-v2.js"></script>
+<script src="../shared/store.localStorage.js"></script>
+<script src="../shared/store.supabase.js"></script>
+<script src="../shared/store.js"></script>
+<script src="admin.js"></script>
+<script>
+Admin.gate(async function () {
+  const store = window.Store;
+  const esc = Admin.esc;
+  let all = [];
+
+  const attKo = (a) => (a ? '참석' : '불참');
+  // 한 응답의 총 인원 = 본인 + 동반자 (불참이면 0)
+  const headOf = (r) => (r.attending ? 1 + (r.companion_count || 0) : 0);
+  const extraText = (r) => {
+    const x = r.extra;
+    if (!x || typeof x !== 'object') return '';
+    return Object.keys(x).map((k) => k + ': ' + x[k]).join(' / ');
+  };
+
+  function filtered() {
+    const a = document.getElementById('attendFilter').value;
+    return all.filter((r) => {
+      if (a === 'yes' && !r.attending) return false;
+      if (a === 'no' && r.attending) return false;
+      return true;
+    });
+  }
+
+  const dupKey = (r) =>
+    (r.name || '').trim().toLowerCase().replace(/\s+/g, ' ') + '|' + (r.phone || '').replace(/\D/g, '');
+
+  async function refresh() {
+    all = await store.listPartyRsvps();
+
+    // 중복 의심: 같은 성함+연락처가 2건 이상. 집계에서 빼지 않고 표시만 합니다.
+    const dupCount = {};
+    all.forEach((r) => { const k = dupKey(r); dupCount[k] = (dupCount[k] || 0) + 1; });
+    const dups = all.filter((r) => dupCount[dupKey(r)] > 1).length;
+    const dupNote = document.getElementById('dupNote');
+    dupNote.hidden = dups === 0;
+    if (dups) dupNote.textContent = '⚠️ 같은 성함·연락처로 접수된 응답이 ' + dups +
+      '건 있습니다 (아래 목록에 주황색 표시). 집계에는 모두 포함되어 있으니 확인 후 삭제하세요.';
+
+    const list = filtered();
+    const going = list.filter((r) => r.attending);
+
+    document.getElementById('stRes').textContent = list.length + '건';
+    document.getElementById('stHead').textContent = list.reduce((s, r) => s + headOf(r), 0) + '명';
+    document.getElementById('stYes').textContent = going.length + '건';
+    document.getElementById('stNo').textContent = (list.length - going.length) + '건';
+
+    // 메뉴별 집계 — 식당에 그대로 전달할 수 있게 본인+동반자 인원 기준
+    const tally = {};
+    going.forEach((r) => {
+      const key = r.menu || '(미선택)';
+      tally[key] = (tally[key] || 0) + headOf(r);
+    });
+    const keys = Object.keys(tally).sort();
+    document.getElementById('menuTally').innerHTML = keys.length
+      ? '<h2 style="font-size:14px; margin-bottom:8px;">메뉴별 인원</h2><div class="stat-row">' +
+        keys.map((k) => '<div class="stat"><b>' + tally[k] + '명</b><span>' + esc(k) + '</span></div>').join('') +
+        '</div>'
+      : '';
+
+    document.getElementById('rows').innerHTML = list.map((r) => {
+      const isDup = dupCount[dupKey(r)] > 1;
+      return '<tr' + (isDup ? ' class="dup-row"' : '') + '>' +
+        '<td style="white-space:nowrap;">' + Admin.fmtDateTime(r.created_at) + '</td>' +
+        '<td>' + esc(r.name) +
+          (isDup ? ' <span class="dup-badge" title="같은 성함·연락처의 응답이 여러 건입니다">중복?</span>' : '') + '</td>' +
+        '<td>' + attKo(r.attending) + '</td>' +
+        '<td class="num">' + (r.attending ? (r.companion_count || 0) : 0) + '</td>' +
+        '<td>' + esc(r.companion) + '</td>' +
+        '<td>' + esc(r.menu) + '</td>' +
+        '<td style="white-space:nowrap;">' + esc(r.phone) + '</td>' +
+        '<td>' + esc(r.message) + '</td>' +
+        '<td>' + esc(extraText(r)) + '</td>' +
+        '<td><button class="btn btn-sm btn-danger" data-del="' + r.id + '">삭제</button></td>' +
+        '</tr>';
+    }).join('');
+    document.getElementById('emptyMsg').hidden = list.length > 0;
+  }
+
+  document.getElementById('attendFilter').addEventListener('change', refresh);
+
+  document.getElementById('rows').addEventListener('click', async function (e) {
+    const btn = e.target.closest('[data-del]');
+    if (!btn) return;
+    const row = all.find((r) => String(r.id) === btn.dataset.del);
+    const who = row
+      ? '"' + row.name + '" (' + Admin.fmtDateTime(row.created_at) + ' 접수) 님의 응답'
+      : '이 응답';
+    if (!confirm(who + '을 삭제할까요?\n\n삭제한 응답은 되돌릴 수 없습니다.')) return;
+    try {
+      await store.deletePartyRsvp(btn.dataset.del);
+    } catch (err) {
+      alert('삭제에 실패했습니다: ' + ((err && err.message) || err));
+    }
+    refresh();
+  });
+
+  document.getElementById('btnCsv').addEventListener('click', function () {
+    const rows = [['접수시각', '성함', '참석', '동반자수', '동반자성함', '메뉴', '연락처', '남긴말', '추가답변']];
+    filtered().forEach((r) => {
+      rows.push([
+        Admin.fmtDateTime(r.created_at), r.name, attKo(r.attending),
+        r.attending ? (r.companion_count || 0) : 0,
+        r.companion, r.menu, r.phone, r.message, extraText(r),
+      ]);
+    });
+    Admin.download('party-rsvp.csv', Admin.toCsv(rows), 'text/csv;charset=utf-8');
+  });
+
+  refresh();
+});
+</script>
+</body>
+</html>

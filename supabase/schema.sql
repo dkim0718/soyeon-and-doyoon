@@ -11,6 +11,7 @@
 -- every table below, is the real gate. With these policies the
 -- anon role can only:
 --   • INSERT a wedding RSVP  (self-report; cannot read them back)
+--   • INSERT a 청모파티 RSVP (self-report; cannot read them back)
 --   • INSERT a guestbook message (cannot read the raw table)
 --   • SELECT the guestbook_public view (no password_hash)
 --   • SELECT config_overrides (public site content)
@@ -30,7 +31,7 @@ create extension if not exists pgcrypto;   -- gen_random_uuid()
 -- TABLES
 -- =========================================================
 
--- Open self-report RSVP (모청 + Korean site). Guests write, only
+-- Open self-report RSVP (Korean site). Guests write, only
 -- admins read.
 create table if not exists public.wedding_rsvps (
   id          uuid primary key default gen_random_uuid(),
@@ -47,6 +48,24 @@ create table if not exists public.wedding_rsvps (
   created_at  timestamptz not null default now()
 );
 create index if not exists wedding_rsvps_created_idx on public.wedding_rsvps (created_at desc);
+
+-- 청모파티 참석·메뉴 접수 (invitation site, soyeondoyoon.com).
+-- Submit-only: guests write their own row and cannot read any back;
+-- there is no edit path by design (the form says 수정 불가).
+-- `extra` holds answers to admin-added questions, keyed by question label.
+create table if not exists public.party_rsvps (
+  id              uuid primary key default gen_random_uuid(),
+  name            text not null,
+  attending       boolean not null default true,
+  menu            text not null default '',
+  companion_count integer not null default 0 check (companion_count >= 0 and companion_count <= 20),
+  companion       text not null default '',
+  phone           text not null default '',
+  message         text not null default '',
+  extra           jsonb not null default '{}'::jsonb,
+  created_at      timestamptz not null default now()
+);
+create index if not exists party_rsvps_created_idx on public.party_rsvps (created_at desc);
 
 -- Curated afterparty invite list (English site). name_norm is a
 -- generated, normalised key used for case/space-insensitive name
@@ -148,6 +167,7 @@ $$;
 -- =========================================================
 
 alter table public.wedding_rsvps     enable row level security;
+alter table public.party_rsvps       enable row level security;
 alter table public.afterparty_guests enable row level security;
 alter table public.afterparty_rsvps  enable row level security;
 alter table public.guestbook          enable row level security;
@@ -171,6 +191,27 @@ create policy "wedding_rsvps_anon_insert" on public.wedding_rsvps
 
 drop policy if exists "wedding_rsvps_admin_all" on public.wedding_rsvps;
 create policy "wedding_rsvps_admin_all" on public.wedding_rsvps
+  for all to authenticated using (public.is_admin()) with check (public.is_admin());
+
+-- ---- party_rsvps (청모파티) ----
+-- Same shape as wedding_rsvps: anon may INSERT only, with length
+-- guards; no select/update/delete policy → nobody can read or
+-- change a response except an admin.
+drop policy if exists "party_rsvps_anon_insert" on public.party_rsvps;
+create policy "party_rsvps_anon_insert" on public.party_rsvps
+  for insert to anon
+  with check (
+    char_length(name) between 1 and 40
+    and char_length(coalesce(menu, '')) <= 60
+    and char_length(coalesce(companion, '')) <= 120
+    and char_length(coalesce(phone, '')) <= 30
+    and char_length(coalesce(message, '')) <= 300
+    and companion_count between 0 and 20
+    and pg_column_size(extra) <= 2000
+  );
+
+drop policy if exists "party_rsvps_admin_all" on public.party_rsvps;
+create policy "party_rsvps_admin_all" on public.party_rsvps
   for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
 -- ---- guestbook ----
@@ -224,11 +265,13 @@ create policy "config_overrides_admin_all" on public.config_overrides
 grant usage on schema public to anon, authenticated;
 
 grant insert on public.wedding_rsvps to anon;
+grant insert on public.party_rsvps   to anon;
 grant insert on public.guestbook     to anon;
 grant select on public.guestbook_public   to anon, authenticated;
 grant select on public.config_overrides    to anon;
 
 grant select, insert, update, delete on public.wedding_rsvps     to authenticated;
+grant select, insert, update, delete on public.party_rsvps       to authenticated;
 grant select, insert, update, delete on public.afterparty_guests to authenticated;
 grant select, insert, update, delete on public.afterparty_rsvps  to authenticated;
 grant select, insert, update, delete on public.guestbook          to authenticated;

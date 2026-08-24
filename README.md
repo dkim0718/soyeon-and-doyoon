@@ -11,23 +11,31 @@ script vendors the shared code into each deploy root; that is the only "build".
 
 | Dir       | URL (set in `shared/site-config.js`) | What it is | Linked from |
 |-----------|--------------------------------------|------------|-------------|
-| `invite/` | `soyeondoyoon.com` (own domain) | **모청** — the Korean mobile invitation (모바일 청첩장). Single scrolling page: greeting, calendar/D-day, gallery, map, accounts, RSVP overlay. | shared everywhere (KakaoTalk, etc.) |
+| `invite/` | `soyeondoyoon.com` (own domain) | **청모파티 초대** — the invitation-party page. Single scrolling page: two full-bleed posters, date/venue, 안내사항, Our Story, 파티 순서, 오시는 길, Q&A, RSVP. | shared everywhere (KakaoTalk, etc.) |
 | `kr/`     | `soyeondoyoon.fun`     | **Korean wedding website** — the full Joy-style multi-page site (welcome, story, schedule, travel, Q&A, gallery, RSVP). | its own URL (the apex); the EN site's **한국어** nav toggle |
 | `en/`     | `soyeondoyoon.fun/en/` | **English afterparty invite** — same Joy engine, English content, curated-list RSVP with +1 allotments. | **nowhere** — unlisted (see below) |
 | `admin/`  | private    | Dashboard: RSVP lists, guestbook moderation, content editor, afterparty guest-list import, JSON backup. | not public |
 
-The 모청 deliberately sits on its **own domain** (not a path on the website's
-domain) so invitation visitors stay isolated from website visitors — separate
-Pages projects mean separate analytics, and trimming the 모청's URL leads
+The invitation page deliberately sits on its **own domain** (not a path on the
+website's domain) so invitation visitors stay isolated from website visitors —
+separate Pages projects mean separate analytics, and trimming its URL leads
 nowhere. The old `soyeondoyoon.fun/invite/` path 301-redirects to it
 (`_redirects`), so pre-split shared links keep working.
 
-**The 모청 links to no other page.** It is fully self-contained (its own
-calendar, map, gallery, and RSVP); the former "웨딩 홈페이지" button to the KR
-site was removed. The English page is the afterparty invitation and is reachable
-**only by its own URL** — it is deliberately linked from nowhere. `SITE_URLS.en`
-exists so the page knows its own address, but it is never rendered into any nav
-or button. Don't add it to one.
+**The invitation page links out only to the wedding site.** Its 결혼식 RSVP card
+and its footer link to `soyeondoyoon.fun` (`links.weddingSite`); everything else
+— posters, 안내사항, 순서, 지도, Q&A, and the party RSVP form — is self-contained.
+The English page is the afterparty invitation and is reachable **only by its own
+URL** — it is deliberately linked from nowhere. `SITE_URLS.en` exists so the page
+knows its own address, but it is never rendered into any nav or button. Don't add
+it to one.
+
+> **History.** This page used to be the 모청 (모바일 청첩장). It was replaced by
+> the 청모파티 invitation. The old engine still lives at `shared/mochung/` because
+> the admin CSS is built on its stylesheet — its `main.js` is no longer loaded by
+> any page. The old content override is still in the database under scope
+> `invite`; the party page reads scope **`party`**, so that row is untouched and
+> serves as a backup.
 
 ### Shared, not duplicated
 
@@ -44,10 +52,11 @@ shared/
   rsvp-widget.js        the two RSVP flows (wedding + afterparty)
   app.js                the Joy engine (renders kr/ and en/)
   css/joy.css           Joy-style theme
-  mochung/              the 모청 engine (main.js, effects.js, style.css)
+  party/                the 청모파티 engine (main.js, style.css)
+  mochung/              the retired 모청 engine — kept only for admin.css's base
   photos/               the one shared photo set (cover, gallery-01…30, og, …)
 
-invite/  config.js       모청 content (MOCHUNG_DEFAULTS)
+invite/  config.js       청모파티 content (PARTY_DEFAULTS)
 kr/      content.ko.js   Korean wedding-site content
 en/      content.en.js   English afterparty content
 supabase/ README.md (setup guide), schema.sql, guest-list.template.csv
@@ -78,7 +87,7 @@ python3 -m http.server 8000
 
 Then open:
 
-- <http://localhost:8000/invite/> — 모청
+- <http://localhost:8000/invite/> — 청모파티 초대
 - <http://localhost:8000/kr/> — Korean wedding site
 - <http://localhost:8000/en/> — English afterparty invite
 - <http://localhost:8000/admin/> — admin dashboard
@@ -91,19 +100,27 @@ for local dev.
 
 ---
 
-## The two RSVP flows
+## The three RSVP flows
 
-Both flows write through the same `Store` interface, so they work identically on
+All three write through the same `Store` interface, so they work identically on
 the localStorage fallback and on Supabase.
 
-### 1. Open wedding RSVP — 모청 + KR site
+### 1. 청모파티 RSVP — invitation site
 
-Anyone can self-report. The 모청 shows its native overlay form; the KR site
-mounts the same fields via `mountWeddingRsvp()`. Fields: name, side (groom /
-bride), attending (yes / no), party size, phone, message. Every submission is
-appended to `wedding_rsvps`. No guest list, no gatekeeping — it's an open form.
+Open and submit-only. Tapping 참석 여부 & 메뉴 알리기 opens a bottom sheet on the
+same page: 참석 여부, 성함, 메뉴 선택, 동반자 수·성함, 연락처, 남기실 말, plus any
+**추가 질문** defined in the admin (stored in the `extra` JSONB column). One row
+goes into `party_rsvps`. There is deliberately **no edit path** — the form says
+수정이 불가하니 재전달해 주세요, matching the wedding form's behaviour.
 
-### 2. Curated afterparty RSVP — EN site
+### 2. Open wedding RSVP — KR site
+
+Anyone can self-report. The KR site mounts the fields via `mountWeddingRsvp()`.
+Fields: name, side (groom / bride), attending (yes / no), party size, phone,
+message. Every submission is appended to `wedding_rsvps`. No guest list, no
+gatekeeping — it's an open form. The invitation page's 결혼식 card links here.
+
+### 3. Curated afterparty RSVP — EN site
 
 The English page is invitation-only and enforces a per-guest **+1 allotment**:
 
@@ -215,7 +232,7 @@ Before the first deploy:
    no trailing slash). The admin's afterparty invite-link generator reads
    `SITE_URLS.en` from here.
 2. **Point DNS** — one subdomain per project (`invite.`, `kr.`, `en.`).
-3. **For the 모청 KakaoTalk share, set an absolute `og:image`.** Kakao (and
+3. **For the KakaoTalk share, set an absolute `og:image`.** Kakao (and
    every other scraper) can't use a relative image path. In `invite/config.js`
    set `share.imageUrl` to an absolute URL such as
    `https://invite.<your-domain>/shared/photos/og.jpg`, and add your Kakao
@@ -229,7 +246,7 @@ Before the first deploy:
 The admin is gated two ways depending on backend:
 
 - **Demo / localStorage** — a client-side **passcode**, default **`1030`**, in
-  `invite/config.js` (`MOCHUNG_DEFAULTS.admin.passcode`). **Change it.** This is
+  `invite/config.js` (`PARTY_DEFAULTS.admin.passcode`). **Change it.** This is
   only obfuscation: the data lives in the visitor's own browser, so it's fine for
   the demo but is *not* real security.
 - **Production / Supabase** — use **Supabase Auth**. Add the admin's email to
