@@ -260,6 +260,9 @@ function homeCtaBlock(cta, href, defaultLabel) {
   if (cta.heading) inner += `<h2 class="invite-heading">${cta.heading}</h2>`;
   if (cta.body) inner += `<p class="invite-body">${String(cta.body).replace(/\n/g, "<br>")}</p>`;
   inner += `<a class="home-cta-btn" href="${href}">${cta.button || defaultLabel}</a>`;
+  // Small print under the button (e.g. "일정·교통편은 Schedule과 Q&A 를 확인해
+  // 주세요"). Comes from the content file, so inline <a> links are allowed.
+  if (cta.note) inner += `<p class="home-cta-note">${String(cta.note).replace(/\n/g, "<br>")}</p>`;
   return `<section class="home-cta reveal">${inner}</section>`;
 }
 function rsvpCtaBlock() { return homeCtaBlock(SITE.rsvp && SITE.rsvp.homeCta, "#/rsvp", "RSVP"); }
@@ -560,6 +563,37 @@ function buildNav() {
       return `<a href="#/${p.id}" data-page="${p.id}"${latin ? ' class="en-label"' : ""}>${p.label}</a>`;
     })
     .join("");
+}
+
+/* ----------------------------------------------------------
+   Sticky menu — KR opt-in via SITE.stickyNav. The nav follows the
+   scroll (청모파티 페이지처럼) but the brand above it does NOT: the whole
+   header is position:sticky with a negative top offset equal to the
+   brand's height, so only the menu row stays pinned. The offset is
+   measured, not hardcoded — the brand's height depends on the SD정체
+   webfont, which loads late. .is-stuck paints the hairline + shadow
+   once the bar is actually pinned.
+   ---------------------------------------------------------- */
+let stickyNavWired = false;
+function initStickyNav() {
+  if (!SITE.stickyNav) return;
+  const header = document.getElementById("siteHeader");
+  const nav = document.getElementById("siteNav");
+  if (!header || !nav) return;
+  document.documentElement.dataset.stickyNav = "on";
+  const measure = () => {
+    // pinned state shows: 10px breathing room + the menu row + header padding-bottom
+    header.style.top = -(header.offsetHeight - nav.offsetHeight - 10) + "px";
+  };
+  measure();
+  if (stickyNavWired) return;
+  stickyNavWired = true;
+  window.addEventListener("resize", measure, { passive: true });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+  window.addEventListener("scroll", () => {
+    header.classList.toggle("is-stuck",
+      header.getBoundingClientRect().top <= parseFloat(header.style.top || "0") + 1);
+  }, { passive: true });
 }
 
 function renderAllPages() {
@@ -1276,6 +1310,7 @@ function renderPage() {
   renderAllPages();
   route();
   syncHeroText();
+  initStickyNav();     // (re)measure the pin offset — brand text may have changed
   loadGoogleFonts();   // re-scan now that content (with any per-item fonts) is in the DOM
 }
 

@@ -120,6 +120,23 @@ html[data-header="inline"] .brand.no-monogram .brand-names { display: inline; }
 .site-nav a:hover { color: var(--c-accent); }
 .site-nav a.active { color: var(--c-accent); border-bottom-color: var(--c-accent); }
 
+/* Sticky menu (SITE.stickyNav — see initStickyNav in app.js). The header pins
+   with a negative top so only the menu row follows the scroll; the brand slides
+   away above it. Translucent + blur like the 청모파티 nav bar. At the top of the
+   page the translucent bg sits on the same --c-bg, so nothing looks different
+   until the bar actually sticks (.is-stuck adds the hairline + shadow). */
+html[data-sticky-nav="on"] .site-header {
+  position: sticky;
+  z-index: 60;   /* over page content, under the lightbox (80) */
+  padding-bottom: 0.45rem;
+  background: color-mix(in srgb, var(--c-bg) 88%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+html[data-sticky-nav="on"] .site-header.is-stuck {
+  box-shadow: 0 1px 0 var(--c-line), 0 10px 20px -16px rgba(0, 0, 0, 0.3);
+}
+
 /* ---------------- page shells ---------------- */
 
 main { min-height: 55vh; }
@@ -1241,6 +1258,19 @@ html[data-hero="classic"] .hero-photo-wrap .hero-img {
 .home-cta-btn:hover { filter: brightness(1.07); box-shadow: 0 10px 26px -8px rgba(0, 0, 0, 0.32); }
 .home-cta-btn:active { transform: scale(0.98); }
 
+/* Small print under a home CTA button (homeCta.note) — e.g. the pointer to the
+   Schedule / Q&A menus under 마음 전하실 곳. */
+.home-cta-note {
+  margin-top: 1.3rem;
+  color: var(--c-muted);
+  font-size: 0.92rem;
+  line-height: 1.9;
+  word-break: keep-all;
+  text-wrap: balance;
+}
+.home-cta-note a { color: var(--c-accent); text-decoration: none; border-bottom: 1px solid var(--c-accent); }
+.home-cta-note a:hover { filter: brightness(1.1); }
+
 /* Home gallery teaser (KR: moments.homePreview) — one row of square thumbnails,
    the whole block a single link to #/moments. Column count follows however many
    thumbnails render (grid-auto-flow), so homePreviewCount just works. */
@@ -1291,6 +1321,10 @@ html[lang="ko"] .site-nav a.en-label {
   font-family: "SD Jeongche", "Helvetica Neue", sans-serif;
   font-weight: 400;
 }
+
+/* KR menu labels a step larger than the Joy default (0.72rem) — 모바일에서
+   읽기 편하게. EN(영문 사이트)은 그대로. */
+html[lang="ko"] .site-nav a { font-size: 0.84rem; }
 
 /* SD Jeongche's only bold cut IS 630i (italic), so keep Korean "bold" text
    upright by pinning it back to the 030 (weight 400) cut — otherwise the
