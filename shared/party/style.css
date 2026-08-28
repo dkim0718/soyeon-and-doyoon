@@ -8,7 +8,7 @@
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
-  background: #efe9e4;
+  background: var(--page-bg, #efe9e4);
   color: var(--ink);
   font-family: var(--font-body);
   line-height: 1.75;
@@ -46,6 +46,35 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); }
   --font-display: 'Gowun Batang', 'Noto Serif KR', serif;
   --font-body: 'Gowun Batang', 'Noto Serif KR', serif;
   --font-en: 'Cormorant Garamond', 'Gowun Batang', serif;
+  --page-bg: #efe9e4;
+}
+
+/* ---------- 테마 프리셋 (관리자 → 디자인) ----------
+   main.js applyTheme() 가 theme.palette / theme.font 값을
+   html[data-palette] / html[data-font] 속성으로 옮겨 답니다. */
+
+/* 블루 — 웨딩 사이트(soyeondoyoon.fun)의 porcelain 네이비와 같은 계열 */
+html[data-palette="blue"] {
+  --bg: #f7f8fa;
+  --bg-soft: #edf1f5;
+  --ink: #232a35;
+  --ink-soft: #5b6371;
+  --ink-faint: #8d95a3;
+  --line: #dde3ea;
+  --accent: #2c3e5d;
+  --accent-deep: #1f2c44;
+  --accent-soft: #e4e9f1;
+  --gold: #8593ad;          /* 금색 포인트 → 스틸 블루 */
+  --shadow: 0 10px 30px rgba(35, 42, 53, 0.10);
+  --page-bg: #e7eaef;
+}
+
+/* 고딕 (맑은 고딕) — 윈도우 전용 글꼴이라, 폰·맥에서는 같은 계열의
+   Noto Sans KR / Apple SD 산돌고딕네오로 대신 보입니다. */
+html[data-font="gothic"] {
+  --font-display: 'Malgun Gothic', '맑은 고딕', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+  --font-body: 'Malgun Gothic', '맑은 고딕', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+  --font-en: 'Malgun Gothic', '맑은 고딕', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
 }
 
 /* ---------- layout ---------- */

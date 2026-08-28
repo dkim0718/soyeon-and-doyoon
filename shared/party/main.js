@@ -53,28 +53,15 @@
     toastTimer = setTimeout(function () { el.classList.remove('show'); }, 2600);
   }
 
-  function copyText(text, okMsg) {
-    var done = function (ok) { toast(ok ? okMsg : '복사에 실패했습니다. 길게 눌러 복사해 주세요.'); };
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(text).then(function () { done(true); }, function () { fallback(); });
-    } else { fallback(); }
-    function fallback() {
-      var ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0;';
-      document.body.appendChild(ta);
-      ta.focus(); ta.select();
-      var ok = false;
-      try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
-      ta.remove();
-      done(ok);
-    }
-  }
-
   /* ---------- 렌더링 ---------- */
 
   function applyTheme(cfg) {
-    document.documentElement.style.setProperty('--font-scale', (cfg.theme && cfg.theme.fontScale) || 1);
+    var t = cfg.theme || {};
+    var d = document.documentElement;
+    d.style.setProperty('--font-scale', t.fontScale || 1);
+    // 팔레트/글꼴 프리셋 → style.css 의 html[data-palette] / html[data-font] 블록
+    d.dataset.palette = t.palette || 'warm';
+    d.dataset.font = t.font || 'serif';
   }
 
   function renderMeta(cfg) {
@@ -184,16 +171,11 @@
         '<div class="map-actions">' +
           '<a target="_blank" rel="noopener" href="https://map.naver.com/p/search/' + q + '">네이버 지도</a>' +
           '<a target="_blank" rel="noopener" href="https://map.kakao.com/link/search/' + q + '">카카오맵</a>' +
-          '<a target="_blank" rel="noopener" href="https://surl.tmap.co.kr/?searchName=' + q + '">티맵</a>' +
         '</div>' +
-      '</div>' +
-      '<button type="button" class="btn btn-ghost" id="btnCopyAddr" style="margin-top:14px;">주소 복사</button>';
+      '</div>';
 
     var frame = $('#mapFrame');
     if (frame) frame.src = 'https://maps.google.com/maps?hl=ko&q=' + p.lat + ',' + p.lng + '&z=16&output=embed';
-    $('#btnCopyAddr').addEventListener('click', function () {
-      copyText(p.address, '주소가 복사되었습니다.');
-    });
   }
 
   function renderQanda(cfg) {

@@ -17,6 +17,10 @@ window.PARTY_DEFAULTS = {
 
   theme: {
     fontScale: 1,
+    // 색상: 'warm'(처음의 로즈 톤) | 'blue'(웨딩 사이트와 같은 네이비 계열)
+    palette: 'blue',
+    // 글꼴: 'serif'(고운바탕 세리프) | 'gothic'(맑은 고딕 계열 산세리프)
+    font: 'gothic',
     effects: { reveal: true },   // 스크롤 시 섹션 서서히 나타나기
   },
 
@@ -30,9 +34,9 @@ window.PARTY_DEFAULTS = {
     venueName: '네이버즈',
     addressLine: '(서울 용산구 신흥로 99)',
     address: '서울 용산구 신흥로 99',
-    // 지도 링크용 좌표 (네이버즈 · 용산구 신흥로 99 부근) — 확정 시 보정
-    lat: 37.54639,
-    lng: 126.98750,
+    // 지도 좌표 — 구글맵의 네이버즈(Neighbors) 위치 기준 (2026-08-28 확정)
+    lat: 37.5451482,
+    lng: 126.9848492,
   },
 
   // 상단 포스터 — 문구는 이미지 안에 포함되어 있습니다 (오버레이 없음).
