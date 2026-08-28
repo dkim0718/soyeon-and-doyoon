@@ -144,10 +144,9 @@ function applySettings() {
   d.style.setProperty("--c-text", colors.text);
   d.style.setProperty("--c-surface", mixWithWhite(colors.bg, 0.55));
   d.style.setProperty("--c-line", mixColors(colors.bg, colors.accent, 0.16));
-  d.style.setProperty("--c-muted", mixColors(colors.text, colors.bg, 0.55));
-  // Deeper soft tone for longer reading passages (초대글) — same hue family as
-  // --c-muted but ~4.6:1 contrast (AA) instead of 2.6:1, still softer than text.
-  d.style.setProperty("--c-muted-deep", mixColors(colors.text, colors.bg, 0.35));
+  // Soft text: text mixed 35% toward bg — ~4.6:1 contrast (AA) on the porcelain
+  // preset. Was 0.55 (~2.6:1), which read too faint for body passages.
+  d.style.setProperty("--c-muted", mixColors(colors.text, colors.bg, 0.35));
 
   d.dataset.hero = layout.hero;
   d.dataset.header = layout.header;
@@ -263,9 +262,6 @@ function homeCtaBlock(cta, href, defaultLabel) {
   if (cta.heading) inner += `<h2 class="invite-heading">${cta.heading}</h2>`;
   if (cta.body) inner += `<p class="invite-body">${String(cta.body).replace(/\n/g, "<br>")}</p>`;
   inner += `<a class="home-cta-btn" href="${href}">${cta.button || defaultLabel}</a>`;
-  // Small print under the button (e.g. "일정·교통편은 Schedule과 Q&A 를 확인해
-  // 주세요"). Comes from the content file, so inline <a> links are allowed.
-  if (cta.note) inner += `<p class="home-cta-note">${String(cta.note).replace(/\n/g, "<br>")}</p>`;
   return `<section class="home-cta reveal">${inner}</section>`;
 }
 function rsvpCtaBlock() { return homeCtaBlock(SITE.rsvp && SITE.rsvp.homeCta, "#/rsvp", "RSVP"); }
@@ -287,6 +283,16 @@ function locationHomeBlock() {
     <h2 class="invite-heading">${w.venue}</h2>
     ${(w.venueAddress || w.venuePhone) ? `<p class="invite-body">${w.venueAddress || ""}${(w.venueAddress && w.venuePhone) ? "<br>" : ""}${w.venuePhone ? `<a class="venue-tel" href="tel:${String(w.venuePhone).replace(/[^0-9+]/g, "")}">${w.venuePhone}</a>` : ""}</p>` : ""}
     ${maps ? `<div class="travel-maps">${maps}</div>` : ""}
+  </section>`;
+}
+
+// Small print closing the home page, below the last block — e.g. the pointer
+// to the Schedule / Q&A menus. KR opt-in via SITE.homeOutro; the string comes
+// from the content file / admin, so inline <a> links are allowed.
+function homeOutroBlock() {
+  if (!SITE.homeOutro) return "";
+  return `<section class="home-cta home-outro">
+    <p class="home-cta-note">${String(SITE.homeOutro).replace(/\n/g, "<br>")}</p>
   </section>`;
 }
 
@@ -326,7 +332,7 @@ function renderWelcome() {
   const heroPhoto = (SITE.photos && SITE.photos.hero)
     ? `<img class="hero-img" src="${SITE.photos.hero}" alt="" fetchpriority="high">` : "";
   const invite = inviteBlock();
-  const cta = rsvpCtaBlock() + locationHomeBlock() + accountsCtaBlock() + galleryHomeBlock();   // RSVP → location/map → gift → gallery
+  const cta = rsvpCtaBlock() + locationHomeBlock() + accountsCtaBlock() + galleryHomeBlock() + homeOutroBlock();   // RSVP → location/map → gift → gallery → outro note
   const countdown = `<div class="countdown" id="countdown"></div>`;
   // KR (has an invitation): hero → invitation → countdown, with extra bottom
   // space before the footer — no warm coda. EN (no invitation): hero+countdown

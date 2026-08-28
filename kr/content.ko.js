@@ -372,10 +372,6 @@ window.SITE = {
         "참석이 어려워 직접 축하를 전하지 못하는 분들을 위해 " +
         "마음 전하실 곳을 마련했습니다.",
       button: "마음 전하실 곳 보기",
-      // 버튼 아래 작은 안내 줄 — Schedule / Q&A 는 해당 메뉴로 가는 링크입니다.
-      note:
-        "결혼식 진행 일정 및 교통편 등은 메뉴의\n" +
-        '<a href="#/schedule">Schedule</a>과 <a href="#/qanda">Q&A</a>를 확인해주세요!',
     },
     groom: [
       {
@@ -423,6 +419,12 @@ window.SITE = {
   // 메뉴가 스크롤을 따라다니게 (청모파티 페이지처럼) — 상단의 이름/모노그램은
   // 따라오지 않고 메뉴 줄만 화면 위에 붙습니다. 한국어 전용 옵트인.
   stickyNav: true,
+
+  // 홈 맨 아래(갤러리 미리보기 아래) 작은 안내 줄 — Schedule / Q&A 는 해당
+  // 메뉴로 가는 링크입니다.
+  homeOutro:
+    "결혼식 진행 일정 및 교통편 등은\n" +
+    '<a href="#/schedule">Schedule</a>과 <a href="#/qanda">Q&A</a>를 확인해주세요!',
 
   navigation: [
     { id: "welcome",  label: "Home" },
