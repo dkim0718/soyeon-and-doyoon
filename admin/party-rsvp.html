@@ -122,8 +122,22 @@ Admin.gate(async function () {
     // 메뉴별 집계 — 식당에 그대로 전달할 수 있게 본인+동반자 인원 기준
     const tally = {};
     going.forEach((r) => {
-      const key = r.menu || '(미선택)';
-      tally[key] = (tally[key] || 0) + headOf(r);
+      const m = r.menu || '';
+      if (m.indexOf('×') !== -1) {
+        // 동반자 응답: "육류 (Chicken)×2 · 생선 (John Dory)×1" 형식
+        m.split('·').forEach((part) => {
+          const seg = part.trim();
+          const ix = seg.lastIndexOf('×');
+          if (ix === -1) return;
+          const label = seg.slice(0, ix).trim() || '(미선택)';
+          const n = parseInt(seg.slice(ix + 1), 10) || 0;
+          tally[label] = (tally[label] || 0) + n;
+        });
+      } else {
+        // 메뉴 라벨 하나 = 일행 전체가 같은 메뉴 (동반자 응답은 항상 × 형식)
+        const key = m || '(미선택)';
+        tally[key] = (tally[key] || 0) + headOf(r);
+      }
     });
     const keys = Object.keys(tally).sort();
     document.getElementById('menuTally').innerHTML = keys.length

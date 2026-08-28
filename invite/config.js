@@ -54,7 +54,7 @@ window.PARTY_DEFAULTS = {
   ],
 
   nav: [
-    { id: 'must',     label: '!필독!', ko: true },
+    { id: 'must',     label: '필독', ko: true, em: true },   // em: 글자 위 드러냄표(점)
     { id: 'story',    label: 'Story' },
     { id: 'schedule', label: 'Schedule' },
     { id: 'qa',       label: 'Q&A' },
@@ -62,7 +62,7 @@ window.PARTY_DEFAULTS = {
   ],
 
   notes: {
-    eyebrow: 'Please Read',
+    eyebrow: '',   // 작은 영문 제목 — 비우면 표시되지 않습니다 (전 섹션 동일)
     title: '안내사항',
     lead: '오시기 전에 딱 여섯 가지만\n확인해 주시면 감사하겠습니다.',
     items: [
@@ -81,7 +81,7 @@ window.PARTY_DEFAULTS = {
   },
 
   story: {
-    eyebrow: 'Our Story',
+    eyebrow: '',
     title: '우리가 만난 이야기',
     photo: '../shared/photos/gallery-05.jpg',
     paragraphs: [
@@ -94,7 +94,7 @@ window.PARTY_DEFAULTS = {
   },
 
   schedule: {
-    eyebrow: 'Schedule',
+    eyebrow: '',
     title: '파티 순서',
     items: [
       { time: '17:30', title: '칵테일 리셉션', place: 'ROOFTOP', desc: '날씨가 좋으면 노을까지 함께 볼 수 있어요.' },
@@ -104,13 +104,13 @@ window.PARTY_DEFAULTS = {
   },
 
   location: {
-    eyebrow: 'Location',
+    eyebrow: '',
     title: '오시는 길',
     showMap: true,
   },
 
   qanda: {
-    eyebrow: 'Q & A',
+    eyebrow: '',
     title: '자주 묻는 질문',
     groups: [
       {
@@ -138,7 +138,7 @@ window.PARTY_DEFAULTS = {
   },
 
   rsvp: {
-    eyebrow: 'R S V P',
+    eyebrow: '',
     title: '참석 여부 알려주기',
     lead: '두 가지 모두 답해주시면\n준비에 큰 도움이 됩니다.',
 
@@ -151,8 +151,10 @@ window.PARTY_DEFAULTS = {
       note: '이 페이지에서 바로 접수됩니다',
       askPhone: true,
       askCompanion: true,
-      // TBD: 실제 메뉴 확정 후 교체 (관리자에서 추가/삭제 가능)
-      menuOptions: ['메뉴 A', '메뉴 B', '채식'],
+      // 동반자 스테퍼 아래 작은 안내 줄
+      companionHint: '동반자는 안내받은 분만 체크해주세요',
+      // 동반자가 있으면 인원수만큼 메뉴를 고르는 화면으로 바뀝니다.
+      menuOptions: ['육류 (Chicken)', '생선 (John Dory)'],
       // 나중에 질문을 더 받고 싶으면 여기(또는 관리자)에서 추가하세요.
       // type: 'text' | 'choice' | 'yesno'
       extraQuestions: [],

@@ -101,14 +101,15 @@
 
   function renderNav(cfg) {
     $('#nav .nav-inner').innerHTML = '<ul>' + (cfg.nav || []).map(function (n) {
-      return '<li><a href="#' + esc(n.id) + '"' + (n.ko ? ' class="ko"' : '') + '>' + esc(n.label) + '</a></li>';
+      var cls = (n.ko ? 'ko' : '') + (n.em ? ' em' : '');
+      return '<li><a href="#' + esc(n.id) + '"' + (cls ? ' class="' + cls.trim() + '"' : '') + '>' + esc(n.label) + '</a></li>';
     }).join('') + '</ul>';
   }
 
   function renderNotes(cfg) {
     var n = cfg.notes;
     $('#must').innerHTML =
-      '<p class="sec-eyebrow">' + esc(n.eyebrow) + '</p>' +
+      (n.eyebrow ? '<p class="sec-eyebrow">' + esc(n.eyebrow) + '</p>' : '') +
       '<h2 class="sec-title">' + esc(n.title) + '</h2>' +
       (n.lead ? '<p class="sec-lead">' + nl2br(n.lead) + '</p>' : '') +
       '<ol class="notes">' + (n.items || []).map(function (it, i) {
@@ -128,7 +129,7 @@
   function renderStory(cfg) {
     var s = cfg.story;
     $('#story').innerHTML =
-      '<p class="sec-eyebrow">' + esc(s.eyebrow) + '</p>' +
+      (s.eyebrow ? '<p class="sec-eyebrow">' + esc(s.eyebrow) + '</p>' : '') +
       '<h2 class="sec-title">' + esc(s.title) + '</h2>' +
       (s.photo ? '<div class="story-photo"><img src="' + esc(s.photo) + '" alt="" loading="lazy"></div>' : '') +
       '<div class="story-body">' +
@@ -139,7 +140,7 @@
   function renderSchedule(cfg) {
     var s = cfg.schedule;
     $('#schedule').innerHTML =
-      '<p class="sec-eyebrow">' + esc(s.eyebrow) + '</p>' +
+      (s.eyebrow ? '<p class="sec-eyebrow">' + esc(s.eyebrow) + '</p>' : '') +
       '<h2 class="sec-title">' + esc(s.title) + '</h2>' +
       '<div class="timeline">' + (s.items || []).map(function (it) {
         return '<div class="slot"><span class="t">' + esc(it.time) + '</span>' +
@@ -157,7 +158,7 @@
     if (l.showMap === false) { sec.hidden = true; return; }
     sec.hidden = false;
     sec.innerHTML =
-      '<p class="sec-eyebrow">' + esc(l.eyebrow) + '</p>' +
+      (l.eyebrow ? '<p class="sec-eyebrow">' + esc(l.eyebrow) + '</p>' : '') +
       '<h2 class="sec-title">' + esc(l.title) + '</h2>' +
       '<p class="loc-venue">' + esc(p.venueName) + '</p>' +
       '<p class="loc-address">' + esc(p.address) + '</p>' +
@@ -182,7 +183,7 @@
     var q = cfg.qanda;
     var open = true;   // 첫 문항만 펼쳐 둡니다
     $('#qa').innerHTML =
-      '<p class="sec-eyebrow">' + esc(q.eyebrow) + '</p>' +
+      (q.eyebrow ? '<p class="sec-eyebrow">' + esc(q.eyebrow) + '</p>' : '') +
       '<h2 class="sec-title">' + esc(q.title) + '</h2>' +
       (q.groups || []).map(function (g) {
         var items = (g.items || []).filter(function (it) { return it.q; });
@@ -236,7 +237,7 @@
         '</div>';
     }
     $('#rsvp').innerHTML =
-      '<p class="sec-eyebrow">' + esc(r.eyebrow) + '</p>' +
+      (r.eyebrow ? '<p class="sec-eyebrow">' + esc(r.eyebrow) + '</p>' : '') +
       '<h2 class="sec-title">' + esc(r.title) + '</h2>' +
       (r.lead ? '<p class="sec-lead">' + nl2br(r.lead) + '</p>' : '') +
       '<div class="rcards">' + cards + '</div>';
@@ -277,12 +278,25 @@
         '<div class="form-field"><label for="fName">성함 <span class="req">*</span></label>' +
           '<input type="text" id="fName" maxlength="20" placeholder="참석자 성함" required></div>' +
         (menus.length
-          ? '<div class="form-field" data-only="yes"><label>메뉴 선택</label><div class="seg" id="fMenu">' +
+          // 혼자면 하나 고르기(seg), 동반자가 있으면 메뉴별 개수 고르기(counts)로
+          // 바뀝니다 — bindRsvpForm 의 syncMenuUI 가 전환합니다.
+          ? '<div class="form-field" data-only="yes"><label id="fMenuLabel">메뉴 선택</label><div class="seg" id="fMenu">' +
               menus.map(function (m) { return '<button type="button" data-v="' + esc(m) + '">' + esc(m) + '</button>'; }).join('') +
+            '</div>' +
+            '<div id="fMenuCounts" hidden>' +
+              menus.map(function (m, i) {
+                return '<div class="menu-count-row"><span class="mc-label">' + esc(m) + '</span>' +
+                  '<div class="stepper stepper-sm">' +
+                  '<button type="button" data-mcm="' + i + '" aria-label="줄이기">−</button>' +
+                  '<output id="fMc' + i + '">0</output>' +
+                  '<button type="button" data-mcp="' + i + '" aria-label="늘리기">＋</button>' +
+                  '</div></div>';
+              }).join('') +
             '</div></div>'
           : '') +
         (party.askCompanion !== false
           ? '<div class="form-field" data-only="yes"><label>동반자 (본인 제외)</label>' +
+              (party.companionHint ? '<p class="field-hint">' + esc(party.companionHint) + '</p>' : '') +
               '<div class="stepper"><button type="button" id="fMinus" aria-label="줄이기">−</button>' +
               '<output id="fCount">0</output>' +
               '<button type="button" id="fPlus" aria-label="늘리기">＋</button></div></div>' +
@@ -338,8 +352,22 @@
     buildRsvpForm(cfg);
 
     var overlay = $('#rsvpOverlay');
-    var state = { attending: 'yes', menu: '', count: 0, extra: {} };
+    var menus = party.menuOptions || [];
+    var state = { attending: 'yes', menu: '', count: 0, menuCounts: menus.map(function () { return 0; }), extra: {} };
     var extras = party.extraQuestions || [];
+
+    // 혼자면 seg(하나 고르기), 동반자가 있으면 메뉴별 개수 고르기.
+    function syncMenuUI() {
+      var seg = $('#fMenu'), counts = $('#fMenuCounts'), lbl = $('#fMenuLabel');
+      if (!seg || !counts) return;
+      var multi = state.count > 0;
+      seg.hidden = multi;
+      counts.hidden = !multi;
+      if (lbl) lbl.textContent = multi ? '메뉴 선택 (본인 포함 ' + (state.count + 1) + '개)' : '메뉴 선택';
+    }
+    function menuTotal() {
+      return state.menuCounts.reduce(function (s, n) { return s + n; }, 0);
+    }
 
     function segBind(wrap, onPick) {
       if (!wrap) return;
@@ -369,9 +397,33 @@
       if (cnt) cnt.textContent = state.count;
       var wrap = $('#fCompanionWrap');
       if (wrap) wrap.hidden = state.count === 0 || state.attending !== 'yes';
+      // 인원이 줄었으면 넘치는 메뉴 개수를 잘라낸다
+      while (menuTotal() > state.count + 1) {
+        for (var i = state.menuCounts.length - 1; i >= 0; i--) {
+          if (state.menuCounts[i] > 0) { setMenuCount(i, state.menuCounts[i] - 1); break; }
+        }
+      }
+      syncMenuUI();
     }
     if ($('#fMinus')) $('#fMinus').addEventListener('click', function () { setCount(state.count - 1); });
     if ($('#fPlus')) $('#fPlus').addEventListener('click', function () { setCount(state.count + 1); });
+
+    function setMenuCount(i, n) {
+      state.menuCounts[i] = Math.max(0, n);
+      var out = $('#fMc' + i);
+      if (out) out.textContent = state.menuCounts[i];
+    }
+    var mcWrap = $('#fMenuCounts');
+    if (mcWrap) mcWrap.addEventListener('click', function (e) {
+      var minus = e.target.closest('button[data-mcm]');
+      var plus = e.target.closest('button[data-mcp]');
+      if (minus) setMenuCount(+minus.dataset.mcm, state.menuCounts[+minus.dataset.mcm] - 1);
+      if (plus) {
+        var i = +plus.dataset.mcp;
+        if (menuTotal() >= state.count + 1) { toast('인원수(' + (state.count + 1) + '개)만큼만 고를 수 있어요.'); return; }
+        setMenuCount(i, state.menuCounts[i] + 1);
+      }
+    });
 
     var ct = $('#consentToggle');
     if (ct) ct.addEventListener('click', function () { $('#consentBox').classList.toggle('open'); });
@@ -382,8 +434,21 @@
       if (!name) { toast('성함을 입력해 주세요.'); $('#fName').focus(); return; }
       if (!$('#fConsent').checked) { toast('개인정보 수집·이용에 동의해 주세요.'); return; }
       var attending = state.attending === 'yes';
-      if (attending && (party.menuOptions || []).length && !state.menu) {
-        toast('메뉴를 선택해 주세요.'); return;
+      // 메뉴: 혼자면 하나(state.menu), 동반자가 있으면 메뉴별 개수 합이
+      // 인원수(본인 포함)와 같아야 합니다. 저장은 "라벨×개수 · …" 텍스트로.
+      var menuVal = '';
+      if (attending && menus.length) {
+        if (state.count > 0) {
+          if (menuTotal() !== state.count + 1) {
+            toast('메뉴를 인원수(' + (state.count + 1) + '개)만큼 골라주세요.'); return;
+          }
+          menuVal = menus.map(function (m, i) {
+            return state.menuCounts[i] ? m + '×' + state.menuCounts[i] : '';
+          }).filter(Boolean).join(' · ');
+        } else {
+          if (!state.menu) { toast('메뉴를 선택해 주세요.'); return; }
+          menuVal = state.menu;
+        }
       }
       extras.forEach(function (q, i) {
         var el = $('[data-extra-text="' + i + '"]');
@@ -395,7 +460,7 @@
       Promise.resolve(window.Store.submitPartyRsvp({
         name: name,
         attending: attending,
-        menu: attending ? state.menu : '',
+        menu: menuVal,
         companionCount: attending ? state.count : 0,
         companion: attending && $('#fCompanion') ? $('#fCompanion').value : '',
         phone: $('#fPhone') ? $('#fPhone').value : '',
