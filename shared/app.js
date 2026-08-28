@@ -145,6 +145,9 @@ function applySettings() {
   d.style.setProperty("--c-surface", mixWithWhite(colors.bg, 0.55));
   d.style.setProperty("--c-line", mixColors(colors.bg, colors.accent, 0.16));
   d.style.setProperty("--c-muted", mixColors(colors.text, colors.bg, 0.55));
+  // Deeper soft tone for longer reading passages (초대글) — same hue family as
+  // --c-muted but ~4.6:1 contrast (AA) instead of 2.6:1, still softer than text.
+  d.style.setProperty("--c-muted-deep", mixColors(colors.text, colors.bg, 0.35));
 
   d.dataset.hero = layout.hero;
   d.dataset.header = layout.header;
@@ -323,7 +326,7 @@ function renderWelcome() {
   const heroPhoto = (SITE.photos && SITE.photos.hero)
     ? `<img class="hero-img" src="${SITE.photos.hero}" alt="" fetchpriority="high">` : "";
   const invite = inviteBlock();
-  const cta = rsvpCtaBlock() + locationHomeBlock() + galleryHomeBlock() + accountsCtaBlock();   // RSVP → location/map → gallery → gift
+  const cta = rsvpCtaBlock() + locationHomeBlock() + accountsCtaBlock() + galleryHomeBlock();   // RSVP → location/map → gift → gallery
   const countdown = `<div class="countdown" id="countdown"></div>`;
   // KR (has an invitation): hero → invitation → countdown, with extra bottom
   // space before the footer — no warm coda. EN (no invitation): hero+countdown
