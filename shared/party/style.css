@@ -49,7 +49,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); }
   --font-body: 'Gowun Batang', 'Noto Serif KR', serif;
   --font-en: 'Cormorant Garamond', 'Gowun Batang', serif;
   --page-bg: #efe9e4;
-  --title: #004225;   /* 큰제목 — 브리티시 레이싱 그린 (미니의 그 색) */
+  --title: var(--accent);   /* 큰제목 — 본문 네이비(#2c3e5d): 이전 딥 네이비(#1f2c44)보다 한 단계 밝게 */
 }
 
 /* ---------- 테마 프리셋 (관리자 → 디자인) ----------
