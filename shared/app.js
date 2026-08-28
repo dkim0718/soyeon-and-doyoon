@@ -284,6 +284,29 @@ function locationHomeBlock() {
   </section>`;
 }
 
+// Home gallery teaser — the first few gallery photos as square thumbnails, the
+// whole block one link to the 갤러리 page (모청처럼 메인에서 사진이 보이게).
+// KR-only: opt-in via SITE.moments.homePreview, mirroring wedding.homeLocation.
+// Reads SITE.galleryDefaults, which boot re-renders after the media override
+// arrives — admin uploads/reorders show up here with no extra wiring.
+function galleryHomeBlock() {
+  const m = SITE.moments;
+  const urls = SITE.galleryDefaults || [];
+  if (!m || !m.homePreview || !urls.length) return "";
+  const thumbs = urls.slice(0, m.homePreviewCount || 3).map((u) =>
+    `<img src="${u}" alt="" loading="lazy">`).join("");
+  // No 'reveal' here for the same reason as the LOCATION block above — this
+  // sits even further below the fold, and photos stuck at opacity 0 read as
+  // "the gallery is broken".
+  return `<section class="home-cta home-gallery">
+    <a class="home-gallery-link" href="#/moments" aria-label="갤러리 전체 보기">
+      <p class="invite-eyebrow">GALLERY</p>
+      <div class="home-gallery-thumbs">${thumbs}</div>
+      <span class="home-gallery-more">${m.homePreviewLabel || "전체 보기 →"}</span>
+    </a>
+  </section>`;
+}
+
 function renderWelcome() {
   const w = SITE.wedding;
   const c = SITE.couple;
@@ -297,7 +320,7 @@ function renderWelcome() {
   const heroPhoto = (SITE.photos && SITE.photos.hero)
     ? `<img class="hero-img" src="${SITE.photos.hero}" alt="" fetchpriority="high">` : "";
   const invite = inviteBlock();
-  const cta = rsvpCtaBlock() + locationHomeBlock() + accountsCtaBlock();   // RSVP → location/map → gift
+  const cta = rsvpCtaBlock() + locationHomeBlock() + galleryHomeBlock() + accountsCtaBlock();   // RSVP → location/map → gallery → gift
   const countdown = `<div class="countdown" id="countdown"></div>`;
   // KR (has an invitation): hero → invitation → countdown, with extra bottom
   // space before the footer — no warm coda. EN (no invitation): hero+countdown

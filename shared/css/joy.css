@@ -1241,6 +1241,36 @@ html[data-hero="classic"] .hero-photo-wrap .hero-img {
 .home-cta-btn:hover { filter: brightness(1.07); box-shadow: 0 10px 26px -8px rgba(0, 0, 0, 0.32); }
 .home-cta-btn:active { transform: scale(0.98); }
 
+/* Home gallery teaser (KR: moments.homePreview) — one row of square thumbnails,
+   the whole block a single link to #/moments. Column count follows however many
+   thumbnails render (grid-auto-flow), so homePreviewCount just works. */
+.home-gallery-link { display: block; text-decoration: none; color: inherit; }
+.home-gallery-thumbs {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 0.55rem;
+  max-width: 30rem;   /* aligns with .home-cta-btn above it */
+  margin: 0 auto;
+}
+.home-gallery-thumbs img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 4px;   /* matches .gallery-item on the 갤러리 page */
+}
+.home-gallery-more {
+  display: inline-block;
+  margin-top: 1.05rem;
+  color: var(--c-muted);
+  font-size: 0.92rem;
+  letter-spacing: 0.06em;
+  transition: color 0.15s;
+}
+.home-gallery-link:hover .home-gallery-more { color: var(--c-accent); }
+.home-gallery-link:hover .home-gallery-thumbs img { filter: brightness(1.05); }
+
 /* KR site: SD정체 for all Korean text (headers/footer names ride --f-brand).
    The English/Latin accents use SD 정체 630i (SD Jeongche weight 700 — the italic
    cut): the monogram, the INVITATION eyebrow, the & ampersands, the footer note,
