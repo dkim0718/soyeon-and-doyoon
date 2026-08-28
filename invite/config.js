@@ -37,19 +37,16 @@ window.PARTY_DEFAULTS = {
 
   // 상단 포스터 — 문구는 이미지 안에 포함되어 있습니다 (오버레이 없음).
   //
-  // 고를 수 있는 시안 5종 (shared/photos/posters/) — 관리자에서 주소만 바꾸면 됩니다:
-  //   ../shared/photos/posters/portrait-watercolor.jpg     인물포스터 1-1.수채
-  //   ../shared/photos/posters/portrait-crayon.jpg         인물포스터 1-1.크레파스
-  //   ../shared/photos/posters/mood-white-watercolor.jpg   무드포스터 1-1.흰색 수채
-  //   ../shared/photos/posters/mood-white-crayon.jpg       무드포스터 1-1.흰색 크레파스
-  //   ../shared/photos/posters/mood-sky.jpg                무드포스터 1-3.하늘배경
+  // ✅ 최종본 (꽃잔치 원본에서 1440px 로 줄인 것, 2026-08-28):
+  //   ../shared/photos/posters/portrait-final.jpg   인물포스터 최종
+  //   ../shared/photos/posters/mood-final.jpg       무드포스터 최종
   //
-  // ⚠️ 지금 파일들은 시안 스크린샷에서 잘라낸 것이라 가로 386px 뿐입니다.
-  //    꽃잔치에서 원본(A3 인쇄용)을 받으면 관리자 → 포스터 → 업로드로 교체하세요.
-  //    업로드하면 자동으로 줄여 저장하므로 원본 그대로 올리면 됩니다.
+  // 참고용 시안 5종도 그대로 있습니다 (스크린샷 크롭이라 가로 386px, 화질 낮음):
+  //   portrait-watercolor / portrait-crayon / mood-white-watercolor /
+  //   mood-white-crayon / mood-sky  (.jpg, 같은 폴더)
   posters: [
-    { src: '../shared/photos/posters/portrait-watercolor.jpg', alt: '소연 & 도윤' },
-    { src: '../shared/photos/posters/mood-white-crayon.jpg', alt: '소연 ♥ 도윤 청첩장 드립니다!' },
+    { src: '../shared/photos/posters/portrait-final.jpg', alt: '소연 & 도윤' },
+    { src: '../shared/photos/posters/mood-final.jpg', alt: '소연 ♥ 도윤 청첩장 드립니다!' },
   ],
 
   nav: [

@@ -89,6 +89,16 @@
         '<img src="' + esc(p.src) + '" alt="' + esc(p.alt || '') + '"' +
         (i === 0 ? ' fetchpriority="high"' : ' loading="lazy"') + '></section>';
     }).join('');
+    // 로드가 끝나면 서서히 나타나기 (style.css .poster img 참고) —
+    // 캐시에서 이미 떠 있으면 바로, 실패해도 alt 가 보이게 클래스는 붙인다.
+    $$('#posters img').forEach(function (img) {
+      var show = function () { img.classList.add('is-loaded'); };
+      if (img.complete && img.naturalWidth) show();
+      else {
+        img.addEventListener('load', show, { once: true });
+        img.addEventListener('error', show, { once: true });
+      }
+    });
   }
 
   function renderIntro(cfg) {

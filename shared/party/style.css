@@ -65,9 +65,20 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); }
 }
 
 /* ---------- 포스터 ----------
-   문구는 이미지 안에 들어 있습니다. 오버레이·크롭 없이 원본 비율 그대로. */
-.poster { display: block; }
-.poster img { width: 100%; height: auto; }
+   문구는 이미지 안에 들어 있습니다. 오버레이·크롭 없이 원본 비율 그대로.
+   aspect-ratio 는 로딩 전 자리 확보용(아래 내용이 점프하지 않게) — 이미지가
+   뜨면 실제 비율이 우선합니다(auto). 로드가 끝나면 다른 섹션의 reveal 처럼
+   부드럽게 나타납니다 (.is-loaded 는 main.js 가 붙입니다). */
+.poster { display: block; background: var(--bg-soft); }
+.poster img {
+  display: block; width: 100%; height: auto;
+  aspect-ratio: auto 889 / 1252;   /* A3 비율 (1778×2504 원본) */
+  opacity: 0; transition: opacity 0.9s ease;
+}
+.poster img.is-loaded { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .poster img { opacity: 1; transition: none; }
+}
 
 /* ---------- 사진 아래 안내 ---------- */
 .intro { padding: 42px 26px 44px; text-align: center; }
