@@ -107,6 +107,35 @@
     });
   }
 
+  /* ---------- 청모파티 RSVP (제출 전용 — 수정 불가) ---------- */
+
+  async function submitPartyRsvp(data) {
+    var row = {
+      name: str(data.name, 40),
+      attending: data.attending === false ? false : true,
+      menu: str(data.menu, 60),
+      companion_count: Math.min(20, Math.max(0, toInt(data.companionCount, 0))),
+      companion: str(data.companion, 120),
+      phone: str(data.phone, 30),
+      message: str(data.message, 300),
+      extra: (data.extra && typeof data.extra === 'object' && !Array.isArray(data.extra)) ? data.extra : {},
+    };
+    if (!row.name) throw new Error('성함을 입력해 주세요.');
+    var res = await client.from('party_rsvps').insert(row);
+    if (res && res.error) throw res.error;
+    return Object.assign({ id: null, created_at: new Date().toISOString() }, row);
+  }
+
+  async function listPartyRsvps() {
+    return unwrap(await client.from('party_rsvps').select('*')
+      .order('created_at', { ascending: false })) || [];
+  }
+
+  async function deletePartyRsvp(id) {
+    var res = await client.from('party_rsvps').delete().eq('id', id);
+    if (res && res.error) throw res.error;
+  }
+
   async function listWeddingRsvps(filter) {
     filter = filter || {};
     var q = client.from('wedding_rsvps').select('*').order('created_at', { ascending: false });
@@ -460,6 +489,7 @@
 
   async function exportAll() {
     var wedding = unwrap(await client.from('wedding_rsvps').select('*')) || [];
+    var party = unwrap(await client.from('party_rsvps').select('*')) || [];
     var apGuests = unwrap(await client.from('afterparty_guests').select('*')) || [];
     var apRsvps = unwrap(await client.from('afterparty_rsvps').select('*')) || [];
     var guestbook = unwrap(await client.from('guestbook').select('*')) || [];
@@ -467,11 +497,13 @@
       exportedAt: new Date().toISOString(),
       backend: 'supabase',
       wedding_rsvps: wedding,
+      party_rsvps: party,
       afterparty_guests: apGuests,
       afterparty_rsvps: apRsvps,
       guestbook: guestbook,
       configOverride: {
         invite: await getConfigOverride('invite'),
+        party: await getConfigOverride('party'),
         kr: await getConfigOverride('kr'),
         en: await getConfigOverride('en'),
       },
@@ -511,7 +543,7 @@
       unwrap(await client.from('guestbook').upsert(notes, { onConflict: 'id' }));
     }
     if (data.configOverride && typeof data.configOverride === 'object') {
-      for (var s = 0, scopes = ['invite', 'kr', 'en']; s < scopes.length; s++) {
+      for (var s = 0, scopes = ['invite', 'party', 'kr', 'en']; s < scopes.length; s++) {
         if (data.configOverride[scopes[s]]) await saveConfigOverride(scopes[s], data.configOverride[scopes[s]]);
       }
     }
@@ -528,6 +560,10 @@
     listRsvps: listRsvps,
     deleteWeddingRsvp: deleteWeddingRsvp,
     deleteRsvp: deleteRsvp,
+    // 청모파티
+    submitPartyRsvp: submitPartyRsvp,
+    listPartyRsvps: listPartyRsvps,
+    deletePartyRsvp: deletePartyRsvp,
     // afterparty
     importAfterpartyGuests: importAfterpartyGuests,
     listAfterpartyGuests: listAfterpartyGuests,

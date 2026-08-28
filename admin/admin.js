@@ -336,9 +336,9 @@ window.Admin = (function () {
   }
 
   // 모청(invite) 기본값 + 저장된 override 병합 (index/edit 전용 — config.js 로드 필요)
-  async function mergedInviteConfig() {
-    const override = await window.Store.getConfigOverride('invite');
-    return deepMerge(window.MOCHUNG_DEFAULTS || {}, override);
+  async function mergedPartyConfig() {
+    const override = await window.Store.getConfigOverride('party');
+    return deepMerge(window.PARTY_DEFAULTS || {}, override);
   }
 
   /* ---------- 접근 게이트 ---------- */
@@ -667,7 +667,7 @@ window.Admin = (function () {
     parseCsv: parseCsv,
     copyText: copyText,
     deepMerge: deepMerge,
-    mergedInviteConfig: mergedInviteConfig,
+    mergedPartyConfig: mergedPartyConfig,
     backend: backend,
     siteUrl: siteUrl,
     wireSiteLinks: wireSiteLinks,

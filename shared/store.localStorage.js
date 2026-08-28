@@ -8,7 +8,8 @@
  * Supabase adapter implements this exact same interface.
  *
  * Tables (localStorage keys):
- *   wedding_rsvps      — open self-report RSVP (모청 + KR site)
+ *   wedding_rsvps      — open self-report RSVP (KR site)
+ *   party_rsvps        — 청모파티 참석·메뉴 접수 (invite site)
  *   afterparty_guests  — pre-loaded curated invite list (EN site)
  *   afterparty_rsvps   — responses to the afterparty invite
  *   guestbook          — 축하 메시지
@@ -20,6 +21,7 @@ window.StoreLocal = (function () {
   const NS = 'mochung.';
   const KEYS = {
     wedding: NS + 'wedding_rsvps',
+    party: NS + 'party_rsvps',
     apGuests: NS + 'afterparty_guests',
     apRsvps: NS + 'afterparty_rsvps',
     guestbook: NS + 'guestbook',
@@ -118,6 +120,36 @@ window.StoreLocal = (function () {
       message: '',
       locale: 'ko',
     });
+  }
+
+  /* ---------- 청모파티 RSVP (제출 전용 — 수정 불가) ---------- */
+
+  async function submitPartyRsvp(data) {
+    const entry = {
+      id: uid(),
+      name: str(data.name, 40),
+      attending: data.attending === false ? false : true,
+      menu: str(data.menu, 60),
+      companion_count: Math.min(20, Math.max(0, toInt(data.companionCount, 0))),
+      companion: str(data.companion, 120),
+      phone: str(data.phone, 30),
+      message: str(data.message, 300),
+      extra: (data.extra && typeof data.extra === 'object') ? data.extra : {},
+      created_at: Date.now(),
+    };
+    if (!entry.name) throw new Error('성함을 입력해 주세요.');
+    const list = readList(KEYS.party);
+    list.push(entry);
+    writeList(KEYS.party, list);
+    return entry;
+  }
+
+  async function listPartyRsvps() {
+    return readList(KEYS.party).sort((a, b) => b.created_at - a.created_at);
+  }
+
+  async function deletePartyRsvp(id) {
+    writeList(KEYS.party, readList(KEYS.party).filter((e) => e.id !== id));
   }
 
   async function listWeddingRsvps(filter) {
@@ -391,7 +423,7 @@ window.StoreLocal = (function () {
    * ===================================================== */
 
   function adminPasscode() {
-    const c = window.MOCHUNG_DEFAULTS && window.MOCHUNG_DEFAULTS.admin && window.MOCHUNG_DEFAULTS.admin.passcode;
+    const c = window.PARTY_DEFAULTS && window.PARTY_DEFAULTS.admin && window.PARTY_DEFAULTS.admin.passcode;
     return c || '1030';
   }
   async function adminSignIn(secret) {
@@ -415,11 +447,13 @@ window.StoreLocal = (function () {
       exportedAt: new Date().toISOString(),
       backend: 'localStorage',
       wedding_rsvps: readList(KEYS.wedding),
+      party_rsvps: readList(KEYS.party),
       afterparty_guests: readList(KEYS.apGuests),
       afterparty_rsvps: readList(KEYS.apRsvps),
       guestbook: readList(KEYS.guestbook),
       configOverride: {
         invite: await getConfigOverride('invite'),
+        party: await getConfigOverride('party'),
         kr: await getConfigOverride('kr'),
         en: await getConfigOverride('en'),
       },
@@ -433,7 +467,7 @@ window.StoreLocal = (function () {
     if (Array.isArray(data.afterparty_rsvps)) writeList(KEYS.apRsvps, data.afterparty_rsvps);
     if (Array.isArray(data.guestbook)) writeList(KEYS.guestbook, data.guestbook);
     if (data.configOverride && typeof data.configOverride === 'object') {
-      for (const scope of ['invite', 'kr', 'en']) {
+      for (const scope of ['invite', 'party', 'kr', 'en']) {
         if (data.configOverride[scope]) await saveConfigOverride(scope, data.configOverride[scope]);
       }
     }
@@ -443,6 +477,8 @@ window.StoreLocal = (function () {
     backend: 'localStorage',
     // wedding
     submitWeddingRsvp, addRsvp, listWeddingRsvps, listRsvps, deleteWeddingRsvp, deleteRsvp,
+    // 청모파티
+    submitPartyRsvp, listPartyRsvps, deletePartyRsvp,
     // afterparty
     importAfterpartyGuests, listAfterpartyGuests, deleteAfterpartyGuest, updateAfterpartyGuest,
     lookupAfterpartyGuest, submitAfterpartyRsvp, listAfterpartyRsvps, deleteAfterpartyRsvp,

@@ -2,7 +2,7 @@
   "name": "soyeon-doyoon-wedding",
   "version": "1.0.0",
   "private": true,
-  "description": "Soyeon & Doyoon wedding — 모청 + Korean site + English/afterparty site (static, no framework). Cloudflare Pages builds each subdomain by copying shared/ into the site folder.",
+  "description": "Soyeon & Doyoon wedding — 청모파티 invitation + Korean site + English/afterparty site (static, no framework). Cloudflare Pages builds each subdomain by copying shared/ into the site folder.",
   "scripts": {
     "build:root": "node scripts/assemble.mjs root",
     "build:invite": "node scripts/assemble.mjs invite",

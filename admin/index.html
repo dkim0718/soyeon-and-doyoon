@@ -15,16 +15,27 @@
     <h1>💌 청첩장 관리자</h1>
     <div class="admin-nav">
       <a href="index.html" class="on">홈</a>
+      <a href="party-rsvp.html">청모파티 참석</a>
       <a href="rsvp.html">웨딩 참석</a>
       <a href="afterparty.html">애프터파티</a>
       <a href="guestbook.html">방명록</a>
-      <a href="edit.html">청첩장 수정</a>
+      <a href="edit.html">청모파티 수정</a>
       <a href="edit-site.html">웹사이트 수정</a>
       <a href="../invite/index.html" data-site-link="invite" target="_blank">청첩장 보기 ↗</a>
     </div>
   </div>
 
   <div class="notice-bar" id="backendNotice"></div>
+
+  <div class="card">
+    <h2>청모파티 참석</h2>
+    <div class="stat-row">
+      <div class="stat"><b id="pRes">-</b><span>응답 수</span></div>
+      <div class="stat"><b id="pHead">-</b><span>참석 인원</span></div>
+      <div class="stat"><b id="pNo">-</b><span>불참</span></div>
+      <div class="stat"><b id="pDday">-</b><span>파티까지</span></div>
+    </div>
+  </div>
 
   <div class="card">
     <h2>웨딩 참석 (RSVP)</h2>
@@ -124,11 +135,23 @@ Admin.gate(async function () {
   set('apPending', pending.length + '건');
   set('apHead', apHead + '명');
 
+  // 청모파티
+  const party = await store.listPartyRsvps();
+  const pGoing = party.filter(function (r) { return r.attending; });
+  set('pRes', party.length + '건');
+  set('pHead', pGoing.reduce(function (s, r) { return s + 1 + (r.companion_count || 0); }, 0) + '명');
+  set('pNo', (party.length - pGoing.length) + '건');
+
   // 방명록 · D-day
   const gb = await store.listGuestbook();
   set('gbCount', gb.length + '건');
-  const cfg = await Admin.mergedInviteConfig();
-  const dday = Math.ceil((new Date(cfg.wedding.dateISO) - new Date()) / 86400000);
+  const cfg = await Admin.mergedPartyConfig();
+  const ddayFmt = function (iso) {
+    const n = Math.ceil((new Date(iso) - new Date()) / 86400000);
+    return n > 0 ? 'D-' + n : n === 0 ? 'D-DAY' : 'D+' + (-n);
+  };
+  set('pDday', ddayFmt(cfg.party.dateISO));
+  const dday = Math.ceil((new Date(cfg.rsvp.wedding.dateISO) - new Date()) / 86400000);
   set('dday', dday > 0 ? 'D-' + dday : dday === 0 ? 'D-DAY' : 'D+' + (-dday));
 
   // 백업
