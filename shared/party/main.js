@@ -302,7 +302,7 @@
               '<button type="button" id="fPlus" aria-label="늘리기">＋</button></div></div>' +
             '<div class="form-field" id="fCompanionWrap" data-only="yes" hidden>' +
               '<label for="fCompanion">동반자 성함</label>' +
-              '<input type="text" id="fCompanion" maxlength="60" placeholder="쉼표로 구분해 입력"></div>'
+              '<input type="text" id="fCompanion" maxlength="60"></div>'
           : '') +
         (party.askPhone !== false
           ? '<div class="form-field"><label for="fPhone">연락처</label>' +

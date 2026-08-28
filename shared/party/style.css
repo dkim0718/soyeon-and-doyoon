@@ -49,6 +49,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); }
   --font-body: 'Gowun Batang', 'Noto Serif KR', serif;
   --font-en: 'Cormorant Garamond', 'Gowun Batang', serif;
   --page-bg: #efe9e4;
+  --title: #004225;   /* 큰제목 — 브리티시 레이싱 그린 (미니의 그 색) */
 }
 
 /* ---------- 테마 프리셋 (관리자 → 디자인) ----------
@@ -117,7 +118,7 @@ html[data-font="gothic"] {
   font-family: var(--font-display);
   font-size: 22px; font-weight: 700;
   letter-spacing: 0.1em; text-indent: 0.1em;
-  color: var(--accent-deep);   /* 큰제목: 블루 팔레트에서 딥 네이비 */
+  color: var(--title);   /* 큰제목 색은 :root 의 --title 한 곳에서 */
 }
 .intro-venue { font-family: var(--font-display); font-size: 16.5px; font-weight: 700; margin-top: 14px; }
 .intro-venue .addr {
@@ -176,7 +177,7 @@ html[data-font="gothic"] {
 .sec-title {
   font-family: var(--font-display); font-size: 23px; font-weight: 700;
   text-align: center; margin-top: 12px; text-wrap: balance;
-  color: var(--accent-deep);   /* 큰제목: 블루 팔레트에서 딥 네이비 */
+  color: var(--title);   /* 큰제목 색은 :root 의 --title 한 곳에서 */
 }
 .sec-lead { font-size: 15px; color: var(--ink-soft); text-align: center; margin-top: 12px; line-height: 1.8; }
 
