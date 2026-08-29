@@ -280,7 +280,7 @@
         (menus.length
           // 혼자면 하나 고르기(seg), 동반자가 있으면 메뉴별 개수 고르기(counts)로
           // 바뀝니다 — bindRsvpForm 의 syncMenuUI 가 전환합니다.
-          ? '<div class="form-field" data-only="yes"><label id="fMenuLabel">메뉴 선택</label><div class="seg" id="fMenu">' +
+          ? '<div class="form-field" data-only="yes"><label id="fMenuLabel">메인 메뉴 선택</label><div class="seg" id="fMenu">' +
               menus.map(function (m) { return '<button type="button" data-v="' + esc(m) + '">' + esc(m) + '</button>'; }).join('') +
             '</div>' +
             '<div id="fMenuCounts" hidden>' +
@@ -363,7 +363,7 @@
       var multi = state.count > 0;
       seg.hidden = multi;
       counts.hidden = !multi;
-      if (lbl) lbl.textContent = multi ? '메뉴 선택 (본인 포함 ' + (state.count + 1) + '개)' : '메뉴 선택';
+      if (lbl) lbl.textContent = multi ? '메인 메뉴 선택 (본인 포함 ' + (state.count + 1) + '개)' : '메인 메뉴 선택';
     }
     function menuTotal() {
       return state.menuCounts.reduce(function (s, n) { return s + n; }, 0);
