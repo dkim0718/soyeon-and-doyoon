@@ -78,8 +78,11 @@
     }).join('');
     // 로드가 끝나면 서서히 나타나기 (style.css .poster img 참고) —
     // 캐시에서 이미 떠 있으면 바로, 실패해도 alt 가 보이게 클래스는 붙인다.
-    $$('#posters img').forEach(function (img) {
-      var show = function () { img.classList.add('is-loaded'); };
+    // 두 포스터가 동시에 로드돼도 500ms 간격을 두고 차례로 나타납니다.
+    $$('#posters img').forEach(function (img, i) {
+      var show = function () {
+        setTimeout(function () { img.classList.add('is-loaded'); }, i * 500);
+      };
       if (img.complete && img.naturalWidth) show();
       else {
         img.addEventListener('load', show, { once: true });
