@@ -57,7 +57,7 @@ window.SITE = {
   wedding: {
     // 카운트다운에 사용됩니다. 시간대(+09:00 = 서울)를 포함하세요.
     dateISO: "2026-10-30T18:30:00+09:00",
-    dateDisplay: "2026년 10월 30일 금요일",
+    dateDisplay: "2026년 10월 30일 금요일 저녁",
     timeDisplay: "오후 6시 30분",
     venue: "서울 신라호텔 영빈관",
     venueAddress: "서울 중구 동호로 249",
