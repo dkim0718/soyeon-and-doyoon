@@ -181,8 +181,10 @@ html[data-font="gothic"] {
 }
 .sec-lead { font-size: 15px; color: var(--ink-soft); text-align: center; margin-top: 12px; line-height: 1.8; }
 
-/* 본문은 좌우 여백을 같게 두고 양쪽 정렬 */
-.note p, .story-body p, .qa .a {
+/* 본문은 좌우 여백을 같게 두고 양쪽 정렬.
+   Q&A 답변은 제외 — 짧은 문장이라 양쪽 정렬 시 단어 사이가 벌어져서
+   왼쪽 정렬(자연스러운 오른쪽 끝)로 둡니다. */
+.note p, .story-body p {
   text-align: justify; text-justify: auto; hanging-punctuation: allow-end;
 }
 
