@@ -73,7 +73,7 @@ window.STRINGS = {
       partySize: '참석 인원 (본인 포함)',
       thanksWedding: '참석의사가 전달되었습니다. 감사합니다! 💛',
       plusOneOk: '동반 포함 최대 {n}명까지 선택하실 수 있어요.',
-      plusOneInfo: '참석 인원은 본인 1인 기준입니다. 동반 안내를 받으신 분은 초대장의 성함 그대로 입력해 주세요.',
+      plusOneInfo: '동행인과 함께하실 분은 RSVP 전 저희에게 미리 알려주시면 안내드리겠습니다.',
       lookupHeading: '',
       lookupHint: '성함을 입력해 주세요.',
       lookupBtn: '다음',
