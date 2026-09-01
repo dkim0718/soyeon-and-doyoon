@@ -1105,6 +1105,16 @@ html[data-hero="classic"] .hero-photo-wrap .hero-img {
 
 .rsvp-widget { max-width: 34rem; margin: 0 auto; }
 .rsvp-hint { font-size: 0.8rem; margin-top: 0.6rem; }
+/* 참석 인원 라벨 자리에 서는 동행 안내 — 라벨(.rsvp-form label)과 같은
+   서체·색: 0.78rem / 0.14em / --c-text (#232a35) */
+.rsvp-hint-strong {
+  color: var(--c-text);
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-top: 0;
+  line-height: 1.8;
+}
 .ap-heading { font-family: var(--f-heading); text-align: center; margin-bottom: 1rem; }
 .ap-greeting { text-align: center; margin-bottom: 1.4rem; }
 .ap-greeting h3 { font-family: var(--f-heading); font-size: 1.4rem; color: var(--c-accent); }

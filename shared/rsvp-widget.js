@@ -67,7 +67,8 @@
     var maxParty = listGated ? 1 : 10;
     var party = el('select', { name: 'party' });
     var partyNote = el('p', { class: 'rsvp-hint muted' });
-    var partyField = field(t('rsvp.partySize'), el('div', {}, [party, partyNote]));
+    var partyLabel = el('span', { text: t('rsvp.partySize') });
+    var partyField = el('label', { class: 'rsvp-field' }, [partyLabel, el('div', {}, [party, partyNote])]);
 
     function rebuildParty() {
       var cur = parseInt(party.value || '1', 10) || 1;
@@ -75,7 +76,16 @@
       for (var i = 1; i <= maxParty; i++) party.append(el('option', { value: String(i), text: String(i) }));
       party.value = String(Math.min(Math.max(1, cur), maxParty));
       if (listGated) {
-        partyNote.textContent = maxParty > 1 ? t('rsvp.plusOneOk', { n: maxParty }) : t('rsvp.plusOneInfo');
+        // 선택지가 1뿐인 드롭다운은 헷갈리기만 해서 라벨째 숨기고 안내문만
+        // 남깁니다(라벨과 같은 서체·색). 이름 조회로 동반 허용이 확인되면
+        // 라벨·드롭다운이 다시 나타납니다.
+        var solo = maxParty === 1;
+        party.style.display = solo ? 'none' : '';
+        partyLabel.style.display = solo ? 'none' : '';
+        partyNote.className = solo ? 'rsvp-hint rsvp-hint-strong' : 'rsvp-hint muted';
+        // plusOneInfo 는 i18n 파일의 고정 문구라 <b> 정도의 태그를 허용
+        if (solo) partyNote.innerHTML = t('rsvp.plusOneInfo');
+        else partyNote.textContent = t('rsvp.plusOneOk', { n: maxParty });
       } else {
         partyNote.style.display = 'none';
       }
